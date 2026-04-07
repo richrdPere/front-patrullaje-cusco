@@ -1,7 +1,7 @@
 <div class="p-6 min-h-full bg-base-300 text-base-content overflow-auto transition-colors duration-300">
 
   <!-- Titulo -->
-  <h1 class="text-2xl font-bold mb-5 text-base-content ">Gestión de Serenos</h1>
+  <h1 class="text-2xl font-bold mb-5 text-base-content ">Gestión de Policias</h1>
 
 
   <!-- Header -->
@@ -34,17 +34,14 @@
 
   </div>
 
-  <!-- Modal Crear Usuario -->
-  <usuarios-form [mostrarModal]="mostrarModal" [modoEdicion]="modoEdicion" [usuarioSeleccionado]="usuarioSeleccionado"
-    (modalCerrado)="cerrarModal()" (usuarioCreado)="getUsuariosPaginados()"></usuarios-form>
 
-  <!-- Modal Ver Usuario -->
-  <usuario-info
-  [mostrarModal]="mostrarModalInfo"
-  [usuario_id]="usuario_id"
-  (modalCerrado)="cerrarModalInfo()"
-  ></usuario-info>
+  <!-- Modal Crear Policia -->
+  <policia-form [mostrarModal]="mostrarModal" [modoEdicion]="modoEdicion" [policiaSeleccionado]="policiaSeleccionado"
+    (modalCerrado)="cerrarModal()" (policiaCreado)="getPoliciasPaginated()"></policia-form>
 
+  <!-- Modal Ver Policia -->
+  <policia-info [mostrarModal]="mostrarModalInfo" [policia_id]="policia_id"
+    (modalCerrado)="cerrarModalInfo()"></policia-info>
 
   <!-- Tabla -->
   <div class="p-6 min-h-auto bg-base-100 rounded-xl shadow-xl">
@@ -71,7 +68,7 @@
           <button class="btn btn-primary text-base-content hover:text-white bg-info hover:bg-primary border-none"
             (click)="abrirModal()">
             <i class="fa-solid fa-plus mr-1"></i>
-            Usuario
+            Policia
           </button>
         </div>
 
@@ -100,33 +97,33 @@
           </tr>
           }
 
-          @for (usuario of usuarios; track usuario.id; let i = $index) {
+          @for (poli of policias; track poli.id; let i = $index) {
           <tr class="hover ">
 
             <!-- Numeracion -->
             <td>{{i + 1}}</td>
 
             <!-- Nombres -->
-            <td>{{ usuario.nombre }}</td>
+            <td>{{ poli.nombre }}</td>
 
             <!-- Apellidos -->
-            <td>{{ usuario.apellidos }}</td>
+            <td>{{ poli.apellidos }}</td>
 
             <!-- Correo -->
             <th>
-              {{usuario.correo}}
+              {{poli.correo}}
             </th>
 
             <!-- DNI -->
-            <td>{{usuario.documento_identidad}}</td>
+            <td>{{poli.documento_identidad}}</td>
 
             <!-- Telefono -->
-            <td>{{usuario.telefono}}</td>
+            <td>{{poli.telefono}}</td>
 
             <!-- Rol -->
             <td class="align-middle">
               <div class="flex flex-wrap gap-1 justify-start">
-                <span *ngFor="let rol of usuario.roles" class="badge badge-soft badge-info badge-sm font-semibold">
+                <span *ngFor="let rol of poli.roles" class="badge badge-soft badge-info badge-sm font-semibold">
                   {{ rol }}
                 </span>
               </div>
@@ -134,7 +131,7 @@
 
             <!-- Actualización -->
             <td>
-              {{ usuario.updatedAt | date: 'dd/MM/yyyy, hh:mm a' }}
+              {{ poli.updatedAt | date: 'dd/MM/yyyy, hh:mm a' }}
             </td>
 
             <!-- ACCIONES PRINCIPALES  -->
@@ -142,17 +139,17 @@
 
               <div class="flex justify-start items-center gap-1">
                 <!-- Ver -->
-                <button class="btn btn-ghost btn-circle btn-md" (click)="verUsuario(usuario)">
+                <button class="btn btn-ghost btn-circle btn-md" (click)="verPolicia(poli)">
                   <i class="fa-solid fa-eye"></i>
                 </button>
 
                 <!-- Editar -->
-                <button class="btn btn-ghost btn-circle btn-md" (click)="editarUsuario(usuario)">
+                <button class="btn btn-ghost btn-circle btn-md" (click)="editarPolicia(poli)">
                   <i class="fa-solid fa-pencil"></i>
                 </button>
 
                 <!-- Eliminar -->
-                <button class="btn btn-ghost btn-circle btn-md" (click)="eliminarUsuario(usuario)">
+                <button class="btn btn-ghost btn-circle btn-md" (click)="eliminarPolicia(poli)">
                   <i class="fa-solid fa-trash"></i>
                 </button>
 
@@ -168,7 +165,7 @@
 
       </table>
 
-      @if (!isLoading && usuarios.length === 0) {
+      @if (!isLoading && policias.length === 0) {
       <div class="flex flex-col items-center justify-center my-10 text-center text-base-content/70">
         <img src="assets/img/empty-folder.png" alt="Sin solicitudes" class="w-40 h-40 mb-6 opacity-80" />
         <h3 class="text-lg font-semibold text-base-content mb-2">
@@ -194,5 +191,6 @@
 
 
   </div>
+
 
 </div>

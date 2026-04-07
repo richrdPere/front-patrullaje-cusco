@@ -16,14 +16,7 @@ export interface Usuario {
   createdAt: string; // puedes convertir a Date si quieres
   updatedAt: string;
   roles: string[];
-  // roles: Rol[];
 }
-export interface Rol {
-  id: number;
-  nombre: string;
-}
-
-export type RolNombre = 'SERENO' | 'CONDUCTOR' | 'ADMIN';
 
 export interface UsuarioResponse {
   data: Usuario[];

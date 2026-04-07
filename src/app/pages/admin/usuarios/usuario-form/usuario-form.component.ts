@@ -6,10 +6,11 @@ import Swal from 'sweetalert2';
 // Directives
 import { UppercaseDirective } from 'src/app/pages/shared/directives/uppercase.directive';
 
+// Services
 import { UsuarioService } from '../../../../services/usuarios.service';
 
-// Services
-
+// Interface
+import { Usuario } from 'src/app/interfaces/login/usuarioResponse';
 
 @Component({
   selector: 'usuarios-form',
@@ -20,7 +21,7 @@ import { UsuarioService } from '../../../../services/usuarios.service';
 export class UsuarioFormComponent implements OnInit, OnChanges {
   @Input() mostrarModal = false;
   @Input() modoEdicion = false;
-  @Input() usuarioSeleccionado: any = null;
+  @Input() usuarioSeleccionado: Usuario | any = null ;
 
   @Output() modalCerrado = new EventEmitter<void>();
   @Output() usuarioCreado = new EventEmitter<void>();

@@ -1,30 +1,28 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output, OnChanges, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import Swal from 'sweetalert2';
 
 // Directives
-import { UppercaseDirective } from 'src/app/pages/shared/directives/uppercase.directive';
+import { Usuario } from 'src/app/interfaces/login/usuarioResponse';
+import { UsuarioService } from 'src/app/services/usuarios.service';
 
 // Services
 
 @Component({
-  selector: 'app-usuario-info',
-  imports: [ReactiveFormsModule, CommonModule, UppercaseDirective],
+  selector: 'usuario-info',
+  imports: [ReactiveFormsModule, CommonModule, DatePipe],
   templateUrl: './usuario-info.component.html',
   styles: ``
 })
 export class UsuarioInfoComponent {
 
   @Input() mostrarModal = false;
-  @Input() modoEdicion = false;
-  @Input() usuarioSeleccionado: any = null;
+  @Input() usuario_id: number | null = null;
 
   @Output() modalCerrado = new EventEmitter<void>();
-  @Output() usuarioCreado = new EventEmitter<void>();
 
-
-  formUsuario!: FormGroup;
+  usuario!: Usuario;
   loading = false;
 
   modalWidthClass = 'max-w-4xl'; // default
@@ -40,5 +38,43 @@ export class UsuarioInfoComponent {
 
     this.modalWidthClass = map[size];
   }
+
+  constructor(private usuarioService: UsuarioService) { }
+
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['usuario_id'] && this.usuario_id) {
+      this.cargarDatosUsuario();
+      this.setModalWidth('lg');
+    }
+  }
+
+
+  cargarDatosUsuario() {
+    this.loading = true;
+
+    this.usuarioService.getUsuarioById(this.usuario_id!).subscribe({
+      next: (data) => {
+
+        console.log("GET USUARIO: ", data);
+        this.usuario = data;
+        this.loading = false;
+
+      },
+      error: (err) => {
+
+        this.loading = false;
+      },
+    });
+  }
+
+
+
+  cerrarModal(): void {
+    this.mostrarModal = false;
+    this.modalCerrado.emit();
+
+  }
+
 
 }

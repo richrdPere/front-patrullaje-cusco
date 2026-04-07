@@ -43,14 +43,21 @@ export const adminRoutes: Routes = [
       {
         path: 'zonas',
         loadComponent: () => import('../../pages/admin/zonas/zonas.component').then(m => m.ZonasComponent),
-        data: { roles: ['GERENTE_SERENAZGO', 'SUPERVISOR_SERENAZGO'] }
+        data: { roles: ['OPERADOR', 'GERENTE_SERENAZGO', 'SUPERVISOR_SERENAZGO'] }
       },
 
-       // Patrullaje programado
+      // Policias
+      {
+        path: 'policias',
+        loadComponent: () => import('../../pages/admin/policias/policias.component').then(m => m.PoliciasComponent),
+        data: { roles: ['OPERADOR', 'GERENTE_SERENAZGO', 'SUPERVISOR_SERENAZGO'] }
+      },
+
+      // Patrullaje programado
       {
         path: 'patrullaje-programado',
         loadComponent: () => import('../../pages/admin/patrullaje-programado/patrullaje-programado.component').then(m => m.PatrullajeProgramadoComponent),
-        data: { roles: ['GERENTE_SERENAZGO', 'SUPERVISOR_SERENAZGO'] }
+        data: { roles: ['OPERADOR', 'GERENTE_SERENAZGO', 'SUPERVISOR_SERENAZGO'] }
       },
 
       // Perfil

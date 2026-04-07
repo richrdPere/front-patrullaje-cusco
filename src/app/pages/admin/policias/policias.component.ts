@@ -6,41 +6,35 @@ import Swal from 'sweetalert2';
 // Directives
 import { UppercaseDirective } from 'src/app/pages/shared/directives/uppercase.directive';
 
-
-// Interface
-import { Usuario } from 'src/app/interfaces/login/usuarioResponse';
-
 // Service
-import { UsuarioService } from 'src/app/services/usuarios.service';
-import { UsuarioFormComponent } from "./usuario-form/usuario-form.component";
-import { UsuarioInfoComponent } from "./usuario-info/usuario-info.component";
-
+import { PoliciasService } from 'src/app/services/policias.service';
+import { PoliciaFormComponent } from "./policia-form/policia-form.component";
+import { PoliciaInfoComponent } from "./policia-info/policia-info.component";
 
 @Component({
-  selector: 'app-usuarios',
-  imports: [DatePipe, FormsModule, UsuarioFormComponent, CommonModule, UppercaseDirective, UsuarioInfoComponent],
-  templateUrl: './usuarios.component.html',
+  selector: 'app-policias',
+  imports: [DatePipe, FormsModule, CommonModule, UppercaseDirective, PoliciaFormComponent, PoliciaInfoComponent],
+  templateUrl: './policias.component.html',
   styles: ``
 })
-export class UsuariosComponent implements OnInit {
+export class PoliciasComponent implements OnInit {
 
 
-  // Usuarios
-  usuarios: Usuario[] = [];
-  usuario_id: number | null = null;
+  // Policias
+  policias: any[] = [];
+  policia_id: number | null = null;
   isLoading = true;
 
   mostrarModal = false;
   mostrarModalInfo = false;
   modoEdicion = false;
-  usuarioSeleccionado: any = null;
+  policiaSeleccionado: any = null;
 
   searchTimeout: any;
 
   // Search
   nombreBusqueda: string = '';
   dniBusqueda: string = '';
-  rolesBusqueda: string = '';
 
   // Paginado
   page = 1;
@@ -51,32 +45,31 @@ export class UsuariosComponent implements OnInit {
 
   pageSizeOptions = [5, 10, 20, 50];
 
-  constructor(private usuarioService: UsuarioService
+  constructor(private policiasService: PoliciasService
   ) { }
 
 
   ngOnInit(): void {
-    this.getUsuariosPaginados();
+    this.getPoliciasPaginated();
 
   }
 
-  // ================================
   // Methods
-  // ================================
-  getUsuariosPaginados() {
+
+  // - Policias paginated
+  getPoliciasPaginated() {
     this.isLoading = true;
 
-    this.usuarioService.getUsuariosPaginados({
+    this.policiasService.getPoliciasPaginated({
       page: this.page,
       limit: this.limit,
       nombres: this.nombreBusqueda?.trim() || undefined,
       dni: this.dniBusqueda?.trim() || undefined,
-      rol: this.rolesBusqueda?.trim() || '',
     }
     ).subscribe({
       next: (res) => {
 
-        this.usuarios = res.data;
+        this.policias = res.data;
         this.totalItems = res.total;
         this.currentPage = res.page;
 
@@ -91,29 +84,21 @@ export class UsuariosComponent implements OnInit {
     });
   }
 
-  // BUSCADOR
+  // - Buscador
   onSearchChange() {
     clearTimeout(this.searchTimeout);
 
     this.searchTimeout = setTimeout(() => {
       this.page = 1;
-      this.getUsuariosPaginados();
+      this.getPoliciasPaginated();
     }, 300);
   }
 
-  // EDITAR USUARIO
-  editarUsuario(user: Usuario) {
-
-    this.modoEdicion = true;
-    this.usuarioSeleccionado = { ...user };
-    this.mostrarModal = true;
-  }
-
-  // ELIMINAR USUARIO
-  eliminarUsuario(usuario: Usuario) {
+  // - Eliminar policia
+  eliminarPolicia(poli: any) {
     Swal.fire({
-      title: '¿Eliminar usuario?',
-      text: `Se eliminará el usuario ${usuario.nombre}`,
+      title: '¿Eliminar policia?',
+      text: `Se eliminará el policia ${poli.nombre}`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Sí, eliminar',
@@ -124,19 +109,19 @@ export class UsuariosComponent implements OnInit {
 
       if (result.isConfirmed) {
 
-        this.usuarioService.eliminarUsuario(usuario.id)
+        this.policiasService.deletePolicia(poli.id)
           .subscribe({
-            next: () => {
+            next: (resp) => {
 
               Swal.fire({
                 icon: 'success',
-                title: 'Usuario eliminado',
-                text: 'El usuario fue eliminado correctamente',
+                title: 'Policia eliminado',
+                text: resp.message,
                 timer: 2000,
                 showConfirmButton: false
               });
 
-              this.getUsuariosPaginados();
+              this.getPoliciasPaginated();
             },
             error: (err) => {
 
@@ -145,7 +130,7 @@ export class UsuariosComponent implements OnInit {
               Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: 'No se pudo eliminar el usuario'
+                text: 'No se pudo eliminar el policia'
               });
 
             }
@@ -156,51 +141,40 @@ export class UsuariosComponent implements OnInit {
     });
   }
 
-  // VER USUARIO
-  verUsuario(user: Usuario) {
-    this.usuario_id = user.id;
+  // - Editar policia
+  editarPolicia(poli: any) {
+    this.modoEdicion = true;
+    this.policiaSeleccionado = { ...poli };
+    this.mostrarModal = true;
+  }
+
+  // - Ver policia
+  verPolicia(poli: any) {
+    this.policia_id = poli.id;
     this.mostrarModalInfo = true;
   }
 
 
-  // CAMBIAR ESTADO
-  cambiarEstado(usuario: Usuario) {
-
-    this.usuarioService
-      .cambiarEstado(usuario.id, !usuario.estado)
-      .subscribe({
-        next: () => {
-
-          usuario.estado = !usuario.estado;
-
-        },
-        error: (err) => console.error(err)
-      });
-
-  }
-
-  // ================================
   // Helpers methods
-  // ================================
   onPageSizeChange() {
     this.currentPage = 1; // vuelve a la primera página
   }
 
   onFiltroChange() {
     this.page = 1;
-    this.getUsuariosPaginados();
+    this.getPoliciasPaginated();
   }
 
   cambiarPagina(nuevaPagina: number) {
     if (nuevaPagina < 1 || nuevaPagina > this.totalPages) return;
     this.page = nuevaPagina;
-    this.getUsuariosPaginados();
+    this.getPoliciasPaginated();
   }
 
   cambiarLimite() {
     this.limit = Number(this.limit);
     this.page = 1;
-    this.getUsuariosPaginados();
+    this.getPoliciasPaginated();
   }
 
   soloNumeros(event: KeyboardEvent) {
@@ -210,10 +184,10 @@ export class UsuariosComponent implements OnInit {
     }
   }
 
-  // MODAL
+  // - Modales
   abrirModal() {
     this.modoEdicion = false;
-    this.usuarioSeleccionado = null;
+    this.policiaSeleccionado = null;
     this.mostrarModal = true;
   }
 
@@ -221,11 +195,9 @@ export class UsuariosComponent implements OnInit {
     this.mostrarModal = false;
   }
 
-
   cerrarModalInfo() {
     this.mostrarModalInfo = false;
-    this.usuario_id = null;
+    this.policia_id = null;
   }
-
 
 }

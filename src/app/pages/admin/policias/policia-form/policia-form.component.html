@@ -1,0 +1,223 @@
+@if (mostrarModal){
+
+<div class="modal modal-open">
+
+  <div class="modal-box max-w-4xl bg-base-100 text-base-content rounded-2xl shadow-2xl p-8">
+
+    <!-- Header -->
+    <div class="flex justify-between items-center ">
+      <h3 class="text-2xl font-semibold">{{ modoEdicion ? 'Editar Policia' : 'Nuevo Policia' }}</h3>
+      <button type="button" (click)="cerrarModal()" class="btn btn-sm btn-circle btn-ghost text-xl">✕</button>
+    </div>
+
+    <div class="divider my-2"></div>
+
+    <!-- Formulario -->
+    <form [formGroup]="formPolicia" (ngSubmit)="crearOEditarPolicia()" class="space-y-4">
+
+      <!-- Sección: Información Personal -->
+      <div class="space-y-3">
+        <h3 class="text-lg font-semibold flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+          Información Personal
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Nombres -->
+          <div class="form-control w-full">
+            <label class="label">
+              <span class="label-text font-medium">Nombres</span>
+              <span *ngIf="esRequerido('nombre')" class="text-red-500 font-bold">*</span>
+            </label>
+            <input type="text" id="nombre" formControlName="nombre" placeholder="Ej: Juan"
+              class="input input-bordered w-full placeholder-gray-400" appUppercase>
+          </div>
+
+          <!-- Apellidos -->
+          <div class="form-control w-full">
+            <label class="label">
+              <span class="label-text font-medium">Apellidos</span>
+              <span *ngIf="esRequerido('apellidos')" class="text-red-500 font-bold">*</span>
+            </label>
+            <input type="text" id="apellidos" formControlName="apellidos" placeholder="Ej: Perez Quispe"
+              class="input input-bordered w-full placeholder-gray-400" appUppercase>
+          </div>
+
+          <!-- Documento de Identidad -->
+          <div class="form-control w-full">
+            <label class="label">
+              <span class="label-text font-medium">Documento de Identidad</span>
+              <span *ngIf="esRequerido('documento_identidad')" class="text-red-500 font-bold">*</span>
+            </label>
+            <input type="text" id="documento_identidad" formControlName="documento_identidad" placeholder="Ej: 12345678"
+              maxlength="8" (keypress)="soloNumeros($event)" class="input input-bordered w-full placeholder-gray-400">
+            <label class="label">
+              <span class="label-text-alt text-base-content/60">DNI (8 dígitos)</span>
+            </label>
+          </div>
+
+          <!-- Teléfono -->
+          <div class="form-control w-full">
+            <label class="label">
+              <span class="label-text font-medium">Teléfono</span>
+              <span *ngIf="esRequerido('telefono')" class="text-red-500 font-bold">*</span>
+            </label>
+            <input type="tel" id="telefono" formControlName="telefono" placeholder="Ej: 987654321" maxlength="9"
+              (keypress)="soloNumeros($event)" class="input input-bordered w-full placeholder-gray-400">
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección: Ubicación -->
+      <div class="space-y-3">
+        <h3 class="text-lg font-semibold flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          Ubicación
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Dirección -->
+          <div class="form-control w-full">
+            <label class="label">
+              <span class="label-text font-medium">Dirección</span>
+              <span *ngIf="esRequerido('direccion')" class="text-red-500 font-bold">*</span>
+            </label>
+            <input type="text" id="direccion" formControlName="direccion" placeholder="Ej: Av. Los Héroes 123"
+              class="input input-bordered w-full placeholder-gray-400" appUppercase>
+          </div>
+
+          <!-- Departamento -->
+          <div class="form-control w-full">
+            <label class="label">
+              <span class="label-text font-medium">Departamento</span>
+              <span *ngIf="esRequerido('departamento')" class="text-red-500 font-bold">*</span>
+            </label>
+            <select id="departamento" formControlName="departamento" class="select select-bordered w-full "
+              appUppercase>
+              <option value="">Seleccionar departamento</option>
+              <option value="Cusco">Cusco</option>
+              <option value="Lima">Lima</option>
+              <option value="Arequipa">Arequipa</option>
+              <option value="Junín">Junín</option>
+              <option value="Puno">Puno</option>
+            </select>
+          </div>
+
+          <!-- Provincia -->
+          <div class="form-control w-full">
+            <label class="label">
+              <span class="label-text font-medium">Provincia</span>
+              <span *ngIf="esRequerido('provincia')" class="text-red-500 font-bold">*</span>
+            </label>
+            <select id="provincia" formControlName="provincia" class="select select-bordered w-full" appUppercase>
+              <option value="">Seleccionar provincia</option>
+              <option value="Cusco">Cusco</option>
+              <option value="La Convención">La Convención</option>
+              <option value="Canchis">Canchis</option>
+            </select>
+          </div>
+
+          <!-- Distrito -->
+          <div class="form-control w-full">
+            <label class="label">
+              <span class="label-text font-medium">Distrito</span>
+              <span *ngIf="esRequerido('distrito')" class="text-red-500 font-bold">*</span>
+            </label>
+            <select id="distrito" formControlName="distrito" class="select select-bordered w-full" appUppercase>
+              <option value="">Seleccionar distrito</option>
+              <option value="Cusco">Cusco</option>
+              <option value="San Jerónimo">San Jerónimo</option>
+              <option value="Santiago">Santiago</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección: Información Policial -->
+      <div class="space-y-3">
+        <h3 class="text-lg font-semibold flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+          </svg>
+          Información Policial
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Grado -->
+          <div class="form-control w-full">
+            <label class="label">
+              <span class="label-text font-medium">Grado</span>
+              <span *ngIf="esRequerido('grado')" class="text-red-500 font-bold">*</span>
+            </label>
+            <select id="grado" formControlName="grado" class="select select-bordered w-full" appUppercase>
+              <option value="">Seleccionar grado</option>
+              <option value="Suboficial">Suboficial</option>
+              <option value="Oficial">Oficial</option>
+              <option value="Cabo">Cabo</option>
+              <option value="Teniente">Teniente</option>
+              <option value="Capitán">Capitán</option>
+              <option value="Mayor">Mayor</option>
+              <option value="Comandante">Comandante</option>
+            </select>
+          </div>
+
+          <!-- Comisaría -->
+          <div class="form-control w-full">
+            <label class="label">
+              <span class="label-text font-medium">Comisaría</span>
+              <span *ngIf="esRequerido('comisaria')" class="text-red-500 font-bold">*</span>
+            </label>
+            <input type="text" id="comisaria" formControlName="comisaria" placeholder="Ej: Comisaría Central"
+              class="input input-bordered w-full placeholder-gray-400" appUppercase>
+          </div>
+
+          <!-- Código Institucional -->
+          <div class="form-control w-full">
+            <label class="label">
+              <span class="label-text font-medium">Código Institucional</span>
+              <span *ngIf="esRequerido('codigo_institucional')" class="text-red-500 font-bold">*</span>
+            </label>
+            <input type="text" id="codigo_institucional" formControlName="codigo_institucional"
+              placeholder="Ej: PNP-001" class="input input-bordered w-full placeholder-gray-400" appUppercase>
+            <label class="label">
+              <span class="label-text-alt text-base-content/60">Código único de la PNP</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Acciones del formulario -->
+      <div class="modal-action justify-center items-center gap-5">
+        <button type="button" class="btn btn-ghost" (click)="cerrarModal()">Cancelar</button>
+
+
+        <button type="submit" class="btn btn-primary" [disabled]="formPolicia.invalid">
+
+          <span *ngIf="!modoEdicion">
+
+            Guardar </span>
+          <span *ngIf="modoEdicion">
+
+            Actualizar </span>
+        </button>
+      </div>
+
+    </form>
+
+
+  </div>
+
+</div>
+}

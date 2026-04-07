@@ -31,30 +31,31 @@ export class SideMenuOptionsComponent {
   // Main nav items
   navItems: NavItem[] = [
     {
-      icon: "assets/icons/sidebar/dashboard.svg",
+      icon: "assets/icons/sidebar/map.svg",
       name: "Mapa",
       path: "/admin/mapas",
       roles: ['GERENTE_SERENAZGO', 'SERENO'],
     },
     {
-      icon: "assets/icons/sidebar/user.svg",
+      icon: "assets/icons/sidebar/sereno.svg",
       name: "Serenos",
       path: "/admin/usuarios",
       roles: ['GERENTE_SERENAZGO', 'SERENO'],
     },
     {
       icon: "assets/icons/sidebar/dashboard.svg",
-      name: "Controles",
+      name: "Vigilancia",
       roles: ['GERENTE_SERENAZGO', 'SERENO'],
       subItems: [
-        { name: "Patrullajes", path: "/admin/unidad-patrullaje" },
+        { name: "Policias Asignados", path: "/admin/policias" },
+        { name: "Unidades de Patrullaje", path: "/admin/unidad-patrullaje" },
         { name: "Zonas de Control", path: "/admin/zonas" },
 
       ],
     },
     {
-      icon: "assets/icons/sidebar/company.svg",
-      name: "Racks",
+      icon: "assets/icons/sidebar/policy.svg",
+      name: "Operativos",
       roles: ['GERENTE_SERENAZGO', 'SERENO'],
       path: "/admin/patrullaje-programado",
     },
@@ -64,7 +65,7 @@ export class SideMenuOptionsComponent {
   // Others nav items
   othersItems: NavItem[] = [
     {
-      icon: "assets/icons/sidebar/empresa.svg",
+      icon: "assets/icons/sidebar/statistics.svg",
       name: "Estados",
       roles: ['GERENTE_SERENAZGO', 'SERENO'],
       subItems: [
@@ -74,7 +75,7 @@ export class SideMenuOptionsComponent {
       ],
     },
     {
-      icon: "assets/icons/sidebar/company.svg",
+      icon: "assets/icons/sidebar/calendary.svg",
       name: "Calendario",
       roles: ['GERENTE_SERENAZGO', 'SERENO'],
       path: "/admin/calendario",

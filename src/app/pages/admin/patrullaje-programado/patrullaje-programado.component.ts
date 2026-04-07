@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
@@ -9,7 +9,7 @@ import { PatrullajeProgramFormComponent } from "./patrullaje-program-form/patrul
 
 @Component({
   selector: 'app-patrullaje-programado',
-  imports: [DatePipe, FormsModule, PatrullajeProgramFormComponent],
+  imports: [DatePipe, FormsModule, PatrullajeProgramFormComponent, CommonModule],
   templateUrl: './patrullaje-programado.component.html',
   styles: ``
 })

@@ -6,16 +6,7 @@ import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 // Interfaces
-// import { UnidadPatrullaje } from '../interfaces/unidad-patrullaje';
-
-// Interface
-
-export interface UnidadResponse {
-  data: any[];
-  total: number;
-  page: number;
-  limit: number;
-}
+import { PaginadoResponse } from '../interfaces/login/loginResponse';
 
 export interface UltimoCodigoResponse {
   codigo: string;
@@ -31,7 +22,6 @@ export class UnidadPatrullajeService {
   envs = environment;
 
   // 2. Variables globales
-
   API_BASE = this.envs.main_url + 'unidad-patrullaje';
 
   API_LISTAR_UNIDADES: string = this.API_BASE + '/paginado';
@@ -69,7 +59,7 @@ export class UnidadPatrullajeService {
     descripcion?: string;
   }
 
-  ): Observable<UnidadResponse> {
+  ): Observable<PaginadoResponse> {
 
     let params = new HttpParams();
 
@@ -81,7 +71,7 @@ export class UnidadPatrullajeService {
 
     const headers = this.getAuthHeaders().headers;
 
-    return this.http.get<UnidadResponse>(this.API_LISTAR_UNIDADES, { params, headers });
+    return this.http.get<PaginadoResponse>(this.API_LISTAR_UNIDADES, { params, headers });
   }
 
   // ===========================================================
