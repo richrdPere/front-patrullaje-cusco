@@ -1,0 +1,102 @@
+<div class="p-6 min-h-full bg-base-300 text-base-content overflow-auto transition-colors duration-300">
+
+
+  <!-- Titulo -->
+  <h1 class="text-2xl font-bold mb-5 text-base-content ">Gestión de Zonas</h1>
+
+  <!-- <div #mapContainer class="w-full h-[500px] rounded-xl shadow border"></div> -->
+  <div class="p-4 min-h-[calc(150vh-15rem)] card bg-base-100 shadow-md">
+    <!-- <h2 class="text-xl font-bold mb-4">Registrar Zona de Patrullaje</h2> -->
+
+    <form [formGroup]="zonaForm">
+
+      <div class="flex flex-col lg:flex-row gap-6">
+
+        <!-- Formulario: lado izquierdo -->
+        <div class="lg:w-1/3 w-full space-y-6">
+          <!-- Form - Zonas -->
+          <div class="card bg-base-300 rounded-box p-6 space-y-4 shadow-md">
+            <!-- Nombre -->
+            <input type="text" placeholder="Nombre" formControlName="nombre" class="input input-bordered w-full "
+              appUppercase />
+            <!-- Descripción -->
+            <textarea placeholder="Descripción" formControlName="descripcion" class="textarea textarea-bordered w-full "
+              rows="4" appUppercase></textarea>
+
+            <!-- Riesgo -->
+            <select formControlName="riesgo" class="select select-bordered w-full ">
+              <option value="" disabled selected>Seleccione nivel de riesgo</option>
+              <option value="Alto">Alto</option>
+              <option value="Medio">Medio</option>
+              <option value="Bajo">Bajo</option>
+            </select>
+
+            <!-- Botón -->
+            <button class="btn btn-primary w-full mt-2" type="button" (click)="guardarZona()">
+              Guardar Zona
+            </button>
+          </div>
+
+          <!-- Tabla - Zonas -->
+          <div class="card bg-base-300 rounded-xl p-6 space-y-4 shadow-md ">
+            <div class="overflow-x-auto">
+
+              @if (zonas.length != 0) {
+              <table class="table table-zebra">
+                <!-- head -->
+                <thead>
+                  <tr>
+                    <th>Check</th>
+                    <th>Zona</th>
+                    <th>Riesgo</th>
+                    <th>Opciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+
+                  <!-- row 1 -->
+                  @for (zona of zonas; track $index) {
+                  <tr>
+                    <td>
+                      <label>
+                        <input type="checkbox" [checked]="zonasVisibles[zona.id]" (change)="toggleZona(zona)"
+                          class="checkbox checkbox-sm" />
+                      </label>
+                    </td>
+
+                    <td>{{ zona.nombre }}</td>
+
+                    <td>{{ zona.riesgo }}</td>
+
+                    <td class="flex justify-center items-center">
+                      <button class="btn btn-xs btn-error" (click)="eliminarZona(zona.id)"> <img
+                          src="assets/icons/crud/delete.svg" alt="Icon Eliminar" class="w-5 h-5 "></button>
+
+                    </td>
+                  </tr>
+                  }
+                </tbody>
+
+              </table>
+              }
+              @else {
+              <p>No hay Zonas Registradas</p>
+              }
+
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Mapa: lado derecho -->
+        <div class="lg:w-2/3 w-full">
+          <div class="card bg-base-300 rounded-xl p-4 shadow-md h-full">
+            <div #mapContainer id="map" class="w-full min-h-full rounded border"></div>
+          </div>
+        </div>
+      </div>
+
+    </form>
+  </div>
+
+</div>

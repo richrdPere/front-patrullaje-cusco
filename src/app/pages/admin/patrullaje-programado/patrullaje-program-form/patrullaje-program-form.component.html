@@ -1,0 +1,149 @@
+@if (mostrarModal) {
+<div class="modal modal-open">
+  <div class="modal-box max-w-4xl bg-base-100 text-base-content rounded-2xl shadow-2xl p-8" [ngClass]="modalWidthClass">
+
+    <!-- Header -->
+    <div class="flex justify-between items-center border-b border-base-300 pb-2">
+      <div class="flex items-center gap-3">
+        <h3 class="text-2xl font-semibold">
+          {{ modoEdicion ? 'Editar Patrullaje Programado' : 'Nuevo Patrullaje Programado' }}
+        </h3>
+        <!-- Badge código -->
+        <!-- <span *ngIf="formPatrullaje.get('codigo')?.value"
+          class="badge badge-primary badge-outline font-mono text-sm px-3 py-3 text-black">
+          {{ formPatrullaje.get('codigo')?.value }}
+        </span> -->
+      </div>
+
+      <button type="button" (click)="cerrarModal()" class="btn btn-sm btn-circle btn-ghost text-xl">
+        ✕
+      </button>
+
+    </div>
+
+
+    <!-- Formulario -->
+    <form [formGroup]="formPatrullaje" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+      <!-- TIPO DE PATRULLAJE -->
+      <div class="md:col-span-2">
+        <label class="label">
+          <span class="label-text font-semibold">Tipo de patrullaje</span>
+        </label>
+
+        <div class="flex gap-4">
+          <label class="cursor-pointer flex items-center gap-2">
+            <input type="radio" class="radio radio-primary" value="unidad" formControlName="tipo_patrullaje">
+            <span>Unidad (vehículo)</span>
+          </label>
+
+          <label class="cursor-pointer flex items-center gap-2">
+            <input type="radio" class="radio radio-secondary" value="pie" formControlName="tipo_patrullaje">
+            <span>Sereno a pie</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- UNIDAD -->
+      <div *ngIf="formPatrullaje.get('tipo_patrullaje')?.value === 'unidad'">
+        <label class="label">
+          <span class="label-text">Unidad de Patrullaje</span>
+        </label>
+
+        <select class="select select-bordered w-full" formControlName="unidad_id" (change)="onUnidadChange($event)">
+
+          <option value="">Seleccione</option>
+          <option *ngFor="let u of unidades" [value]="u.id">
+            {{u.codigo}}
+          </option>
+
+        </select>
+      </div>
+
+      <!-- SERENOS DE LA UNIDAD -->
+      <div *ngIf="serenosUnidad.length > 0 && formPatrullaje.get('tipo_patrullaje')?.value === 'unidad'"
+        class="md:col-span-2">
+
+        <label class="label">
+          <span class="label-text">Serenos asignados</span>
+        </label>
+
+        <div class="bg-base-200 rounded-xl p-3 max-h-32 overflow-auto">
+          <ul class="space-y-1 text-sm">
+            <li *ngFor="let s of serenosUnidad">
+              {{s.sereno.nombre}} {{s.sereno.apellidos}}
+            </li>
+          </ul>
+        </div>
+      </div>
+
+
+      <!-- ZONA -->
+      <div class="mb-3">
+        <label class="label">
+          <span class="label-text">Zona</span>
+        </label>
+
+        <select class="select select-bordered w-full" formControlName="zona_id">
+          <option value="">Seleccione</option>
+          <option *ngFor="let z of zonas" [value]="z.id">
+            {{z.nombre}}
+          </option>
+        </select>
+      </div>
+
+      <!-- FECHA -->
+      <div class="mb-3">
+        <label class="label">
+          <span class="label-text">Fecha</span>
+        </label>
+
+        <input type="date" class="input input-bordered w-full" formControlName="fecha">
+      </div>
+
+      <!-- HORA INICIO -->
+      <div class="mb-3">
+        <label class="label">
+          <span class="label-text">Hora inicio</span>
+        </label>
+
+        <input type="time" class="input input-bordered w-full" formControlName="hora_inicio">
+      </div>
+
+      <!-- HORA FIN -->
+      <div class="mb-3">
+        <label class="label">
+          <span class="label-text">Hora fin</span>
+        </label>
+
+        <input type="time" class="input input-bordered w-full" formControlName="hora_fin">
+      </div>
+
+      <!-- DESCRIPCIÓN -->
+      <div class="md:col-span-2">
+        <label class="label">
+          <span class="label-text">Incidencia</span>
+        </label>
+
+        <textarea class="textarea textarea-bordered w-full" formControlName="descripcion" rows="3">
+        </textarea>
+      </div>
+
+
+      <!-- BOTONES -->
+      <div class="md:col-span-2 flex justify-end gap-3 mt-4">
+        <button type="button" class="btn btn-ghost" (click)="cerrarModal()">
+          Cancelar
+        </button>
+
+        <button type="button" class="btn btn-primary" [disabled]="formPatrullaje.invalid"
+          (click)="registrarPatrullaje()">
+
+          {{ modoEdicion ? 'Actualizar' : 'Programar' }}
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+}

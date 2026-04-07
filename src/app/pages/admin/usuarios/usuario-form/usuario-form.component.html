@@ -1,0 +1,317 @@
+@if (mostrarModal){
+<div class="modal modal-open">
+  <div class="modal-box max-w-4xl bg-base-100 text-base-content rounded-2xl shadow-2xl p-8">
+
+    <!-- Header -->
+    <div class="flex justify-between items-center border-b border-base-300 pb-2">
+      <h3 class="text-2xl font-semibold">{{ modoEdicion ? 'Editar Usuario' : 'Nuevo Usuario' }}</h3>
+      <button type="button" (click)="cerrarModal()" class="btn btn-sm btn-circle btn-ghost text-xl">✕</button>
+    </div>
+
+    <form [formGroup]="formUsuario" (ngSubmit)="crearOEditarUsuario()" class="space-y-4">
+
+      <!--  Nombre + Apellidos -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+
+        <!-- Nombre -->
+        <div class="form-control">
+          <label class="label ">
+            <span class="label-text flex items-center gap-1">
+              Nombre
+              <span *ngIf="esRequerido('nombre')" class="text-red-500 font-bold">*</span>
+            </span>
+          </label>
+          <input type="text" formControlName="nombre" placeholder="Ingrese nombres (Ej. Juan)"
+            class="input input-bordered w-full placeholder-gray-400"
+            [class.input-error]="formUsuario.get('nombre')?.invalid && formUsuario.get('nombre')?.touched"
+            appUppercase />
+
+          <!-- Error local -->
+          @if (formUsuario.get('nombre')?.hasError('required') && formUsuario.get('nombre')?.touched) {
+          <p class="text-red-500 text-sm">
+            El nombre es obligatorio.
+          </p>
+          }
+        </div>
+
+        <!-- Apellidos -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text flex items-center gap-1">Apellidos
+              <span *ngIf="esRequerido('apellidos')" class="text-red-500 font-bold">*</span>
+            </span>
+          </label>
+          <input type="text" formControlName="apellidos" placeholder="Ingrese apellidos (Ej. Pérez López)"
+            class="input input-bordered w-full placeholder-gray-400"
+            [class.input-error]="formUsuario.get('apellidos')?.invalid && formUsuario.get('apellidos')?.touched"
+            appUppercase />
+
+          @if (formUsuario.get('apellidos')?.hasError('required') && formUsuario.get('apellidos')?.touched) {
+          <p class="text-red-500 text-sm">
+            Los apellidos son obligatorios.
+          </p>
+          }
+        </div>
+      </div>
+
+
+      <!--  Correo y Password -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+
+        <!-- Correo -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text flex items-center gap-1">
+              Correo
+              <span *ngIf="esRequerido('correo')" class="text-red-500 font-bold">*</span>
+            </span>
+          </label>
+          <input type="email" formControlName="correo" placeholder="Ingrese correo electrónico"
+            class="input input-bordered w-full placeholder-gray-400"
+            [class.input-error]="formUsuario.get('correo')?.invalid && formUsuario.get('correo')?.touched" />
+
+          @if (formUsuario.get('correo')?.hasError('required') && formUsuario.get('correo')?.touched) {
+          <p class="text-red-500 text-sm">
+            El correo es obligatorio.
+          </p>
+          }
+
+          @if (formUsuario.get('correo')?.hasError('email') && formUsuario.get('correo')?.touched) {
+          <p class="text-red-500 text-sm">
+            Ingresa un correo válido.
+          </p>
+          }
+        </div>
+
+        <!-- Roles -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text flex items-center gap-1">
+              Rol
+              <span *ngIf="esRequerido('roles')" class="text-red-500 font-bold">*</span>
+            </span>
+          </label>
+
+          <div class="dropdown w-full">
+            <label tabindex="0" class="btn btn-outline w-full justify-between">
+              Seleccionar roles
+              <span class="text-xs opacity-70">
+                ({{ formUsuario.get('roles')?.value?.length || 0 }} seleccionados)
+              </span>
+            </label>
+
+            <ul tabindex="0"
+              class="dropdown-content menu p-3 shadow bg-base-100 rounded-box w-full max-h-60 overflow-y-auto z-[1]">
+
+              <li>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" [checked]="formUsuario.get('roles')?.value?.includes('SERENO')"
+                    (change)="toggleRol('SERENO', $event)" />
+                  SERENO
+                </label>
+              </li>
+
+              <li>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" [checked]="formUsuario.get('roles')?.value?.includes('CONDUCTOR')"
+                    (change)="toggleRol('CONDUCTOR', $event)" />
+                  CONDUCTOR
+                </label>
+              </li>
+
+              <li>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" [checked]="formUsuario.get('roles')?.value?.includes('SUPERVISOR_SERENAZGO')"
+                    (change)="toggleRol('SUPERVISOR_SERENAZGO', $event)" />
+                  SUPERVISOR SERENAZGO
+                </label>
+              </li>
+
+              <li>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" [checked]="formUsuario.get('roles')?.value?.includes('GERENTE_SERENAZGO')"
+                    (change)="toggleRol('GERENTE_SERENAZGO', $event)" />
+                  GERENTE SERENAZGO
+                </label>
+              </li>
+
+              <li>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" [checked]="formUsuario.get('roles')?.value?.includes('OPERADOR')"
+                    (change)="toggleRol('OPERADOR', $event)" />
+                  OPERADOR
+                </label>
+              </li>
+
+            </ul>
+          </div>
+
+          <!-- Mostrar seleccionados -->
+          <div class="mt-2 flex flex-wrap gap-1">
+            <span *ngFor="let rol of formUsuario.get('rol')?.value" class="badge badge-info badge-sm text-white">
+              {{ rol }}
+            </span>
+          </div>
+
+          <!-- Error -->
+          @if (formUsuario.get('rol')?.hasError('required') &&
+          formUsuario.get('rol')?.touched) {
+          <p class="text-red-500 text-sm">Debe seleccionar al menos un rol</p>
+          }
+        </div>
+      </div>
+
+      <!-- Documento de identidad y Teléfono -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+
+        <!-- Documento de identidad -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text flex items-center gap-1">
+              N° DNI
+              <span *ngIf="esRequerido('documento_identidad')" class="text-red-500 font-bold">*</span>
+            </span>
+          </label>
+
+          <input type="text" formControlName="documento_identidad" placeholder="Ingrese DNI" inputmode="numeric"
+            pattern="[0-9]*" maxlength="8" class="input input-bordered w-full placeholder-gray-400"
+            (keypress)="soloNumeros($event)" />
+
+          @if (formUsuario.get('documento_identidad')?.hasError('required') &&
+          formUsuario.get('documento_identidad')?.touched) {
+          <p class="text-red-500 text-sm">El DNI es obligatorio.</p>
+          }
+
+          @if (formUsuario.get('documento_identidad')?.hasError('minlength') ||
+          formUsuario.get('documento_identidad')?.hasError('maxlength')) {
+          <p class="text-red-500 text-sm">El DNI debe tener 8 dígitos.</p>
+          }
+        </div>
+
+        <!-- Teléfono -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text flex items-center gap-1">
+              Teléfono
+              <span *ngIf="esRequerido('telefono')" class="text-red-500 font-bold">*</span>
+            </span>
+          </label>
+
+          <input type="text" formControlName="telefono" placeholder="Ingrese teléfono" inputmode="numeric"
+            pattern="[0-9]*" maxlength="9" class="input input-bordered w-full placeholder-gray-400"
+            (keypress)="soloNumeros($event)" />
+
+          @if (formUsuario.get('telefono')?.hasError('required') &&
+          formUsuario.get('telefono')?.touched) {
+          <p class="text-red-500 text-sm">El teléfono es obligatorio.</p>
+          }
+
+          @if (formUsuario.get('telefono')?.hasError('minlength') ||
+          formUsuario.get('telefono')?.hasError('maxlength')) {
+          <p class="text-red-500 text-sm">El teléfono debe tener 9 dígitos.</p>
+          }
+        </div>
+      </div>
+
+
+      <!-- Departamento y provincia -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <!-- Departamento -->
+        <div class="form-control">
+          <label class="label ">
+            <span class="label-text flex items-center gap-1">
+              Departamento
+              <span *ngIf="esRequerido('departamento')" class="text-red-500 font-bold">*</span>
+            </span>
+          </label>
+          <input type="text" formControlName="departamento" placeholder="Ingrese departamento"
+            class="input input-bordered w-full placeholder-gray-400"
+            [class.input-error]="formUsuario.get('departamento')?.invalid && formUsuario.get('departamento')?.touched"
+            appUppercase />
+
+          <!-- Error local -->
+          @if (formUsuario.get('departamento')?.hasError('required') && formUsuario.get('departamento')?.touched) {
+          <p class="text-red-500 text-sm">
+            El departamento es obligatorio.
+          </p>
+          }
+        </div>
+
+        <!-- Provincia -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text flex items-center gap-1">Provincia
+              <span *ngIf="esRequerido('provincia')" class="text-red-500 font-bold">*</span>
+            </span>
+          </label>
+          <input type="text" formControlName="provincia" placeholder="Ingrese la provincia"
+            class="input input-bordered w-full placeholder-gray-400"
+            [class.input-error]="formUsuario.get('provincia')?.invalid && formUsuario.get('provincia')?.touched"
+            appUppercase />
+
+          @if (formUsuario.get('provincia')?.hasError('required') && formUsuario.get('provincia')?.touched) {
+          <p class="text-red-500 text-sm">
+            La provincia es obligatorio.
+          </p>
+          }
+        </div>
+
+      </div>
+
+
+      <!-- Distrito y direccion  -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <!-- Distrito -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text flex items-center gap-1">Distrito
+              <span *ngIf="esRequerido('distrito')" class="text-red-500 font-bold">*</span>
+            </span>
+          </label>
+          <input type="text" formControlName="distrito" placeholder="Ingrese el distrito"
+            class="input input-bordered w-full placeholder-gray-400"
+            [class.input-error]="formUsuario.get('distrito')?.invalid && formUsuario.get('distrito')?.touched"
+            appUppercase />
+
+          @if (formUsuario.get('distrito')?.hasError('required') && formUsuario.get('distrito')?.touched) {
+          <p class="text-red-500 text-sm">
+            La provincia es obligatorio.
+          </p>
+          }
+        </div>
+
+        <!-- Direccion -->
+        <div class="form-control">
+          <label class="label ">
+            <span class="label-text flex items-center gap-1">
+              Dirección
+              <span *ngIf="esRequerido('direccion')" class="text-red-500 font-bold">*</span>
+            </span>
+          </label>
+          <input type="text" formControlName="direccion" placeholder="Ingrese direccion"
+            class="input input-bordered w-full placeholder-gray-400"
+            [class.input-error]="formUsuario.get('direccion')?.invalid && formUsuario.get('direccion')?.touched"
+            appUppercase />
+
+          <!-- Error local -->
+          @if (formUsuario.get('direccion')?.hasError('required') && formUsuario.get('direccion')?.touched) {
+          <p class="text-red-500 text-sm">
+            La direccion es obligatorio.
+          </p>
+          }
+        </div>
+
+      </div>
+
+      <!-- Footer Buttons -->
+      <div class="modal-action">
+        <button type="button" class="btn btn-ghost" (click)="cerrarModal()">Cancelar</button>
+        <button type="submit" class="btn bg-primary text-white hover:bg-primary" [disabled]="formUsuario.invalid">
+          <span *ngIf="!modoEdicion">Guardar usuario</span>
+          <span *ngIf="modoEdicion">Actualizar usuario</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+}

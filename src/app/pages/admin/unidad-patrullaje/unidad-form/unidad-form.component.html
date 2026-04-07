@@ -1,0 +1,125 @@
+@if (mostrarModal) {
+
+<div class="modal modal-open">
+
+  <div class="modal-box max-w-4xl bg-base-100 text-base-content rounded-2xl shadow-2xl p-8">
+
+    <!-- Header -->
+    <div class="flex justify-between items-center border-b border-base-300 pb-2">
+      <div class="flex items-center gap-3">
+        <h3 class="text-2xl font-semibold">
+          {{ modoEdicion ? 'Editar Unidad' : 'Nueva Unidad' }}
+        </h3>
+        <!-- Badge código -->
+        <span *ngIf="formUnidad.get('codigo')?.value"
+          class="badge badge-primary badge-outline font-mono text-sm px-3 py-3 text-black">
+          {{ formUnidad.get('codigo')?.value }}
+        </span>
+      </div>
+
+      <button type="button" (click)="cerrarModal()" class="btn btn-sm btn-circle btn-ghost text-xl">
+        ✕
+      </button>
+
+    </div>
+
+    <!-- Formulario -->
+
+    <form [formGroup]="formUnidad" (ngSubmit)="crearOEditarUnidad()" class="space-y-4">
+
+      <!--  Placa + Tipo y estado -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+
+        <!-- Placa -->
+        <div class="form-control">
+          <label class="label ">
+            <span class="label-text flex items-center gap-1">
+              Placa
+              <span class="text-red-500 font-bold">*</span>
+            </span>
+          </label>
+          <input type="text" formControlName="placa" placeholder="VOM-452" class="input input-bordered w-full"
+            [class.input-error]="formUnidad.get('placa')?.invalid && formUnidad.get('placa')?.touched" appUppercase />
+
+          <!-- Error local -->
+          @if (formUnidad.get('placa')?.hasError('required') && formUnidad.get('placa')?.touched) {
+          <p class="text-red-500 text-sm">
+            La placa es obligatorio.
+          </p>
+          }
+        </div>
+
+        <!-- Tipo -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text flex items-center gap-1">Tipo
+              <span class="text-red-500 font-bold">*</span>
+            </span>
+          </label>
+          <select formControlName="tipo" class="select select-md w-full ">
+            <option value="">Seleccione un tipo</option>
+            <option value="CAMIONETA">Camioneta</option>
+            <option value="MOTOCICLETA">Motocicleta</option>
+          </select>
+
+          @if (formUnidad.get('tipo')?.hasError('required') &&
+          formUnidad.get('tipo')?.touched) {
+          <p class="text-red-500 text-sm">Debe seleccionar un tipo</p>
+          }
+        </div>
+
+        <!-- Estado -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text flex items-center gap-1">Estado
+              <span class="text-red-500 font-bold">*</span>
+            </span>
+          </label>
+          <select formControlName="estado" class="select select-md w-full ">
+            <!-- <option value="">Seleccione un tipo</option> -->
+            <option value="Disponible">DISPONIBLE</option>
+            <option value="En patrullaje">EN PATRULLAJE</option>
+            <option value="Mantenimiento">MANTENIMIENTO</option>
+          </select>
+
+          @if (formUnidad.get('estado')?.hasError('required') &&
+          formUnidad.get('estado')?.touched) {
+          <p class="text-red-500 text-sm">Debe seleccionar un estado</p>
+          }
+        </div>
+      </div>
+
+
+      <!-- Descripción -->
+      <div>
+        <label class="label">
+          <span class="label-text flex items-center gap-1">Descripción
+            <span class="text-red-500 font-bold">*</span>
+          </span>
+        </label>
+        <textarea formControlName="descripcion" rows="2" placeholder="Descripción de la unidad" appUppercase
+          class="textarea textarea-bordered w-full focus:outline-none resize-none"></textarea>
+        @if (formUnidad.get('descripcion')?.hasError('required') &&
+        formUnidad.get('descripcion')?.touched) {
+        <p class="text-red-500 text-sm">La descripción es obligatoria</p>
+        }
+
+      </div>
+
+      <!-- Footer Buttons -->
+      <div class="modal-action">
+        <button type="button" class="btn btn-ghost" (click)="cerrarModal()">Cancelar</button>
+        <button type="submit" class="btn bg-primary text-white hover:bg-primary" [disabled]="formUnidad.invalid">
+          <span *ngIf="!modoEdicion">Guardar unidad</span>
+          <span *ngIf="modoEdicion">Actualizar unidad</span>
+        </button>
+      </div>
+
+
+    </form>
+
+  </div>
+
+</div>
+
+}

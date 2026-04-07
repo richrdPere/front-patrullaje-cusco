@@ -1,0 +1,40 @@
+<main
+  class="flex w-screen h-screen antialiased text-base-content selection:bg-blue-600 selection:text-white bg-base-200">
+
+  <!-- sidebar -->
+  <div class="h-full ">
+    <sidebar-menu-admin />
+  </div>
+
+
+  <!-- Main content -->
+  <div class="flex flex-col flex-1">
+    <!-- Header -->
+    <header>
+      <nav class="navbar border-gray-200 px-4 lg:px-6 py-2.5 bg-base-100">
+        <div class="container mx-auto my-3 xl:max-w-full flex items-center justify-between">
+          <!-- Logo a la izquierda -->
+          <div class="flex flex-col">
+            <h2 class="text-lg font-semibol">
+              Bienvenido,
+              <span class="text-info font-bold">{{ nombre || 'Usuario' }}</span>
+            </h2>
+            <p class="text-sm">Rol: {{ rol | capitalize }}</p>
+          </div>
+        </div>
+
+        <!-- Menu de usuario a la derecha -->
+        <div class="flex items-center">
+          <navbar-menu-admin />
+        </div>
+
+      </nav>
+    </header>
+
+    <!-- Router outlet -->
+    <div class="flex-1 overflow-y-auto">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</main>
+

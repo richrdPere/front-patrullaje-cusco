@@ -1,0 +1,42 @@
+<!-- Dropdown menu -->
+<div class="dropdown dropdown-end">
+  <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+    <div class="w-10 rounded-full">
+      <img [src]="avatar || 'assets/img/default-avatar.png'" alt="Avatar del user" />
+    </div>
+  </div>
+  <ul tabindex="0" class="menu menu-sm dropdown-content text-black bg-white rounded-box z-1 mt-3 w-52 p-2 shadow">
+
+    <!-- Perfil del usuario -->
+    <li class="mb-2 border-b border-base-300 pb-2">
+      <div class="flex flex-col items-start px-2">
+        <span class="font-semibold text-sm">{{name}}</span>
+        <span class="text-xs text-gray-500">{{email}}</span>
+      </div>
+    </li>
+
+    @for (item of menuOptions; track item.route) {
+
+    @if (item.label !== 'Cerrar Sesión') {
+    <li [routerLink]="item.route" routerLinkActive="bg-gray-200">
+      <a class="justify-start items-center ">
+        <img [src]="item.icon" alt="{{ item.label }} icon" class="w-5 h-5 mr-3 " />
+        {{item.label}}
+      </a>
+    </li>
+    }
+    @else {
+    <li (click)="logout()">
+      <a class="justify-start items-center">
+        <img [src]="item.icon" alt="Cerrar Sesión icon" class="w-5 h-5 mr-3" />
+        Cerrar Sesión
+      </a>
+    </li>
+    }
+
+    }
+
+  </ul>
+</div>
+
+

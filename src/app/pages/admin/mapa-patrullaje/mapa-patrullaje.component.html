@@ -1,0 +1,76 @@
+<div class="p-6 min-h-full bg-base-300 text-base-content overflow-auto transition-colors duration-300">
+
+
+
+  <!-- Titulo -->
+  <div class="flex flex-row justify-between">
+
+    <h1 class="text-2xl font-bold mb-5 text-base-content ">Mapa de Patrullaje de Serenos</h1>
+
+
+    <div class="">
+      <!-- Panel flotante con zonas -->
+      <!-- Botón flotante para mostrar panel (cuando está oculto) -->
+      @if (!panelVisible) {
+      <button (click)="mostrarPanel()" class="btn btn-primary btn-sm absolute right-10 ">
+        <i class="fa-solid fa-map-location-dot mr-1"></i> Zonas
+      </button>
+      }
+
+      <!-- Panel de zonas flotante -->
+      @if (panelVisible) {
+      <div class="absolute top-35 right-10 w-[280px] cursor-move z-30" #zonaPanel>
+        <div
+          class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md rounded-lg shadow-lg p-4 border border-gray-300 dark:border-gray-700">
+          <!-- Botón para ocultar -->
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200">
+              Zonas de Patrullaje
+            </h2>
+            <button (click)="ocultarPanel()" class="btn btn-circle btn-sm btn-ghost">
+              <i class="fa-solid fa-xmark text-gray-700 dark:text-gray-200"></i>
+            </button>
+          </div>
+
+          <!-- Lista de zonas -->
+          <ul class="space-y-3 max-h-[400px] overflow-y-auto pr-1">
+            @for (zona of zonas; track $index) {
+            <li>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" [checked]="zonasVisibles[zona.id]" (change)="toggleZona(zona)"
+                  class="checkbox checkbox-sm" />
+                <span class="text-sm text-gray-700 dark:text-gray-300">{{ zona.nombre }}</span>
+              </label>
+            </li>
+            }
+          </ul>
+        </div>
+      </div>
+      }
+
+    </div>
+
+  </div>
+
+
+
+  <hr class="border-gray-300" />
+
+  <!-- Contenedor del mapa -->
+  <div
+    class="relative w-full min-h-[calc(100vh-15rem)] lg:min-h-[calc(100vh-16rem)] rounded-xl shadow border border-gray-300 ">
+
+    <!-- Estado de carga -->
+    @if (!mapaCargado) {
+    <div class="absolute inset-0 flex flex-col items-center justify-center bg-white/70 z-10">
+      <span class="loading loading-spinner text-primary w-10 h-10 mb-2"></span>
+      <span class="text-primary font-semibold">Cargando mapa...</span>
+    </div>
+    }
+
+    <!-- Mapa -->
+    <div #map class="absolute inset-0 w-full h-full z-0"></div>
+  </div>
+
+
+</div>
