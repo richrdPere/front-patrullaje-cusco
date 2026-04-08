@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 //Environment
 import { environment } from '@environments/environment';
 import { ZonaPatrullaje } from './../interfaces/zonaPatrullaje';
+import { PaginadoResponse } from '../interfaces/login/loginResponse';
 
 @Injectable({ providedIn: 'root' })
 export class PatrullajeProgramadoService {
@@ -17,11 +18,12 @@ export class PatrullajeProgramadoService {
 
   API_BASE = this.envs.main_url + 'patrullaje-programado';
 
-  API_LISTAR_PATRULLAJE: string = this.API_BASE + '/todos';
-  API_CREAR_PATRULLAJE: string = this.API_BASE + '/crear';
-  API_ACTUALIZAR_PATRULLAJE: string = this.API_BASE + '/editar/';
-  API_OBTENER_PATRULLAJE_POR_ID: string = this.API_BASE + '/detalle/';
-  // API_ELIMINAR_PATRULLAJE: string = this.API_BASE + '/eliminar/';
+  API_NEW_PATRULLAJE: string = this.API_BASE + '/crear';
+  API_GET_ALL_PATRULLAJE: string = this.API_BASE + '/todos';
+  API_GET_PATRULLAJES_PAGINATED: string = this.API_BASE + '/paginado';
+  API_GET_PATRULLAJE_BY_ID: string = this.API_BASE + '/detalle/';
+  API_UPDATE_PATRULLAJE: string = this.API_BASE + '/editar/';
+  API_DELETE_PATRULLAJE: string = this.API_BASE + '/eliminar/';
 
   constructor(private http: HttpClient) { }
 
@@ -42,17 +44,26 @@ export class PatrullajeProgramadoService {
   // ===========================================================
   // 1.- Crear Patrullaje
   // ===========================================================
-  crearPatrullajeProgramado(patrullaje: any): Observable<any> {
-    return this.http.post(this.API_CREAR_PATRULLAJE, patrullaje);
+  newPatrullajeProgramado(patrullaje: any): Observable<any> {
+    return this.http.post(this.API_NEW_PATRULLAJE, patrullaje);
   }
 
   // ===========================================================
-  // 2.- Obtener Patrullaje
+  // 2.- Obtener todos los Patrullajes
   // ===========================================================
-  getPatrullajesPaginado(filters: {
+  getAllPatrullajeProgramado() {
+    return this.http.get<any>(`${this.API_GET_ALL_PATRULLAJE}`);
+  }
+
+  // ===========================================================
+  // 3.- Obtener todos los Patrullajes (paginado)
+  // ===========================================================
+  getPatrullajesProgramadoPaginated(filters: {
     page?: number;
     limit?: number;
-  }): Observable<any> {
+    fecha?: string,
+    descripcion?: string
+  }): Observable<PaginadoResponse> {
 
     let params = new HttpParams();
 
@@ -63,21 +74,27 @@ export class PatrullajeProgramadoService {
     });
 
     const headers = this.getAuthHeaders().headers;
-    return this.http.get<any[]>(this.API_LISTAR_PATRULLAJE, { headers });
+    return this.http.get<PaginadoResponse>(this.API_GET_PATRULLAJES_PAGINATED, { params, headers });
   }
 
   // ===========================================================
-  // 3.- Obtener Patrullaje por ID
+  // 4.- Obtener Patrullaje por ID
   // ===========================================================
-  getPatrullajeById(id: string): Observable<any> {
-    return this.http.get(this.API_OBTENER_PATRULLAJE_POR_ID + `${id}`);
+  getPatrullajeProgramadoById(id: string): Observable<any> {
+    return this.http.get(this.API_GET_PATRULLAJE_BY_ID + `${id}`);
   }
 
   // ===========================================================
-  // 4.- Actualizar Patrullaje por ID
+  // 5.- Actualizar Patrullaje por ID
   // ===========================================================
-  updatePatrullaje(id: string, data: Partial<any>): Observable<any> {
-    return this.http.put<any>(`${this.API_ACTUALIZAR_PATRULLAJE}${id}`, data);
+  updatePatrullajeProgramado(id: string, data: Partial<any>): Observable<any> {
+    return this.http.put<any>(`${this.API_UPDATE_PATRULLAJE}${id}`, data);
   }
 
+  // ===========================================================
+  // 6.- Eliminar Patrullaje Programado
+  // ===========================================================
+  deletePatrullajeProgramado(id: string): Observable<any> {
+    return this.http.delete(`${this.API_DELETE_PATRULLAJE}${id}`);
+  }
 }

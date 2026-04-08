@@ -36,8 +36,6 @@ export class DashAdminComponent implements OnInit {
     if (usuarioStorage) {
       const usuario: Usuario = JSON.parse(usuarioStorage);
 
-      console.log("USUARIO (localStorage):", usuario);
-
       this.rol = usuario.roles.join(', ') || '';
       this.nombre = usuario.nombre;
     }

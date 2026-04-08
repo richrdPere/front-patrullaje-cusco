@@ -5,7 +5,7 @@ import Swal from 'sweetalert2';
 
 @Component({
   selector: 'policia-info',
-  imports: [ReactiveFormsModule, CommonModule, DatePipe],
+  imports: [ReactiveFormsModule, CommonModule, ], // DatePipe
   templateUrl: './policia-info.component.html',
   styles: ``
 })

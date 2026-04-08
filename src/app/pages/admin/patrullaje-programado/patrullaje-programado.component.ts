@@ -18,9 +18,11 @@ export class PatrullajeProgramadoComponent implements OnInit {
 
   // Unidad patrullaje
   patrullajes: any[] = [];
+  patrullaje_id: number | null = null;
   isLoading = true;
 
   mostrarModal = false;
+  mostrarModalInfo = false;
   modoEdicion = false;
   patrullajeSeleccionado: any = null;
 
@@ -28,7 +30,6 @@ export class PatrullajeProgramadoComponent implements OnInit {
 
   // Search
   placaBusqueda: string = '';
-
 
   // Paginado
   page = 1;
@@ -49,12 +50,13 @@ export class PatrullajeProgramadoComponent implements OnInit {
 
   }
 
+  // - Patrullaje paginado
   getPatrullajePaginado() {
     this.isLoading = true;
 
-    this.patrullajeService.getPatrullajesPaginado({
-    page: this.page,
-    limit: this.limit,
+    this.patrullajeService.getPatrullajesProgramadoPaginated({
+      page: this.page,
+      limit: this.limit,
 
     }).subscribe({
       next: (res) => {
@@ -76,18 +78,67 @@ export class PatrullajeProgramadoComponent implements OnInit {
     });
   }
 
-  eliminarPatrullaje(_t44: any) {
-    throw new Error('Method not implemented.');
-  }
-  editarPatrullaje(_t44: any) {
-    throw new Error('Method not implemented.');
-  }
-  verPatrullaje(_t44: any) {
-    throw new Error('Method not implemented.');
+  // - Eliminar patrullaje
+  eliminarPatrullaje(patrullaje: any) {
+    Swal.fire({
+      title: '¿Eliminar Programación?',
+      text: `Se eliminará el operativo programado`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6'
+    }).then((result) => {
+
+      if (result.isConfirmed) {
+
+        this.patrullajeService.deletePatrullajeProgramado(patrullaje.id)
+          .subscribe({
+            next: () => {
+
+              Swal.fire({
+                icon: 'success',
+                title: 'Operativo eliminado',
+                text: 'El operativo fue eliminado correctamente',
+                timer: 2000,
+                showConfirmButton: false
+              });
+
+              this.getPatrullajePaginado();
+            },
+            error: (err) => {
+
+              console.error(err);
+
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se pudo eliminar el operativo'
+              });
+
+            }
+          });
+
+      }
+
+    });
   }
 
+  // - Editar patrullaje
+  editarPatrullaje(patrullaje: any) {
+    this.modoEdicion = true;
+    this.patrullajeSeleccionado = { ...patrullaje };
+    this.mostrarModal = true;
+  }
 
+  // - Ver patrullaje
+  verPatrullaje(patrullaje: any) {
+    this.patrullaje_id = patrullaje.id;
+    this.mostrarModalInfo = true;
+  }
 
+  // - Crear patrullaje
   abrirModal() {
     this.modoEdicion = false;
     this.patrullajeSeleccionado = null;

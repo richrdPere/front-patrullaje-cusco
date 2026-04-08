@@ -38,7 +38,6 @@ export class LoginComponent implements OnInit {
 
     this.initLoginForm();
 
-    console.log(this.token);
     if (this.token) {
       this._router.navigate(['/admin']);
     }

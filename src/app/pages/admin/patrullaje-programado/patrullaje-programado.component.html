@@ -55,7 +55,7 @@
   <!-- Modal crear patrullaje  -->
   <patrullaje-program-form [mostrarModal]="mostrarModal" [modoEdicion]="modoEdicion"
     [patrullajeSeleccionado]="patrullajeSeleccionado" (modalCerrado)="cerrarModal()"
-    (unidadCreado)="getPatrullajePaginado()"></patrullaje-program-form>
+    (patrullajeCreado)="getPatrullajePaginado()"></patrullaje-program-form>
 
 
   <!-- Tabla -->
@@ -80,13 +80,6 @@
         <!-- Botónes -->
         <div class="flex flex-row justify-center items-center gap-4">
 
-          <!-- <button class="btn btn-warning text-base-content hover:text-white bg-info hover:bg-primary border-none"
-            (click)="abrirParticipe()">
-            <i class="fa-solid fa-plus mr-1"></i>
-            Participe
-          </button> -->
-
-
           <button class="btn btn-primary text-base-content hover:text-white bg-info hover:bg-primary border-none"
             (click)="abrirModal()">
             <i class="fa-solid fa-plus mr-1"></i>
@@ -102,10 +95,9 @@
         <thead class="bg-base-300/90">
           <tr>
             <th>#</th>
-            <th>Codigo</th>
             <th>Descripcion</th>
-            <th>Tipo</th>
-            <th>Placa</th>
+            <th>Hora Inicio</th>
+            <th>Hora Final</th>
             <th>Estado</th>
             <th>Actualización</th>
             <th>Acciones</th>
@@ -124,19 +116,16 @@
             <!-- Numeracion -->
             <td>{{i + 1}}</td>
 
-            <!-- Codigo -->
-            <td>{{ patrulla.codigo }}</td>
-
             <!-- Descripcion -->
             <td>{{ patrulla.descripcion }}</td>
 
-            <!-- Tipo -->
+            <!-- Hora Inicio -->
             <th>
-              {{patrulla.tipo}}
+              {{patrulla.hora_inicio}}
             </th>
 
-            <!-- Placa -->
-            <td>{{patrulla.placa}}</td>
+            <!-- Hora Fin -->
+            <td>{{patrulla.hora_fin}}</td>
 
             <!-- Estado -->
             <td>

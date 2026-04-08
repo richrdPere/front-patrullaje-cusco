@@ -104,12 +104,17 @@ export class UsuarioService {
   // 6. Cambiar estado usuario
   // =========================================================
   cambiarEstado(id: number, estado: boolean): Observable<any> {
-
     return this.http.patch(
       `${this.API_BASE}/${id}/estado`,
       { estado }
     );
+  }
 
+  // =========================================================
+  // 7. Listar todos los serenos y conductores
+  // =========================================================
+  getSerenosAndConductores(): Observable<Usuario> {
+    return this.http.get<Usuario>(`${this.API_BASE}/serenos`);
   }
 
 }
