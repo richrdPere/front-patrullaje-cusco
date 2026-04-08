@@ -82,10 +82,10 @@
             <th>#</th>
             <th>Nombres</th>
             <th>Apellidos</th>
-            <th>Correo</th>
             <th>DNI</th>
             <th>Telefono</th>
-            <th>Roles</th>
+            <th>Grado</th>
+            <th>Comisaria</th>
             <th>Actualización</th>
             <th>Acciones</th>
           </tr>
@@ -104,34 +104,30 @@
             <td>{{i + 1}}</td>
 
             <!-- Nombres -->
-            <td>{{ poli.nombre }}</td>
+            <td>{{ poli.usuario.nombre }}</td>
 
             <!-- Apellidos -->
-            <td>{{ poli.apellidos }}</td>
-
-            <!-- Correo -->
-            <th>
-              {{poli.correo}}
-            </th>
+            <td>{{ poli.usuario.apellidos }}</td>
 
             <!-- DNI -->
-            <td>{{poli.documento_identidad}}</td>
+            <td>{{poli.usuario.documento_identidad}}</td>
 
             <!-- Telefono -->
-            <td>{{poli.telefono}}</td>
+            <td>{{poli.usuario.telefono}}</td>
 
-            <!-- Rol -->
-            <td class="align-middle">
-              <div class="flex flex-wrap gap-1 justify-start">
-                <span *ngFor="let rol of poli.roles" class="badge badge-soft badge-info badge-sm font-semibold">
-                  {{ rol }}
-                </span>
-              </div>
-            </td>
+            <!-- Grado -->
+            <th>
+              {{poli.grado}}
+            </th>
+
+            <!-- Comisaria -->
+            <th>
+              {{poli.comisaria}}
+            </th>
 
             <!-- Actualización -->
             <td>
-              {{ poli.updatedAt | date: 'dd/MM/yyyy, hh:mm a' }}
+              {{ poli.usuario.updatedAt | date: 'dd/MM/yyyy, hh:mm a' }}
             </td>
 
             <!-- ACCIONES PRINCIPALES  -->
@@ -169,9 +165,9 @@
       <div class="flex flex-col items-center justify-center my-10 text-center text-base-content/70">
         <img src="assets/img/empty-folder.png" alt="Sin solicitudes" class="w-40 h-40 mb-6 opacity-80" />
         <h3 class="text-lg font-semibold text-base-content mb-2">
-          No hay usuarios registrados
+          No hay policias registrados
         </h3>
-        <p class="text-sm max-w-md">Cuando se registren nuevos usuarios, aparecerán aquí automáticamente.</p>
+        <p class="text-sm max-w-md">Cuando se registren nuevos policias, aparecerán aquí automáticamente.</p>
       </div>}
 
       <!-- Paginación -->

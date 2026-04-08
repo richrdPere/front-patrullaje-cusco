@@ -3,6 +3,9 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
 
+// Interface
+import { Policia } from 'src/app/interfaces/policia/IPolicia';
+
 // Directives
 import { UppercaseDirective } from 'src/app/pages/shared/directives/uppercase.directive';
 
@@ -10,6 +13,7 @@ import { UppercaseDirective } from 'src/app/pages/shared/directives/uppercase.di
 import { PoliciasService } from 'src/app/services/policias.service';
 import { PoliciaFormComponent } from "./policia-form/policia-form.component";
 import { PoliciaInfoComponent } from "./policia-info/policia-info.component";
+
 
 @Component({
   selector: 'app-policias',
@@ -21,7 +25,7 @@ export class PoliciasComponent implements OnInit {
 
 
   // Policias
-  policias: any[] = [];
+  policias: Policia[] = [];
   policia_id: number | null = null;
   isLoading = true;
 
@@ -98,7 +102,7 @@ export class PoliciasComponent implements OnInit {
   eliminarPolicia(poli: any) {
     Swal.fire({
       title: '¿Eliminar policia?',
-      text: `Se eliminará el policia ${poli.nombre}`,
+      text: `Se eliminará el policia ${poli.usuario.nombre}`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Sí, eliminar',

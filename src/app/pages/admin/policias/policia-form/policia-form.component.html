@@ -102,14 +102,11 @@
               <span class="label-text font-medium">Departamento</span>
               <span *ngIf="esRequerido('departamento')" class="text-red-500 font-bold">*</span>
             </label>
-            <select id="departamento" formControlName="departamento" class="select select-bordered w-full "
-              appUppercase>
-              <option value="">Seleccionar departamento</option>
-              <option value="Cusco">Cusco</option>
-              <option value="Lima">Lima</option>
-              <option value="Arequipa">Arequipa</option>
-              <option value="Junín">Junín</option>
-              <option value="Puno">Puno</option>
+            <select formControlName="departamento" class="select select-bordered w-full ">
+              <option [ngValue]="null">Seleccionar departamento</option>
+              <option *ngFor="let d of departamentos" [ngValue]="d.id">
+                {{ d.nombre }}
+              </option>
             </select>
           </div>
 
@@ -119,11 +116,11 @@
               <span class="label-text font-medium">Provincia</span>
               <span *ngIf="esRequerido('provincia')" class="text-red-500 font-bold">*</span>
             </label>
-            <select id="provincia" formControlName="provincia" class="select select-bordered w-full" appUppercase>
-              <option value="">Seleccionar provincia</option>
-              <option value="Cusco">Cusco</option>
-              <option value="La Convención">La Convención</option>
-              <option value="Canchis">Canchis</option>
+            <select formControlName="provincia" class="select select-bordered w-full ">
+              <option [ngValue]="null">Seleccionar provincia</option>
+              <option *ngFor="let p of provinciasCusco" [ngValue]="p.id">
+                {{ p.nombre }}
+              </option>
             </select>
           </div>
 
@@ -133,11 +130,11 @@
               <span class="label-text font-medium">Distrito</span>
               <span *ngIf="esRequerido('distrito')" class="text-red-500 font-bold">*</span>
             </label>
-            <select id="distrito" formControlName="distrito" class="select select-bordered w-full" appUppercase>
-              <option value="">Seleccionar distrito</option>
-              <option value="Cusco">Cusco</option>
-              <option value="San Jerónimo">San Jerónimo</option>
-              <option value="Santiago">Santiago</option>
+            <select formControlName="distrito" class="select select-bordered w-full ">
+              <option [ngValue]="null">Seleccionar distrito</option>
+              <option *ngFor="let d of distritosFiltrados" [ngValue]="d.id">
+                {{ d.nombre }}
+              </option>
             </select>
           </div>
         </div>
@@ -161,15 +158,11 @@
               <span class="label-text font-medium">Grado</span>
               <span *ngIf="esRequerido('grado')" class="text-red-500 font-bold">*</span>
             </label>
-            <select id="grado" formControlName="grado" class="select select-bordered w-full" appUppercase>
-              <option value="">Seleccionar grado</option>
-              <option value="Suboficial">Suboficial</option>
-              <option value="Oficial">Oficial</option>
-              <option value="Cabo">Cabo</option>
-              <option value="Teniente">Teniente</option>
-              <option value="Capitán">Capitán</option>
-              <option value="Mayor">Mayor</option>
-              <option value="Comandante">Comandante</option>
+            <select id="grado" formControlName="grado" class="select select-bordered w-full">
+              <option [ngValue]="null">Seleccionar grado</option>
+              <option *ngFor="let g of grados" [ngValue]="g.id">
+                {{ g.nombre }}
+              </option>
             </select>
           </div>
 

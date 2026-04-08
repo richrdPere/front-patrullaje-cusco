@@ -16,7 +16,7 @@ export class PoliciasService {
   envs = environment;
 
   // 2. Variables globales
-  API_BASE = this.envs.main_url + 'unidad-patrullaje';
+  API_BASE = this.envs.main_url + 'policias';
 
   API_NEW_POLICIA: string = this.API_BASE + '/crear';
   API_GET_ALL_POLICIAS: string = this.API_BASE + '/todos';
