@@ -11,43 +11,22 @@
       <!--  BUSCADOR -->
       <div class="flex flex-col md:flex-row gap-4 items-center w-full md:w-auto">
 
-        <!-- Filtro Placa -->
-        <div class="relative w-full md:max-w-xs">
-          <input type="text" class="input input-bordered w-full bg-base-100 rounded-md h-11 pl-10 pr-4 text-sm
-                 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Buscar por placa"
-            autocomplete="off" [(ngModel)]="placaBusqueda" (ngModelChange)="onSearchChange()" />
-          <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-        </div>
-
         <!-- Input descripcion -->
-        <!-- <div class="relative w-full md:max-w-xs">
+        <div class="relative w-full md:max-w-xs">
           <input type="text" class="input input-bordered w-full bg-base-100 rounded-md h-11 pl-10 pr-4 text-sm
                  focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Buscar por descripción"
             autocomplete="off" [(ngModel)]="descripcionBusqueda" (ngModelChange)="onSearchChange()" />
           <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-        </div> -->
+        </div>
 
+        <!-- Filtro Fecha -->
+        <div class="relative w-full md:max-w-xs">
+          <input type="date" class="input input-bordered w-full bg-base-100 rounded-md h-11 pl-10 pr-4 text-sm
+           focus:outline-none focus:ring-2 focus:ring-indigo-500" [(ngModel)]="fechaBusqueda"
+            (change)="onSearchChange()" />
 
-        <!-- Filtro MES -->
-        <!-- <select class="select select-bordered h-11 bg-base-100 text-base-content w-full md:w-40" [(ngModel)]="filtroMes"
-          (change)="aplicarFiltros()">
-
-          <option value="">Mes</option>
-          <option *ngFor="let mes of meses" [value]="mes.value">
-            {{ mes.label }}
-          </option>
-        </select> -->
-
-        <!-- Filtro AÑO -->
-        <!-- <select class="select select-bordered h-11 bg-base-100 text-base-content w-full md:w-32"
-          [(ngModel)]="filtroAnio" (change)="aplicarFiltros()">
-
-          <option value="">Año</option>
-          <option *ngFor="let anio of anios" [value]="anio">
-            {{ anio }}
-          </option>
-        </select> -->
-
+          <i class="fa fa-calendar absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+        </div>
       </div>
     </div>
   </div>

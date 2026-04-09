@@ -4,78 +4,290 @@
 
   <div class="modal-box max-w-4xl bg-base-100 text-base-content rounded-2xl shadow-2xl p-8" [ngClass]="modalWidthClass">
 
-
     <!-- Header -->
     <div class="flex justify-between items-center border-b border-base-300 pb-2">
-      <h3 class="text-2xl font-semibold">Detalles del Operativo</h3>
+      <h3 class="font-semibold text-xl ">Detalle de Patrullaje Programado</h3>
       <button type="button" (click)="cerrarModal()" class="btn btn-sm btn-circle btn-ghost text-xl">✕</button>
     </div>
 
-    <!-- Información Personal -->
-    <div class="my-6">
-      <h4 class="font-semibold text-lg mb-3 flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24"
-          stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-        </svg>
-        Información del Operativo
-      </h4>
-
-      <!-- <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-base-200 p-3 rounded-lg">
-          <label class="text-xs text-base-content/60">Nombre completo</label>
-          <p class="font-medium">{{usuario.nombre}} {{usuario.apellidos}}</p>
-        </div>
-
-        <div class="bg-base-200 p-3 rounded-lg">
-          <label class="text-xs text-base-content/60">Documento de Identidad</label>
-          <p class="font-medium">{{usuario.documento_identidad}}</p>
-        </div>
-
-        <div class="bg-base-200 p-3 rounded-lg">
-          <label class="text-xs text-base-content/60">Teléfono</label>
-          <p class="font-medium">{{usuario.telefono}}</p>
-        </div>
-
-        <div class="bg-base-200 p-3 rounded-lg">
-          <label class="text-xs text-base-content/60">Correo Electrónico</label>
-          <p class="font-medium">{{usuario.correo}}</p>
-        </div>
-
-        <div class="bg-base-200 p-3 rounded-lg">
-          <label class="text-xs text-base-content/60">Roles asignados</label>
-          <div class="flex flex-wrap gap-1 justify-start">
-            <span *ngFor="let rol of usuario.roles" class="badge badge-soft badge-primary badge-sm font-medium ">
-              {{ rol }}
-            </span>
-          </div>
-        </div>
-
-        <div class="bg-base-200 p-3 rounded-lg">
-          <label class="text-xs text-base-content/60">Estado</label>
-
-          <div>
-            <span class="badge gap-1" [ngClass]="usuario.estado ? 'badge-success' : 'badge-error'">
-
-              <svg *ngIf="usuario.estado" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none"
-                viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
-
-              <svg *ngIf="!usuario.estado" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none"
-                viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-
-
-              {{ usuario.estado ? 'Activo' : 'Desactivado' }}
-            </span>
-          </div>
-        </div>
-      </div> -->
+    <!-- LOADING -->
+    <div *ngIf="loading" class="text-center py-10">
+      <span class="loading loading-spinner"></span>
     </div>
 
+    <!-- CONTENIDO -->
+    <div *ngIf="!loading && p as p" class="p-6 space-y-6 max-h-[80vh] ">
+
+      <!-- Estado del Patrullaje -->
+      <div class="alert" [ngClass]="{
+       'alert-info': p.estado === 'PROGRAMADO',
+       'alert-success': p.estado === 'EN_CURSO',
+       'alert-warning': p.estado === 'COMPLETADO',
+       'alert-error': p.estado === 'CANCELADO'
+     }">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <div>
+          <h3 class="font-bold">Estado: {{ p.estado || 'PROGRAMADO' }}</h3>
+          <div class="text-sm">Patrullaje programado para el día {{ p.fecha | date:'dd/MM/yyyy' }}</div>
+        </div>
+      </div>
+
+      <!-- Información General -->
+      <div class="space-y-3">
+        <h4 class="font-semibold text-lg flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Información General
+        </h4>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="bg-base-200 p-3 rounded-lg">
+            <label class="text-xs text-base-content/60">Fecha</label>
+            <p class="font-medium flex items-center gap-1">
+              📅 {{ formatearFecha(p.fecha)}}
+            </p>
+          </div>
+
+          <div class="bg-base-200 p-3 rounded-lg">
+            <label class="text-xs text-base-content/60">Hora de Inicio</label>
+            <p class="font-medium flex items-center gap-1">
+              🕐 {{ formatearHora(p.hora_inicio)}}
+            </p>
+          </div>
+
+          <div class="bg-base-200 p-3 rounded-lg">
+            <label class="text-xs text-base-content/60">Hora de Fin</label>
+            <p class="font-medium flex items-center gap-1">
+              🕘 {{ formatearHora(p.hora_fin) }}
+            </p>
+          </div>
+        </div>
+
+        <div class="bg-base-200 p-3 rounded-lg">
+          <label class="text-xs text-base-content/60">Descripción</label>
+          <p class="font-medium">{{ p.descripcion }}</p>
+        </div>
+      </div>
+
+      <!-- Unidad y Zona -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Información de la Unidad -->
+        <div class="space-y-3">
+          <h4 class="font-semibold text-lg flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+            </svg>
+            Unidad de Patrullaje
+          </h4>
+
+          <div class="card bg-base-200">
+            <div class="card-body p-4">
+              <div class="flex items-center gap-3 mb-3">
+
+                <div>
+                  <p class="font-bold">{{ p.unidad.codigo }}</p>
+                  <p class="text-sm text-base-content/60">{{ p.unidad.tipo }}</p>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <label class="text-xs text-base-content/60">Placa</label>
+                  <p class="font-medium">{{ p.unidad.placa }}</p>
+                </div>
+                <div>
+                  <label class="text-xs text-base-content/60">Estado</label>
+                  <span class="badge badge-sm" [ngClass]="{
+                    'badge-success': p.unidad.estado === 'En patrullaje',
+                    'badge-warning': p.unidad.estado === 'En mantenimiento',
+                    'badge-info': p.unidad.estado === 'Disponible'
+                  }">
+                    {{ p.unidad.estado}}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Información de la Zona -->
+        <div class="space-y-3">
+          <h4 class="font-semibold text-lg flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Zona de Patrullaje
+          </h4>
+
+          <div class="card bg-base-200">
+            <div class="card-body p-4">
+              <div class="flex items-center gap-3 mb-3">
+
+                <div>
+                  <p class="font-bold">{{ p.zona.nombre }}</p>
+                  <p class="text-sm text-base-content/60">Zona ID: #{{ p.zona.id }}</p>
+                </div>
+              </div>
+
+              <div class="space-y-2">
+                <div>
+                  <label class="text-xs text-base-content/60">Descripción</label>
+                  <p class="text-sm">{{ p.zona.descripcion }}</p>
+                </div>
+                <div>
+                  <label class="text-xs text-base-content/60">Nivel de Riesgo</label>
+                  <span class="badge" [ngClass]="{
+                    'badge-error': p.zona.riesgo === 'alto',
+                    'badge-warning': p.zona.riesgo === 'medio',
+                    'badge-info': p.zona.riesgo === 'bajo'
+                  }">
+                    {{ p.zona.riesgo.toUpperCase() }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Personal Asignado -->
+      <div class="space-y-3">
+        <h4 class="font-semibold text-lg flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+          Personal Asignado
+          <span class="badge badge-primary">{{ (p.serenos.length || 0) +
+            (p.policias.length || 0) }} personas</span>
+        </h4>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          <!-- Serenos -->
+          <div class="card bg-base-200">
+            <div class="card-body p-4">
+              <div class="flex items-center gap-2 mb-3">
+                <span class="badge badge-primary">👮 Serenos</span>
+                <span class="text-sm text-base-content/60">{{ p.serenos.length }} asignados</span>
+              </div>
+
+              <div class="space-y-2 max-h-64 overflow-y-auto">
+                <div *ngFor="let sereno of p.serenos" class="flex items-center gap-3 p-2 bg-base-100 rounded-lg">
+                  <!-- <div class="avatar placeholder">
+                    <div class="bg-primary text-primary-content rounded-full w-8">
+                      <span class="text-xs">{{ (sereno.nombre?.charAt(0) || 'V') + (sereno.apellidos?.charAt(0) || 'A')
+                        }}</span>
+                    </div>
+                  </div> -->
+                  <div class="flex-1">
+                    <p class="font-medium text-sm">{{ sereno.nombre }} {{ sereno.apellidos }}</p>
+                    <div class="flex flex-wrap gap-1 mt-1">
+                      <span *ngFor="let rol of sereno.roles" class="badge badge-xs badge-outline">
+                        {{ rol }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="badge badge-success badge-sm">Activo</div>
+                </div>
+
+                <div *ngIf="!p.serenos.length" class="text-center text-base-content/60 py-4">
+                  No hay serenos asignados
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Policías -->
+          <div class="card bg-base-200">
+            <div class="card-body p-4">
+              <div class="flex items-center gap-2 mb-3">
+                <span class="badge badge-secondary">👮‍♂️ Policías</span>
+                <span class="text-sm text-base-content/60">{{ p.policias.length || 1 }} asignados</span>
+              </div>
+
+              <div class="space-y-2 max-h-64 overflow-y-auto">
+                <div *ngFor="let policia of p.policias" class="flex items-center gap-3 p-2 bg-base-100 rounded-lg">
+                  <!-- <div class="avatar placeholder">
+                    <div class="bg-secondary text-secondary-content rounded-full w-8">
+                      <span class="text-xs">{{ (policia.usuario?.nombre?.charAt(0) || 'E') +
+                        (policia.usuario?.apellidos?.charAt(0) || 'C') }}</span>
+                    </div>
+                  </div> -->
+                  <div class="flex-1">
+                    <p class="font-medium text-sm">{{ policia.usuario.nombre }} {{ policia.usuario.apellidos }}</p>
+                    <div class="flex flex-wrap gap-1 mt-1">
+                      <span class="badge badge-xs badge-outline">{{ policia.grado }}</span>
+                      <span class="badge badge-xs badge-outline">{{ policia.comisaria }}</span>
+                    </div>
+                  </div>
+                  <div class="badge badge-info badge-sm">PNP</div>
+                </div>
+
+                <div *ngIf="!p.policias.length" class="text-center text-base-content/60 py-4">
+                  No hay policías asignados
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Información del Sistema -->
+      <div class="space-y-3">
+        <h4 class="font-semibold text-lg flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Información del Sistema
+        </h4>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-base-200 p-3 rounded-lg">
+            <label class="text-xs text-base-content/60">Creado el</label>
+            <p class="font-medium text-sm">{{ p.createdAt |
+              date:'dd/MM/yyyy
+              hh:mm a' }}</p>
+          </div>
+
+          <div class="bg-base-200 p-3 rounded-lg">
+            <label class="text-xs text-base-content/60">Actualizado el</label>
+            <p class="font-medium text-sm">{{ p.updatedAt | date:'dd/MM/yyyy
+              hh:mm a' }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer con acciones -->
+      <div class="modal-action justify-center items-center gap-5">
+        <button class="btn btn-primary" (click)="cerrarModal()">
+          Cerrar
+        </button>
+
+        <button class="btn btn-success">
+          Imprimir
+        </button>
+      </div>
+
+
+
+    </div>
   </div>
 
 </div>

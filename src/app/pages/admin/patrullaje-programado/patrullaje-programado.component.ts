@@ -30,7 +30,8 @@ export class PatrullajeProgramadoComponent implements OnInit {
   searchTimeout: any;
 
   // Search
-  placaBusqueda: string = '';
+  descripcionBusqueda: string = '';
+  fechaBusqueda: string = '';
 
   // Paginado
   page = 1;
@@ -58,6 +59,8 @@ export class PatrullajeProgramadoComponent implements OnInit {
     this.patrullajeService.getPatrullajesProgramadoPaginated({
       page: this.page,
       limit: this.limit,
+      descripcion: this.descripcionBusqueda?.trim() || '',
+      fecha: this.fechaBusqueda?.trim() || '',
 
     }).subscribe({
       next: (res) => {
@@ -146,14 +149,19 @@ export class PatrullajeProgramadoComponent implements OnInit {
     this.mostrarModal = true;
   }
 
+  // - Buscador
+  onSearchChange() {
+    clearTimeout(this.searchTimeout);
+
+    this.searchTimeout = setTimeout(() => {
+      this.page = 1;
+      this.getPatrullajePaginado();
+    }, 300);
+  }
 
   // ================================
   // Helpers methods
   // ================================
-
-  onSearchChange() {
-    throw new Error('Method not implemented.');
-  }
 
   onPageSizeChange() {
     this.currentPage = 1; // vuelve a la primera página
