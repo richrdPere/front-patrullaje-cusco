@@ -140,7 +140,7 @@
               </label>
 
               <ul tabindex="0"
-                class="dropdown-content menu p-3 shadow bg-base-100 rounded-box w-full max-h-60 overflow-y-auto z-[1]">
+                class="dropdown-content menu p-3 shadow bg-base-100 rounded-box w-full max-h-60 overflow-y-auto z-1">
 
                 <li *ngFor="let sereno of serenos">
                   <label class="flex items-center gap-2 cursor-pointer">
@@ -186,7 +186,7 @@
               </label>
 
               <ul tabindex="0"
-                class="dropdown-content menu p-3 shadow bg-base-100 rounded-box w-full max-h-60 overflow-y-auto z-[1]">
+                class="dropdown-content menu p-3 shadow bg-base-100 rounded-box w-full max-h-60 overflow-y-auto z-1">
 
                 <li *ngFor="let policia of policias">
                   <label class="flex items-center gap-2 cursor-pointer">
@@ -229,7 +229,7 @@
             </label>
 
             <textarea class="textarea textarea-bordered w-full" rows="3" formControlName="descripcion"
-              placeholder="Ingrese descripción">
+              placeholder="Ingrese descripción" appUppercase>
           </textarea>
 
             <span class="text-error text-sm mt-1"

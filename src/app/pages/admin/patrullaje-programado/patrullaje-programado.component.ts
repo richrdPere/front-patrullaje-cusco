@@ -6,10 +6,11 @@ import Swal from 'sweetalert2';
 // Service
 import { PatrullajeProgramadoService } from 'src/app/services/patrullaje_programado.service';
 import { PatrullajeProgramFormComponent } from "./patrullaje-program-form/patrullaje-program-form.component";
+import { PatrullajeProgramInfoComponent } from "./patrullaje-program-info/patrullaje-program-info.component";
 
 @Component({
   selector: 'app-patrullaje-programado',
-  imports: [DatePipe, FormsModule, PatrullajeProgramFormComponent, CommonModule],
+  imports: [DatePipe, FormsModule, PatrullajeProgramFormComponent, CommonModule, PatrullajeProgramInfoComponent],
   templateUrl: './patrullaje-programado.component.html',
   styles: ``
 })
@@ -177,6 +178,11 @@ export class PatrullajeProgramadoComponent implements OnInit {
 
   cerrarModal() {
     this.mostrarModal = false;
+  }
+
+  cerrarModalInfo() {
+    this.mostrarModalInfo = false;
+    this.patrullaje_id = null;
   }
 
 }

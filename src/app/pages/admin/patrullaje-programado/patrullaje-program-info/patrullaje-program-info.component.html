@@ -1,1 +1,82 @@
-<p>patrullaje-program-info works!</p>
+@if (mostrarModal) {
+
+<div class="modal modal-open">
+
+  <div class="modal-box max-w-4xl bg-base-100 text-base-content rounded-2xl shadow-2xl p-8" [ngClass]="modalWidthClass">
+
+
+    <!-- Header -->
+    <div class="flex justify-between items-center border-b border-base-300 pb-2">
+      <h3 class="text-2xl font-semibold">Detalles del Operativo</h3>
+      <button type="button" (click)="cerrarModal()" class="btn btn-sm btn-circle btn-ghost text-xl">✕</button>
+    </div>
+
+    <!-- Información Personal -->
+    <div class="my-6">
+      <h4 class="font-semibold text-lg mb-3 flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24"
+          stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+        Información del Operativo
+      </h4>
+
+      <!-- <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-base-200 p-3 rounded-lg">
+          <label class="text-xs text-base-content/60">Nombre completo</label>
+          <p class="font-medium">{{usuario.nombre}} {{usuario.apellidos}}</p>
+        </div>
+
+        <div class="bg-base-200 p-3 rounded-lg">
+          <label class="text-xs text-base-content/60">Documento de Identidad</label>
+          <p class="font-medium">{{usuario.documento_identidad}}</p>
+        </div>
+
+        <div class="bg-base-200 p-3 rounded-lg">
+          <label class="text-xs text-base-content/60">Teléfono</label>
+          <p class="font-medium">{{usuario.telefono}}</p>
+        </div>
+
+        <div class="bg-base-200 p-3 rounded-lg">
+          <label class="text-xs text-base-content/60">Correo Electrónico</label>
+          <p class="font-medium">{{usuario.correo}}</p>
+        </div>
+
+        <div class="bg-base-200 p-3 rounded-lg">
+          <label class="text-xs text-base-content/60">Roles asignados</label>
+          <div class="flex flex-wrap gap-1 justify-start">
+            <span *ngFor="let rol of usuario.roles" class="badge badge-soft badge-primary badge-sm font-medium ">
+              {{ rol }}
+            </span>
+          </div>
+        </div>
+
+        <div class="bg-base-200 p-3 rounded-lg">
+          <label class="text-xs text-base-content/60">Estado</label>
+
+          <div>
+            <span class="badge gap-1" [ngClass]="usuario.estado ? 'badge-success' : 'badge-error'">
+
+              <svg *ngIf="usuario.estado" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+
+              <svg *ngIf="!usuario.estado" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+
+
+              {{ usuario.estado ? 'Activo' : 'Desactivado' }}
+            </span>
+          </div>
+        </div>
+      </div> -->
+    </div>
+
+  </div>
+
+</div>
+}

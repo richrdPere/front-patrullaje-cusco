@@ -17,7 +17,7 @@ import { PoliciasService } from 'src/app/services/policias.service';
 
 @Component({
   selector: 'patrullaje-program-form',
-  imports: [ReactiveFormsModule, CommonModule,],  // UppercaseDirective
+  imports: [ReactiveFormsModule, CommonModule, UppercaseDirective],
   templateUrl: './patrullaje-program-form.component.html',
   styles: ``
 })
@@ -135,8 +135,8 @@ export class PatrullajeProgramFormComponent implements OnInit, OnChanges {
       // Campos comunes
       let formData: any = {
         id: patrullaje.id,
-        unidad_id: patrullaje.unidad_id,
-        zona_id: patrullaje.zona_id,
+        unidad_id: patrullaje.unidad?.id || null,
+        zona_id: patrullaje.zona?.id || null,
         fecha: patrullaje.fecha,
         hora_inicio: patrullaje.hora_inicio,
         hora_fin: patrullaje.hora_fin,

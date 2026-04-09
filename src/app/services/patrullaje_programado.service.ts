@@ -80,7 +80,7 @@ export class PatrullajeProgramadoService {
   // ===========================================================
   // 4.- Obtener Patrullaje por ID
   // ===========================================================
-  getPatrullajeProgramadoById(id: string): Observable<any> {
+  getPatrullajeProgramadoById(id: number): Observable<any> {
     return this.http.get(this.API_GET_PATRULLAJE_BY_ID + `${id}`);
   }
 

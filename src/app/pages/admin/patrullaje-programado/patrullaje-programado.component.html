@@ -52,10 +52,15 @@
     </div>
   </div>
 
-  <!-- Modal crear patrullaje  -->
+  <!-- Modal Crear patrullaje  -->
   <patrullaje-program-form [mostrarModal]="mostrarModal" [modoEdicion]="modoEdicion"
     [patrullajeSeleccionado]="patrullajeSeleccionado" (modalCerrado)="cerrarModal()"
     (patrullajeCreado)="getPatrullajePaginado()"></patrullaje-program-form>
+
+
+  <!-- Modal Ver patrullaje -->
+  <patrullaje-program-info [mostrarModal]="mostrarModalInfo" [patrullaje_id]="patrullaje_id"
+    (modalCerrado)="cerrarModalInfo()"></patrullaje-program-info>
 
 
   <!-- Tabla -->
