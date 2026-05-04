@@ -13,7 +13,7 @@ export const routes: Routes = [
   {
     path: 'admin',
     canActivate: [RoleGuard],
-    data: { roles: ["SERENO", "SUPERVISOR_SERENAZGO", "GERENTE_SERENAZGO", "OPERADOR"] },
+    data: { roles: ["ADMIN", "SERENO", "SUPERVISOR_SERENAZGO", "GERENTE_SERENAZGO", "OPERADOR"] },
     loadChildren: () => import('./layout/dashboard-admin/admin.routes'),
   },
 

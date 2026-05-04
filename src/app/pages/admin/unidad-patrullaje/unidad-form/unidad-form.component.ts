@@ -11,7 +11,7 @@ import { UnidadPatrullajeService } from 'src/app/services/unidad-patrullaje.serv
 
 @Component({
   selector: 'unidad-form',
-  imports: [ReactiveFormsModule, CommonModule, UppercaseDirective],
+  imports: [ReactiveFormsModule, CommonModule, UppercaseDirective,],
   templateUrl: './unidad-form.component.html',
   styles: ``
 })
@@ -27,6 +27,19 @@ export class UnidadFormComponent implements OnInit, OnChanges {
   codigo: string = '';
   formUnidad!: FormGroup;
   isLoading = false;
+
+  // Selectores
+  tipoUnidad = [
+    { id: 'CAMIONETA', nombre: 'Camioneta' },
+    { id: 'MOTOCICLETA', nombre: 'Motocicleta' }
+  ];
+
+  estadoUnidad = [
+    { id: 'DISPONIBLE', nombre: 'Disponible' },
+    { id: 'EN_PATRULLAJE', nombre: 'En patrullaje' },
+    { id: 'MANTENIMIENTO', nombre: 'Mantenimiento' },
+    { id: 'FUERA_DE_SERVICIO', nombre: 'Fuera de servicio' }
+  ];
 
   modalWidthClass = 'max-w-4xl'; // default
 
@@ -63,6 +76,8 @@ export class UnidadFormComponent implements OnInit, OnChanges {
 
       const unidad = this.unidadSeleccionado;
 
+      console.log("Unidad seleccionado: ", unidad);
+
       // Campos comunes
       let formData: any = {
         id: unidad.id,
@@ -75,10 +90,23 @@ export class UnidadFormComponent implements OnInit, OnChanges {
 
       // Aplicar al formulario
       this.formUnidad.patchValue(formData);
-
     }
 
     // CREAR / CERRAR MODAL
+    if (changes['mostrarModal'] && this.mostrarModal && !this.modoEdicion) {
+      this.formUnidad.reset();
+
+      // ACTUALIZANDO EL FORM
+      this.formUnidad.patchValue({
+        estado: 'DISPONIBLE'
+      });
+
+      // OBTENIENDO CODIGO
+      this.getCodigo();
+
+      this.modoEdicion = false;
+    }
+
     if (changes['mostrarModal'] && !this.mostrarModal) {
       this.formUnidad.reset();
       this.modoEdicion = false;
@@ -94,7 +122,7 @@ export class UnidadFormComponent implements OnInit, OnChanges {
       placa: ['', Validators.required],
       tipo: [null, Validators.required],
       descripcion: ['', Validators.required],
-      estado: ['', Validators.required],
+      estado: [null],
       codigo: ['']
     });
   }
@@ -172,7 +200,6 @@ export class UnidadFormComponent implements OnInit, OnChanges {
     this.modoEdicion = false;
     this.unidadSeleccionado = null;
     this.modalCerrado.emit();
-
   }
 
 }

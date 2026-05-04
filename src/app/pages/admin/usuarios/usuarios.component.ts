@@ -33,7 +33,7 @@ export class UsuariosComponent implements OnInit {
   mostrarModal = false;
   mostrarModalInfo = false;
   modoEdicion = false;
-  usuarioSeleccionado: any = null;
+  usuarioSeleccionado: Usuario | null = null;
 
   searchTimeout: any;
 
@@ -71,7 +71,7 @@ export class UsuariosComponent implements OnInit {
       limit: this.limit,
       nombres: this.nombreBusqueda?.trim() || undefined,
       dni: this.dniBusqueda?.trim() || undefined,
-      rol: this.rolesBusqueda?.trim() || '',
+      rol: this.rolesBusqueda?.trim() || undefined,
     }
     ).subscribe({
       next: (res) => {
@@ -80,7 +80,7 @@ export class UsuariosComponent implements OnInit {
         this.totalItems = res.total;
         this.currentPage = res.page;
 
-        this.totalPages = Math.ceil(res.total / res.limit);
+        this.totalPages = res.totalPages;
 
         this.isLoading = false;
       },
@@ -113,7 +113,7 @@ export class UsuariosComponent implements OnInit {
   eliminarUsuario(usuario: Usuario) {
     Swal.fire({
       title: '¿Eliminar usuario?',
-      text: `Se eliminará el usuario ${usuario.nombre}`,
+      text: `Se eliminará el usuario`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Sí, eliminar',
@@ -124,7 +124,7 @@ export class UsuariosComponent implements OnInit {
 
       if (result.isConfirmed) {
 
-        this.usuarioService.eliminarUsuario(usuario.id)
+        this.usuarioService.deleteUsuario(usuario.id)
           .subscribe({
             next: () => {
 
@@ -167,12 +167,18 @@ export class UsuariosComponent implements OnInit {
   cambiarEstado(usuario: Usuario) {
 
     this.usuarioService
-      .cambiarEstado(usuario.id, !usuario.estado)
+      .changeStateUsuario(usuario.id, !usuario.estado)
       .subscribe({
-        next: () => {
+        next: (res) => {
 
-          usuario.estado = !usuario.estado;
+          usuario.estado = res.usuario.estado;
 
+          Swal.fire({
+            icon: 'success',
+            title: res.message,
+            timer: 1500,
+            showConfirmButton: false
+          });
         },
         error: (err) => console.error(err)
       });

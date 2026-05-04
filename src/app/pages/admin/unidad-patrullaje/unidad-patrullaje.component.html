@@ -56,13 +56,8 @@
 
 
   <!-- Modal crear unidad -->
-  <unidad-form
-    [mostrarModal]="mostrarModal"
-    [modoEdicion]="modoEdicion"
-    [unidadSeleccionado]="unidadSeleccionado"
-    (modalCerrado)="cerrarModal()"
-    (unidadCreado)="getUnidadesPaginado()"
-    ></unidad-form>
+  <unidad-form [mostrarModal]="mostrarModal" [modoEdicion]="modoEdicion" [unidadSeleccionado]="unidadSeleccionado"
+    (modalCerrado)="cerrarModal()" (unidadCreado)="getUnidadesPaginado()"></unidad-form>
 
   <!-- Modal ver unidad -->
 
@@ -149,8 +144,8 @@
 
             <!-- Estado -->
             <td>
-              <span class="badge badge-soft badge-info font-semibold">
-                {{ unidad.estado }}
+              <span class="badge badge-soft font-semibold" [ngClass]="getEstadoInfo(unidad.estado).class">
+                {{ getEstadoInfo(unidad.estado).label }}
               </span>
             </td>
 

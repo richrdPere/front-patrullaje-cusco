@@ -24,22 +24,22 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="bg-base-200 p-3 rounded-lg">
           <label class="text-xs text-base-content/60">Nombre completo</label>
-          <p class="font-medium">{{usuario.nombre}} {{usuario.apellidos}}</p>
+          <p class="font-medium">{{usuario.persona.nombres}} {{usuario.persona.apellidos}}</p>
         </div>
 
         <div class="bg-base-200 p-3 rounded-lg">
           <label class="text-xs text-base-content/60">Documento de Identidad</label>
-          <p class="font-medium">{{usuario.documento_identidad}}</p>
+          <p class="font-medium">{{usuario.persona.documento_identidad}}</p>
         </div>
 
         <div class="bg-base-200 p-3 rounded-lg">
           <label class="text-xs text-base-content/60">Teléfono</label>
-          <p class="font-medium">{{usuario.telefono}}</p>
+          <p class="font-medium">{{usuario.persona.telefono}}</p>
         </div>
 
         <div class="bg-base-200 p-3 rounded-lg">
           <label class="text-xs text-base-content/60">Correo Electrónico</label>
-          <p class="font-medium">{{usuario.correo}}</p>
+          <p class="font-medium">{{usuario.correo}}
         </div>
 
         <div class="bg-base-200 p-3 rounded-lg">
@@ -90,22 +90,22 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="bg-base-200 p-3 rounded-lg">
           <label class="text-xs text-base-content/60">Dirección</label>
-          <p class="font-medium">{{usuario.direccion}}</p>
+          <p class="font-medium">{{usuario.persona.direccion}}</p>
         </div>
 
         <div class="bg-base-200 p-3 rounded-lg">
           <label class="text-xs text-base-content/60">Distrito</label>
-          <p class="font-medium">{{usuario.distrito}}</p>
+          <p class="font-medium">{{usuario.persona.distrito}}</p>
         </div>
 
         <div class="bg-base-200 p-3 rounded-lg">
           <label class="text-xs text-base-content/60">Provincia</label>
-          <p class="font-medium">{{usuario.provincia}}</p>
+          <p class="font-medium">{{usuario.persona.provincia}}</p>
         </div>
 
         <div class="bg-base-200 p-3 rounded-lg">
           <label class="text-xs text-base-content/60">Departamento</label>
-          <p class="font-medium">{{usuario.departamento}}</p>
+          <p class="font-medium">{{usuario.persona.departamento}}</p>
         </div>
       </div>
     </div>
@@ -125,11 +125,11 @@
         <div class="bg-base-200 p-3 rounded-lg">
           <label class="text-xs text-base-content/60">Estado en línea</label>
           <div>
-            <span class="badge gap-1" [ngClass]="usuario.online ? 'badge-success' : 'badge-ghost'">
+            <span class="badge gap-1" [ngClass]="usuario.estado ? 'badge-success' : 'badge-ghost'">
               <!-- Indicador -->
-              <span class="w-2 h-2 rounded-full" [ngClass]="usuario.online ? 'bg-green-500' : 'bg-gray-400'"></span>
+              <span class="w-2 h-2 rounded-full" [ngClass]="usuario.estado ? 'bg-green-500' : 'bg-gray-400'"></span>
 
-              {{ usuario.online ? 'En línea' : 'Desconectado' }}
+              {{ usuario.estado ? 'Activo' : 'Inactivo' }}
             </span>
           </div>
         </div>
@@ -141,7 +141,7 @@
 
         <div class="bg-base-200 p-3 rounded-lg">
           <label class="text-xs text-base-content/60">Actualizado el</label>
-          <p class="font-medium text-sm">{{usuario.updatedAt | date:'dd/MM/yyyy hh:mm a'}}</p>
+          <p class="font-medium text-sm">{{usuario.persona.updatedAt | date:'dd/MM/yyyy hh:mm a'}}</p>
         </div>
       </div>
     </div>

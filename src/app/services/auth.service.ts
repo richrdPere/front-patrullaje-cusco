@@ -65,7 +65,7 @@ export class AuthService {
         localStorage.setItem('usuario', JSON.stringify(usuarioCompleto));
         localStorage.setItem('roles', JSON.stringify(res.roles))
 
-        this.currentUserSubject.next(res.usuario);
+        this.currentUserSubject.next(usuarioCompleto);
       })
     );
   }

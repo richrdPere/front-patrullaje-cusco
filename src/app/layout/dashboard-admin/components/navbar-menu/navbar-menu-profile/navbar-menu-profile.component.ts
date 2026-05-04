@@ -40,7 +40,7 @@ export class NavbarMenuProfileComponent {
   ngOnInit(): void {
     this._authService.currentUser$.subscribe(usuario => {
       if (usuario) {
-        this.name = usuario.nombre;
+        this.name = usuario.persona.nombres;
         this.email = usuario.correo;
         // this.avatar = `${this.perfilService.envs.url_image}${usuario.foto_perfil}?t=${Date.now()}`;
         //        ↑ evita cache del navegador

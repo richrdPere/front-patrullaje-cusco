@@ -2,7 +2,7 @@
 
 <div class="modal modal-open">
 
-  <div class="modal-box max-w-4xl bg-base-100 text-base-content rounded-2xl shadow-2xl p-8">
+  <div class="modal-box max-w-4xl bg-base-100 text-base-content rounded-2xl shadow-2xl p-8" [ngClass]="modalWidthClass">
 
     <!-- Header -->
     <div class="flex justify-between items-center border-b border-base-300 pb-2">
@@ -28,7 +28,7 @@
     <form [formGroup]="formUnidad" (ngSubmit)="crearOEditarUnidad()" class="space-y-4">
 
       <!--  Placa + Tipo y estado -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div class="grid grid-cols-1 gap-3" [ngClass]="modoEdicion ? 'md:grid-cols-3' : 'md:grid-cols-2'">
 
         <!-- Placa -->
         <div class="form-control">
@@ -38,7 +38,8 @@
               <span class="text-red-500 font-bold">*</span>
             </span>
           </label>
-          <input type="text" formControlName="placa" placeholder="VOM-452" class="input input-bordered w-full"
+          <input type="text" formControlName="placa" placeholder="Ingrese la placa (Ej. VOM-452)"
+            class="input input-bordered w-full"
             [class.input-error]="formUnidad.get('placa')?.invalid && formUnidad.get('placa')?.touched" appUppercase />
 
           <!-- Error local -->
@@ -57,9 +58,10 @@
             </span>
           </label>
           <select formControlName="tipo" class="select select-md w-full ">
-            <option value="">Seleccione un tipo</option>
-            <option value="CAMIONETA">Camioneta</option>
-            <option value="MOTOCICLETA">Motocicleta</option>
+            <option [ngValue]="null" disabled>Seleccione un tipo</option>
+            <option *ngFor="let d of tipoUnidad" [ngValue]="d.id">
+              {{ d.nombre }}
+            </option>
           </select>
 
           @if (formUnidad.get('tipo')?.hasError('required') &&
@@ -68,8 +70,8 @@
           }
         </div>
 
-        <!-- Estado -->
-        <div class="form-control">
+        <!-- Estado   -->
+        <div class="form-control" *ngIf="modoEdicion">
           <label class="label">
             <span class="label-text flex items-center gap-1">Estado
               <span class="text-red-500 font-bold">*</span>
@@ -77,9 +79,11 @@
           </label>
           <select formControlName="estado" class="select select-md w-full ">
             <!-- <option value="">Seleccione un tipo</option> -->
-            <option value="Disponible">DISPONIBLE</option>
-            <option value="En patrullaje">EN PATRULLAJE</option>
-            <option value="Mantenimiento">MANTENIMIENTO</option>
+            <option [ngValue]="null" disabled>Seleccione un estado</option>
+
+            <option *ngFor="let d of estadoUnidad" [ngValue]="d.id">
+              {{ d.nombre }}
+            </option>
           </select>
 
           @if (formUnidad.get('estado')?.hasError('required') &&
@@ -97,7 +101,7 @@
             <span class="text-red-500 font-bold">*</span>
           </span>
         </label>
-        <textarea formControlName="descripcion" rows="2" placeholder="Descripción de la unidad" appUppercase
+        <textarea formControlName="descripcion" rows="2" placeholder="Ingrese la descripción de la unidad" appUppercase
           class="textarea textarea-bordered w-full focus:outline-none resize-none"></textarea>
         @if (formUnidad.get('descripcion')?.hasError('required') &&
         formUnidad.get('descripcion')?.touched) {
@@ -107,11 +111,11 @@
       </div>
 
       <!-- Footer Buttons -->
-      <div class="modal-action">
+      <div class="modal-action justify-center items-center gap-5">
         <button type="button" class="btn btn-ghost" (click)="cerrarModal()">Cancelar</button>
-        <button type="submit" class="btn bg-primary text-white hover:bg-primary" [disabled]="formUnidad.invalid">
-          <span *ngIf="!modoEdicion">Guardar unidad</span>
-          <span *ngIf="modoEdicion">Actualizar unidad</span>
+        <button type="submit" class="btn btn-primary" [disabled]="formUnidad.invalid">
+          <span *ngIf="!modoEdicion">Guardar</span>
+          <span *ngIf="modoEdicion">Actualizar</span>
         </button>
       </div>
 

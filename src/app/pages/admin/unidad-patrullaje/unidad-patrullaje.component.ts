@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
@@ -9,7 +9,7 @@ import { UnidadFormComponent } from "./unidad-form/unidad-form.component";
 
 @Component({
   selector: 'app-unidad-patrullaje',
-  imports: [DatePipe, FormsModule, UnidadFormComponent],
+  imports: [DatePipe, FormsModule, UnidadFormComponent, CommonModule],
   templateUrl: './unidad-patrullaje.component.html',
   styles: ``
 })
@@ -171,5 +171,31 @@ export class UnidadPatrullajeComponent implements OnInit {
 
   cerrarModal() {
     this.mostrarModal = false;
+  }
+
+  getEstadoInfo(estado: string) {
+    const map: any = {
+      DISPONIBLE: {
+        label: 'DISPONIBLE',
+        class: 'badge-info'
+      },
+      EN_PATRULLAJE: {
+        label: 'EN_PATRULLAJE',
+        class: 'badge-success'
+      },
+      MANTENIMIENTO: {
+        label: 'MANTENIMIENTO',
+        class: 'badge-accent'
+      },
+      FUERA_DE_SERVICIO: {
+        label: 'FUERA_DE_SERVICIO',
+        class: 'badge-error'
+      }
+    };
+
+    return map[estado] || {
+      label: estado,
+      class: 'badge-neutral'
+    };
   }
 }

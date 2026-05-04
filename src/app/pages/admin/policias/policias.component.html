@@ -104,16 +104,16 @@
             <td>{{i + 1}}</td>
 
             <!-- Nombres -->
-            <td>{{ poli.usuario.nombre }}</td>
+            <td>{{ poli.usuario.persona.nombres }}</td>
 
             <!-- Apellidos -->
-            <td>{{ poli.usuario.apellidos }}</td>
+            <td>{{ poli.usuario.persona.apellidos }}</td>
 
             <!-- DNI -->
-            <td>{{poli.usuario.documento_identidad}}</td>
+            <td>{{poli.usuario.persona.documento_identidad}}</td>
 
             <!-- Telefono -->
-            <td>{{poli.usuario.telefono}}</td>
+            <td>{{poli.usuario.persona.telefono}}</td>
 
             <!-- Grado -->
             <th>
@@ -127,7 +127,7 @@
 
             <!-- Actualización -->
             <td>
-              {{ poli.usuario.updatedAt | date: 'dd/MM/yyyy, hh:mm a' }}
+              {{ poli.usuario.createdAt | date: 'dd/MM/yyyy, hh:mm a' }}
             </td>
 
             <!-- ACCIONES PRINCIPALES  -->

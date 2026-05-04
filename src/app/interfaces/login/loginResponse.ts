@@ -3,12 +3,9 @@ import { Usuario } from "./usuarioResponse";
 export interface LoginResponse {
   message: string;
   token: string;
-  usuario: Usuario;
   roles: string[];
+  usuario: Usuario;
 }
-
-
-
 
 export interface PaginadoResponse {
   data: any[];

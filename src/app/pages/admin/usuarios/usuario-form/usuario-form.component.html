@@ -1,6 +1,6 @@
 @if (mostrarModal){
 <div class="modal modal-open">
-  <div class="modal-box max-w-4xl bg-base-100 text-base-content rounded-2xl shadow-2xl p-8">
+  <div class="modal-box max-w-4xl bg-base-100 text-base-content rounded-2xl shadow-2xl p-8" [ngClass]="modalWidthClass">
 
     <!-- Header -->
     <div class="flex justify-between items-center border-b border-base-300 pb-2">
@@ -10,26 +10,26 @@
 
     <form [formGroup]="formUsuario" (ngSubmit)="crearOEditarUsuario()" class="space-y-4">
 
-      <!--  Nombre + Apellidos -->
+      <!--  Nombres + Apellidos -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
 
-        <!-- Nombre -->
+        <!-- Nombres -->
         <div class="form-control">
           <label class="label ">
             <span class="label-text flex items-center gap-1">
-              Nombre
-              <span *ngIf="esRequerido('nombre')" class="text-red-500 font-bold">*</span>
+              Nombres
+              <span *ngIf="esRequerido('nombres')" class="text-red-500 font-bold">*</span>
             </span>
           </label>
-          <input type="text" formControlName="nombre" placeholder="Ingrese nombres (Ej. Juan)"
+          <input type="text" formControlName="nombres" placeholder="Ingrese nombres (Ej. Juan)"
             class="input input-bordered w-full placeholder-gray-400"
-            [class.input-error]="formUsuario.get('nombre')?.invalid && formUsuario.get('nombre')?.touched"
+            [class.input-error]="formUsuario.get('nombres')?.invalid && formUsuario.get('nombres')?.touched"
             appUppercase />
 
           <!-- Error local -->
-          @if (formUsuario.get('nombre')?.hasError('required') && formUsuario.get('nombre')?.touched) {
+          @if (formUsuario.get('nombres')?.hasError('required') && formUsuario.get('nombres')?.touched) {
           <p class="text-red-500 text-sm">
-            El nombre es obligatorio.
+            Los nombres son obligatorios.
           </p>
           }
         </div>
@@ -101,7 +101,7 @@
             </label>
 
             <ul tabindex="0"
-              class="dropdown-content menu p-3 shadow bg-base-100 rounded-box w-full max-h-60 overflow-y-auto z-[1]">
+              class="dropdown-content menu p-3 shadow bg-base-100 rounded-box w-full max-h-60 overflow-y-auto">
 
               <li>
                 <label class="flex items-center gap-2 cursor-pointer">
@@ -304,11 +304,11 @@
       </div>
 
       <!-- Footer Buttons -->
-      <div class="modal-action">
+      <div class="modal-action justify-center items-center gap-5">
         <button type="button" class="btn btn-ghost" (click)="cerrarModal()">Cancelar</button>
-        <button type="submit" class="btn bg-primary text-white hover:bg-primary" [disabled]="formUsuario.invalid">
-          <span *ngIf="!modoEdicion">Guardar usuario</span>
-          <span *ngIf="modoEdicion">Actualizar usuario</span>
+        <button type="submit" class="btn btn-primary" [disabled]="formUsuario.invalid">
+          <span *ngIf="!modoEdicion">Guardar</span>
+          <span *ngIf="modoEdicion">Actualizar</span>
         </button>
       </div>
     </form>

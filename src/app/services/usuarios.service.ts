@@ -6,16 +6,34 @@ import { Observable } from 'rxjs';
 import { environment } from '@environments/environment';
 
 // Interfaces
-import { Usuario, UsuarioResponse } from '../interfaces/login/usuarioResponse';
+import {
+  Usuario,
+  UsuarioListResponse,
+  UsuarioDetalleResponse,
+  CrearUsuarioResponse,
+  UpdateUsuarioResponse,
+  EstadoUsuarioResponse,
+  SerenosConductoresResponse
+} from '../interfaces/login/usuarioResponse';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UsuarioService {
 
+  // 1. Environment
   envs = environment;
 
+  // 2. Variables globales
   API_BASE = this.envs.main_url + 'usuarios';
+
+  API_NEW_USUARIO: string = this.API_BASE + '/crear';
+  API_GET_ALL_USUARIOS: string = this.API_BASE + '/serenos';
+  API_GET_USUARIOS_PAGINATED: string = this.API_BASE + '/paginado';
+  API_GET_USUARIO_BY_ID: string = this.API_BASE + '/detalle/';
+  API_UPDATE_USUARIO: string = this.API_BASE + '/editar/';
+  API_DELETE_USUARIO: string = this.API_BASE + '/eliminar/';
+  API_CHANGE_STATE_USUARIO: string = this.API_BASE + '/estado/';
 
   constructor(private http: HttpClient) { }
 
@@ -33,9 +51,22 @@ export class UsuarioService {
     return { headers };
   }
 
+  // =========================================================
+  // 1. Crear usuario
+  // =========================================================
+  newUsuario(data: any): Observable<CrearUsuarioResponse> {
+    return this.http.post<CrearUsuarioResponse>(this.API_NEW_USUARIO, data, this.getAuthHeaders());
+  }
 
   // =========================================================
-  // 1. Listar usuarios (paginado + buscador)
+  // 2. Obtener todos los serenos y conductores
+  // =========================================================
+  getSerenosAndConductores(): Observable<SerenosConductoresResponse> {
+    return this.http.get<SerenosConductoresResponse>(`${this.API_GET_ALL_USUARIOS}`, this.getAuthHeaders());
+  }
+
+  // =========================================================
+  // 3. Listar usuarios (paginado + buscador)
   // =========================================================
   getUsuariosPaginados(
     filters: {
@@ -45,7 +76,7 @@ export class UsuarioService {
       dni?: string;
       rol?: string;
     }
-  ): Observable<UsuarioResponse> {
+  ): Observable<UsuarioListResponse> {
 
     let params = new HttpParams()
     Object.entries(filters).forEach(([key, value]) => {
@@ -54,67 +85,41 @@ export class UsuarioService {
       }
     });
 
-    const headers = this.getAuthHeaders().headers;
-    return this.http.get<UsuarioResponse>(this.API_BASE, { params, headers });
+    return this.http.get<UsuarioListResponse>(this.API_GET_USUARIOS_PAGINATED, { params, ...this.getAuthHeaders() });
   }
 
   // =========================================================
-  // 2. Obtener usuario por ID
+  // 4. Obtener usuario por ID
   // =========================================================
-  getUsuarioById(id: number): Observable<Usuario> {
-    return this.http.get<Usuario>(`${this.API_BASE}/${id}`);
+  getUsuarioById(id: number): Observable<UsuarioDetalleResponse> {
+    return this.http.get<UsuarioDetalleResponse>(`${this.API_GET_USUARIO_BY_ID}${id}`, this.getAuthHeaders());
   }
 
   // =========================================================
-  // 3. Crear usuario
+  // 5. Actualizar usuario
   // =========================================================
-  crearUsuario(data: any): Observable<any> {
+  updateUsuario(id: number, data: any): Observable<UpdateUsuarioResponse> {
+    return this.http.put<UpdateUsuarioResponse>(`${this.API_UPDATE_USUARIO}${id}`, data, this.getAuthHeaders());
+  }
 
-    let headers = new HttpHeaders().set('Content-Type', 'application/json');
+  // =========================================================
+  // 6. Eliminar usuario
+  // =========================================================
+  deleteUsuario(id: number): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.API_DELETE_USUARIO}${id}`, this.getAuthHeaders());
+  }
 
-    return this.http.post(
-      this.API_BASE,
-      data,
-      { headers }
+  // =========================================================
+  // 7. Cambiar estado usuario
+  // =========================================================
+  changeStateUsuario(id: number, estado: boolean): Observable<EstadoUsuarioResponse> {
+    return this.http.patch<EstadoUsuarioResponse>(
+      `${this.API_CHANGE_STATE_USUARIO}${id}`,
+      { estado },
+      this.getAuthHeaders()
     );
   }
 
-  // =========================================================
-  // 4. Actualizar usuario
-  // =========================================================
-  actualizarUsuario(id: number, data: any): Observable<any> {
 
-    let headers = new HttpHeaders().set('Content-Type', 'application/json');
-
-    return this.http.put(
-      `${this.API_BASE}/${id}`,
-      data,
-      { headers }
-    );
-  }
-
-  // =========================================================
-  // 5. Eliminar usuario
-  // =========================================================
-  eliminarUsuario(id: number): Observable<any> {
-    return this.http.delete(`${this.API_BASE}/${id}`);
-  }
-
-  // =========================================================
-  // 6. Cambiar estado usuario
-  // =========================================================
-  cambiarEstado(id: number, estado: boolean): Observable<any> {
-    return this.http.patch(
-      `${this.API_BASE}/${id}/estado`,
-      { estado }
-    );
-  }
-
-  // =========================================================
-  // 7. Listar todos los serenos y conductores
-  // =========================================================
-  getSerenosAndConductores(): Observable<Usuario> {
-    return this.http.get<Usuario>(`${this.API_BASE}/serenos`);
-  }
 
 }

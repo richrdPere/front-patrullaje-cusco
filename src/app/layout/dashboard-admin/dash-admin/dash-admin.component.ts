@@ -37,7 +37,7 @@ export class DashAdminComponent implements OnInit {
       const usuario: Usuario = JSON.parse(usuarioStorage);
 
       this.rol = usuario.roles.join(', ') || '';
-      this.nombre = usuario.nombre;
+      this.nombre = usuario.persona.nombres || '';
     }
 
     // 2. Escuchar cambios (login, refresh, etc.)
@@ -45,7 +45,7 @@ export class DashAdminComponent implements OnInit {
 
       if (usuario) {
         this.rol = usuario.roles?.join(', ') || '';
-        this.nombre = usuario.nombre;
+        this.nombre = usuario.persona.nombres;
       }
 
       console.log("ROLES (observable):", this.rol);

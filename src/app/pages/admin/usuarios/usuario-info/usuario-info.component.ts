@@ -5,9 +5,9 @@ import Swal from 'sweetalert2';
 
 // Directives
 import { Usuario } from 'src/app/interfaces/login/usuarioResponse';
-import { UsuarioService } from 'src/app/services/usuarios.service';
 
 // Services
+import { UsuarioService } from 'src/app/services/usuarios.service';
 
 @Component({
   selector: 'usuario-info',
@@ -68,13 +68,8 @@ export class UsuarioInfoComponent {
     });
   }
 
-
-
   cerrarModal(): void {
     this.mostrarModal = false;
     this.modalCerrado.emit();
-
   }
-
-
 }

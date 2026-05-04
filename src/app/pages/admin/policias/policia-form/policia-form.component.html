@@ -103,7 +103,7 @@
               <span *ngIf="esRequerido('departamento')" class="text-red-500 font-bold">*</span>
             </label>
             <select formControlName="departamento" class="select select-bordered w-full ">
-              <option [ngValue]="null">Seleccionar departamento</option>
+              <option [ngValue]="null" disabled>Seleccionar departamento</option>
               <option *ngFor="let d of departamentos" [ngValue]="d.id">
                 {{ d.nombre }}
               </option>
