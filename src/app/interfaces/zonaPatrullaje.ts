@@ -1,5 +1,5 @@
 export interface ZonaPatrullaje {
-  id: string;
+  id: number;
   nombre: string;
   descripcion: string;
   coordenadas: { lat: number; lng: number }[];

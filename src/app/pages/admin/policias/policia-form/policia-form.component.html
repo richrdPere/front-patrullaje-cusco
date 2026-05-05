@@ -5,7 +5,7 @@
   <div class="modal-box max-w-4xl bg-base-100 text-base-content rounded-2xl shadow-2xl p-8">
 
     <!-- Header -->
-    <div class="flex justify-between items-center ">
+    <div class="flex justify-between items-center">
       <h3 class="text-2xl font-semibold">{{ modoEdicion ? 'Editar Policia' : 'Nuevo Policia' }}</h3>
       <button type="button" (click)="cerrarModal()" class="btn btn-sm btn-circle btn-ghost text-xl">✕</button>
     </div>
@@ -31,9 +31,9 @@
           <div class="form-control w-full">
             <label class="label">
               <span class="label-text font-medium">Nombres</span>
-              <span *ngIf="esRequerido('nombre')" class="text-red-500 font-bold">*</span>
+              <span *ngIf="esRequerido('nombres')" class="text-red-500 font-bold">*</span>
             </label>
-            <input type="text" id="nombre" formControlName="nombre" placeholder="Ej: Juan"
+            <input type="text" id="nombres" formControlName="nombres" placeholder="Ej: Juan"
               class="input input-bordered w-full placeholder-gray-400" appUppercase>
           </div>
 
@@ -104,8 +104,8 @@
             </label>
             <select formControlName="departamento" class="select select-bordered w-full ">
               <option [ngValue]="null" disabled>Seleccionar departamento</option>
-              <option *ngFor="let d of departamentos" [ngValue]="d.id">
-                {{ d.nombre }}
+              <option *ngFor="let d of departamentos" [value]="d.departamento_id">
+                {{ d.departamento }}
               </option>
             </select>
           </div>
@@ -118,7 +118,7 @@
             </label>
             <select formControlName="provincia" class="select select-bordered w-full ">
               <option [ngValue]="null">Seleccionar provincia</option>
-              <option *ngFor="let p of provinciasCusco" [ngValue]="p.id">
+              <option *ngFor="let p of provincias" [value]="p.provincia_id">
                 {{ p.nombre }}
               </option>
             </select>
@@ -132,7 +132,7 @@
             </label>
             <select formControlName="distrito" class="select select-bordered w-full ">
               <option [ngValue]="null">Seleccionar distrito</option>
-              <option *ngFor="let d of distritosFiltrados" [ngValue]="d.id">
+              <option *ngFor="let d of distritos" [value]="d.id">
                 {{ d.nombre }}
               </option>
             </select>
@@ -160,7 +160,7 @@
             </label>
             <select id="grado" formControlName="grado" class="select select-bordered w-full">
               <option [ngValue]="null">Seleccionar grado</option>
-              <option *ngFor="let g of grados" [ngValue]="g.id">
+              <option *ngFor="let g of grados" [value]="g.id">
                 {{ g.nombre }}
               </option>
             </select>

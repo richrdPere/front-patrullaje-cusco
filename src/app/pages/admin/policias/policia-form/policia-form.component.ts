@@ -3,12 +3,16 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
 
-
 // Directives
 import { UppercaseDirective } from 'src/app/pages/shared/directives/uppercase.directive';
-import { PoliciasService } from 'src/app/services/policias.service';
-import { Policia } from 'src/app/interfaces/policia/IPolicia';
 
+// Interfaces
+import { Policia } from 'src/app/interfaces/policia/IPolicia';
+import { CrearPoliciaResponse, UpdatePoliciaResponse } from 'src/app/interfaces/policia/policia_response';
+
+// Services
+import { PoliciasService } from 'src/app/services/policias.service';
+import { UbigeoService } from 'src/app/services/ubigeo.service';
 
 
 @Component({
@@ -21,13 +25,30 @@ export class PoliciaFormComponent implements OnInit, OnChanges {
 
   @Input() mostrarModal = false;
   @Input() modoEdicion = false;
-  @Input() policiaSeleccionado: Policia | any = null;
+  @Input() policiaSeleccionado: Policia | null = null;
 
   @Output() modalCerrado = new EventEmitter<void>();
   @Output() policiaCreado = new EventEmitter<void>();
 
   formPolicia!: FormGroup;
   isLoading = false;
+
+  // Selectores
+  departamentos: any[] = [];
+  provincias: any[] = [];
+  distritos: any[] = [];
+
+  distritosFiltrados: any[] = [];
+
+  grados = [
+    { id: 'SUBOFICIAL', nombre: 'Suboficial' },
+    { id: 'OFICIAL', nombre: 'Oficial' },
+    { id: 'CABO', nombre: 'Cabo' },
+    { id: 'TENIENTE', nombre: 'Teniente' },
+    { id: 'CAPITAN', nombre: 'Capitán' },
+    { id: 'MAYOR', nombre: 'Mayor' },
+    { id: 'COMANDANTE', nombre: 'Comandante' }
+  ];
 
   modalWidthClass = 'max-w-4xl'; // default
 
@@ -43,74 +64,10 @@ export class PoliciaFormComponent implements OnInit, OnChanges {
     this.modalWidthClass = map[size];
   }
 
-  distritosFiltrados: any[] = [];
-
-  departamentos = [
-    { id: 'CUSCO', nombre: 'Cusco' },
-    { id: 'LIMA', nombre: 'Lima' },
-    { id: 'AREQUIPA', nombre: 'Arequipa' }
-  ];
-
-  provinciasCusco = [
-    { id: 'CUSCO', nombre: 'Cusco' },
-    { id: 'ACOMAYO', nombre: 'Acomayo' },
-    { id: 'ANTA', nombre: 'Anta' },
-    { id: 'CALCA', nombre: 'Calca' },
-    { id: 'CANAS', nombre: 'Canas' },
-    { id: 'CANCHIS', nombre: 'Canchis' },
-    { id: 'CHUMBIVILCAS', nombre: 'Chumbivilcas' },
-    { id: 'ESPINAR', nombre: 'Espinar' },
-    { id: 'LA_CONVENCION', nombre: 'La Convención' },
-    { id: 'PARURO', nombre: 'Paruro' },
-    { id: 'PAUCARTAMBO', nombre: 'Paucartambo' },
-    { id: 'QUISPICANCHI', nombre: 'Quispicanchi' },
-    { id: 'URUBAMBA', nombre: 'Urubamba' }
-  ];
-
-  distritosCusco = [
-    // Provincia: Cusco
-    { id: 'CUSCO', nombre: 'Cusco', provinciaId: 'CUSCO' },
-    { id: 'CCORCA', nombre: 'Ccorca', provinciaId: 'CUSCO' },
-    { id: 'POROY', nombre: 'Poroy', provinciaId: 'CUSCO' },
-    { id: 'SAN_JERONIMO', nombre: 'San Jerónimo', provinciaId: 'CUSCO' },
-    { id: 'SAN_SEBASTIAN', nombre: 'San Sebastián', provinciaId: 'CUSCO' },
-    { id: 'SANTIAGO', nombre: 'Santiago', provinciaId: 'CUSCO' },
-    { id: 'SAYLLA', nombre: 'Saylla', provinciaId: 'CUSCO' },
-    { id: 'WANCHAQ', nombre: 'Wanchaq', provinciaId: 'CUSCO' },
-
-    // Provincia: Urubamba
-    { id: 'URUBAMBA', nombre: 'Urubamba', provinciaId: 'URUBAMBA' },
-    { id: 'CHINCHERO', nombre: 'Chinchero', provinciaId: 'URUBAMBA' },
-    { id: 'HUAYLLABAMBA', nombre: 'Huayllabamba', provinciaId: 'URUBAMBA' },
-    { id: 'MACHUPICCHU', nombre: 'Machupicchu', provinciaId: 'URUBAMBA' },
-    { id: 'MARAS', nombre: 'Maras', provinciaId: 'URUBAMBA' },
-    { id: 'OLLANTAYTAMBO', nombre: 'Ollantaytambo', provinciaId: 'URUBAMBA' },
-    { id: 'YUCAY', nombre: 'Yucay', provinciaId: 'URUBAMBA' },
-
-    // Provincia: Canchis
-    { id: 'SICUANI', nombre: 'Sicuani', provinciaId: 'CANCHIS' },
-    { id: 'CHECACUPE', nombre: 'Checacupe', provinciaId: 'CANCHIS' },
-    { id: 'COMBAPATA', nombre: 'Combapata', provinciaId: 'CANCHIS' },
-    { id: 'MARANGANI', nombre: 'Marangani', provinciaId: 'CANCHIS' },
-    { id: 'PITUMARCA', nombre: 'Pitumarca', provinciaId: 'CANCHIS' },
-    { id: 'SAN_PABLO', nombre: 'San Pablo', provinciaId: 'CANCHIS' },
-    { id: 'SAN_PEDRO', nombre: 'San Pedro', provinciaId: 'CANCHIS' },
-    { id: 'TINTA', nombre: 'Tinta', provinciaId: 'CANCHIS' }
-  ];
-
-  grados = [
-    { id: 'SUBOFICIAL', nombre: 'Suboficial' },
-    { id: 'OFICIAL', nombre: 'Oficial' },
-    { id: 'CABO', nombre: 'Cabo' },
-    { id: 'TENIENTE', nombre: 'Teniente' },
-    { id: 'CAPITAN', nombre: 'Capitán' },
-    { id: 'MAYOR', nombre: 'Mayor' },
-    { id: 'COMANDANTE', nombre: 'Comandante' }
-  ];
-
   constructor(
     private fb: FormBuilder,
     private policiasService: PoliciasService,
+    private ubigeoService: UbigeoService
   ) { }
 
   ngOnInit(): void {
@@ -118,8 +75,58 @@ export class PoliciaFormComponent implements OnInit, OnChanges {
     this.setModalWidth('lg');
 
     // - listen
-    this.listenProvincia();
+    this.initUbigeo();
+    this.listenUbigeoChanges();
   }
+
+  initUbigeo() {
+    this.ubigeoService.loadData().subscribe(data => {
+      this.departamentos = data;
+
+      console.log('Departamentos cargados:', this.departamentos);
+    });
+  }
+
+
+  listenUbigeoChanges() {
+    // Departamento → Provincias
+    this.formPolicia.get('departamento')?.valueChanges.subscribe(depUbigeo => {
+      if (!depUbigeo) return;
+
+      this.provincias = this.ubigeoService.getProvincias(depUbigeo);
+      this.distritos = [];
+
+      this.formPolicia.patchValue({
+        provincia: null,
+        distrito: null
+      }, { emitEvent: false });
+    });
+
+    // Provincia → Distritos
+    this.formPolicia.get('provincia')?.valueChanges.subscribe(provUbigeo => {
+      const depUbigeo = this.formPolicia.value.departamento;
+      if (!depUbigeo || !provUbigeo) return;
+
+      console.log('Provincia seleccionada:', provUbigeo, 'en departamento:', depUbigeo);
+      this.distritos = this.ubigeoService.getDistritos(depUbigeo, provUbigeo);
+      console.log('Distritos cargados:', this.distritos);
+      this.formPolicia.patchValue({
+        distrito: null
+      }, { emitEvent: false });
+    });
+  }
+
+
+
+  onDepartamentoChange(depUbigeo: string) {
+    this.provincias = this.ubigeoService.getProvincias(depUbigeo);
+    this.distritos = [];
+  }
+
+  onProvinciaChange(depUbigeo: string, provUbigeo: string) {
+    this.distritos = this.ubigeoService.getDistritos(depUbigeo, provUbigeo);
+  }
+
 
   // ====================================
   // Formulario
@@ -127,7 +134,7 @@ export class PoliciaFormComponent implements OnInit, OnChanges {
   initFormPolicias() {
     this.formPolicia = this.fb.group({
       id: [null],
-      nombre: ['', Validators.required],
+      nombres: ['', Validators.required],
       apellidos: ['', Validators.required],
       documento_identidad: [
         '',
@@ -166,26 +173,33 @@ export class PoliciaFormComponent implements OnInit, OnChanges {
 
       const poli = this.policiaSeleccionado;
 
-      // Campos comunes
-      let formData: any = {
+      const depUbigeo = this.mapNombreToUbigeo(poli.persona?.departamento, 'dep');
+      const provUbigeo = this.mapNombreToUbigeo(poli.persona?.provincia, 'prov');
+      const distUbigeo = this.mapNombreToUbigeo(poli.persona?.distrito, 'dist');
+
+      // Cargar cascada
+      this.provincias = depUbigeo
+        ? this.ubigeoService.getProvincias(depUbigeo)
+        : [];
+
+      this.distritos = (depUbigeo && provUbigeo)
+        ? this.ubigeoService.getDistritos(depUbigeo, provUbigeo)
+        : [];
+
+      this.formPolicia.patchValue({
         id: poli.id,
-        nombre: poli.usuario.nombre,
-        apellidos: poli.usuario.apellidos,
-        correo: poli.usuario.correo,
-        telefono: poli.usuario.telefono,
-        documento_identidad: poli.usuario.documento_identidad,
-        direccion: poli.usuario.direccion,
-        departamento: poli.usuario.departamento,
-        provincia: poli.usuario.provincia,
-        distrito: poli.usuario.distrito,
+        nombres: poli.persona?.nombres ?? '',
+        apellidos: poli.persona?.apellidos ?? '',
+        telefono: poli.persona?.telefono ?? '',
+        documento_identidad: poli.persona?.documento_identidad ?? '',
+        direccion: poli.persona?.direccion ?? '',
+        departamento: depUbigeo,
+        provincia: provUbigeo,
+        distrito: distUbigeo,
         grado: poli.grado,
         comisaria: poli.comisaria,
         codigo_institucional: poli.codigo_institucional,
-      };
-
-      // Aplicar al formulario
-      this.formPolicia.patchValue(formData);
-
+      });
     }
 
     // CREAR / CERRAR MODAL
@@ -198,19 +212,35 @@ export class PoliciaFormComponent implements OnInit, OnChanges {
   // ====================================
   // Methods
   // ====================================
-
   crearOEditarPolicia() {
-    // Clonamos el value para poder manipularlo
-    const policia: any = { ...this.formPolicia.value };
+    const formValue = this.formPolicia.value;
+
+    const dep = this.ubigeoService.findByUbigeo(formValue.departamento);
+    const prov = this.ubigeoService.findByUbigeo(formValue.provincia);
+    const dist = this.ubigeoService.findByUbigeo(formValue.distrito);
+
+    const payload = {
+      nombres: formValue.nombres,
+      apellidos: formValue.apellidos,
+      documento_identidad: formValue.documento_identidad,
+      telefono: formValue.telefono,
+      direccion: formValue.direccion,
+      departamento: dep.departamento?.departamento,
+      provincia: prov.provincia?.nombre,
+      distrito: dist.distrito?.nombre,
+      grado: formValue.grado,
+      comisaria: formValue.comisaria,
+      codigo_institucional: formValue.codigo_institucional,
+    };
 
     // ============================
     // MODO EDICIÓN
     // ============================
-    if (this.modoEdicion && policia.id) {
+    if (this.modoEdicion && formValue.id) {
 
-      this.policiasService.updatePolicia(policia.id, policia).subscribe({
-        next: () => {
-          Swal.fire({ icon: 'success', title: 'Policia actualizado correctamente' });
+      this.policiasService.updatePolicia(formValue.id, payload).subscribe({
+        next: (res: UpdatePoliciaResponse) => {
+          Swal.fire({ icon: 'success', title: res.message });
           this.policiaCreado.emit(); // refrescar tabla
           this.cerrarModal();
         },
@@ -229,12 +259,12 @@ export class PoliciaFormComponent implements OnInit, OnChanges {
     // ============================
     // MODO CREACIÓN
     // ============================
-    this.policiasService.newPolicia(policia).subscribe({
-      next: (resp) => {
+    this.policiasService.newPolicia(payload).subscribe({
+      next: (resp: CrearPoliciaResponse) => {
         Swal.fire({
           icon: 'success',
-          title: 'Usuario creado correctamente',
-          text: resp.message
+          title: 'Policía creado correctamente',
+          text: resp.message,
         });
 
         this.policiaCreado.emit(); // refrescar tabla
@@ -243,7 +273,7 @@ export class PoliciaFormComponent implements OnInit, OnChanges {
       error: (err) => {
         Swal.fire({
           icon: 'error',
-          title: 'Error al crear usuario',
+          title: 'Error al crear policia',
           text: err.error?.message || 'Error desconocido',
         });
       }
@@ -268,24 +298,32 @@ export class PoliciaFormComponent implements OnInit, OnChanges {
     this.modalCerrado.emit();
   }
 
-
   esRequerido(campo: string): boolean {
     const control = this.formPolicia.get(campo);
     return control?.hasValidator(Validators.required) ?? false;
   }
 
-  listenProvincia() {
-    this.formPolicia.get('provincia')?.valueChanges.subscribe(value => {
-      this.onProvinciaChange(value);
-    });
-  }
+  mapNombreToUbigeo(nombre: string | undefined, tipo: 'dep' | 'prov' | 'dist'): string | null {
+    for (const dep of this.ubigeoService.getDepartamentos()) {
 
-  onProvinciaChange(provinciaId: string) {
-    this.distritosFiltrados = this.distritosCusco.filter(
-      d => d.provinciaId === provinciaId
-    );
+      if (tipo === 'dep' && dep.departamento === nombre) {
+        return dep.departamento_id;
+      }
 
-    // reset distrito
-    this.formPolicia.patchValue({ distrito: null });
+      for (const prov of dep.provincias) {
+
+        if (tipo === 'prov' && prov.nombre === nombre) {
+          return prov.provincia_id;
+        }
+
+        for (const dist of prov.distritos) {
+          if (tipo === 'dist' && dist.nombre === nombre) {
+            return dist.id;
+          }
+        }
+      }
+    }
+
+    return null;
   }
 }

@@ -69,7 +69,7 @@ export class ZonaService {
   // ===========================================================
   // 4.- Eliminar zona por ID
   // ===========================================================
-  deleteZonaById(id: string): Observable<any> {
+  deleteZonaById(id: number): Observable<any> {
     return this.http.delete(this.API_ELIMINAR_ZONA + `${id}`);
   }
 }

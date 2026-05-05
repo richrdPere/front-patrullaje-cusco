@@ -7,16 +7,15 @@ import { environment } from 'src/environments/environment';
 
 // Interfaces
 import { PaginadoResponse } from '../interfaces/login/loginResponse';
+import { CrearPoliciaResponse, DeletePoliciaResponse, PoliciaDetalleResponse, PoliciaListResponse, PoliciaSelectResponse, UpdatePoliciaResponse } from '../interfaces/policia/policia_response';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PoliciasService {
-  // 1. Environment
-  envs = environment;
 
-  // 2. Variables globales
-  API_BASE = this.envs.main_url + 'policias';
+  // 1. Variables globales
+  API_BASE = environment.main_url + 'policias';
 
   API_NEW_POLICIA: string = this.API_BASE + '/crear';
   API_GET_ALL_POLICIAS: string = this.API_BASE + '/todos';
@@ -45,16 +44,15 @@ export class PoliciasService {
   // ===========================================================
   // 1.- Crear policia
   // ===========================================================
-  newPolicia(data: any): Observable<any> {
-    return this.http.post<any>(this.API_NEW_POLICIA, data);
+  newPolicia(data: any): Observable<CrearPoliciaResponse> {
+    return this.http.post<CrearPoliciaResponse>(this.API_NEW_POLICIA, data);
   }
-
 
   // ===========================================================
   // 2.- Obtener todos los policias
   // ===========================================================
-  getAllPolicias() {
-    return this.http.get<any>(`${this.API_GET_ALL_POLICIAS}`);
+  getAllPolicias(): Observable<PoliciaSelectResponse> {
+    return this.http.get<PoliciaSelectResponse>(`${this.API_GET_ALL_POLICIAS}`);
   }
 
   // ===========================================================
@@ -65,7 +63,7 @@ export class PoliciasService {
     limit?: number;
     nombres?: string;
     dni?: string;
-  }): Observable<PaginadoResponse> {
+  }): Observable<PoliciaListResponse> {
 
     let params = new HttpParams();
 
@@ -77,27 +75,27 @@ export class PoliciasService {
 
     const headers = this.getAuthHeaders().headers;
 
-    return this.http.get<PaginadoResponse>(this.API_GET_POLICIAS_PAGINATED, { params, headers });
+    return this.http.get<PoliciaListResponse>(this.API_GET_POLICIAS_PAGINATED, { params, headers });
   }
 
   // ===========================================================
   // 4.- Obtener policia por ID
   // ===========================================================
-  getPoliciaById(id: string): Observable<any> {
-    return this.http.get<any>(`${this.API_GET_POLICIA_BY_ID}${id}`);
+  getPoliciaById(id: number): Observable<PoliciaDetalleResponse> {
+    return this.http.get<PoliciaDetalleResponse>(`${this.API_GET_POLICIA_BY_ID}${id}`);
   }
 
   // ===========================================================
   // 5.- Actualizar policia
   // ===========================================================
-  updatePolicia(id: string, data: Partial<any>): Observable<any> {
-    return this.http.put<any>(`${this.API_UPDATE_POLICIA}${id}`, data);
+  updatePolicia(id: string, data: Partial<any>): Observable<UpdatePoliciaResponse> {
+    return this.http.put<UpdatePoliciaResponse>(`${this.API_UPDATE_POLICIA}${id}`, data);
   }
 
   // ===========================================================
   // 6.- Eliminar policia
   // ===========================================================
-  deletePolicia(id: string): Observable<any> {
-    return this.http.delete(`${this.API_DELETE_UNIDAD}${id}`);
+  deletePolicia(id: string): Observable<DeletePoliciaResponse> {
+    return this.http.delete<DeletePoliciaResponse>(`${this.API_DELETE_UNIDAD}${id}`);
   }
 }

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { JwtHelperService } from "@auth0/angular-jwt";
+import { SocketService } from './socket.service';
 
 // Environment
 import { environment } from '@environments/environment';
@@ -10,20 +11,13 @@ import { environment } from '@environments/environment';
 import { LoginResponse } from '../interfaces/login/loginResponse';
 import { Usuario } from '../interfaces/login/usuarioResponse';
 
-
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
 
-  // 1. Environment
-  envs = environment;
-
-  // 2. Variables globales
-  private currentUserSubject = new BehaviorSubject<LoginResponse['usuario'] | null>(null);
-  currentUser$ = this.currentUserSubject.asObservable();
-
-  API_BASE = this.envs.main_url + 'auth';
+  // 1. CONFIG
+  private API_BASE = environment.main_url + 'auth';
 
   API_LOGIN: string = this.API_BASE + '/login';
   API_CONFIRMAR = this.API_BASE + '/confirmar';
@@ -32,12 +26,31 @@ export class AuthService {
 
   private jwtHelper = new JwtHelperService();
 
-  // 3. inicializar
-  constructor(private _http: HttpClient) {
-    // Restaurar sesión si ya existe en localStorage
+  // 2. STATE
+  private currentUserSubject = new BehaviorSubject<LoginResponse['usuario'] | null>(null);
+  currentUser$ = this.currentUserSubject.asObservable();
+
+  constructor(
+    private http: HttpClient,
+    private socketService: SocketService
+  ) {
+    this.restoreSession();
+  }
+
+  // RESTORE SESSION (IMPORTANTE)
+  private restoreSession(): void {
     const savedUser = localStorage.getItem('usuario');
-    if (savedUser) {
+    const token = localStorage.getItem('token');
+
+    if (savedUser && token && !this.jwtHelper.isTokenExpired(token)) {
+
       this.currentUserSubject.next(JSON.parse(savedUser));
+
+      // CONECTAR SOCKET AUTOMÁTICAMENTE
+      this.socketService.connect();
+
+    } else {
+      this.logout();
     }
   }
 
@@ -48,7 +61,7 @@ export class AuthService {
 
     const headers = new HttpHeaders().set('Content-Type', 'application/json');
 
-    return this._http.post<LoginResponse>(
+    return this.http.post<LoginResponse>(
       this.API_LOGIN,
       { username, password },
       { headers }
@@ -56,16 +69,21 @@ export class AuthService {
 
       tap((res) => {
 
-        const usuarioCompleto = {
+        const usuarioCompleto: Usuario = {
           ...res.usuario,
           roles: res.roles
         };
 
+        // GUARDAR
         localStorage.setItem('token', res.token);
         localStorage.setItem('usuario', JSON.stringify(usuarioCompleto));
         localStorage.setItem('roles', JSON.stringify(res.roles))
 
+        // STATE
         this.currentUserSubject.next(usuarioCompleto);
+
+        // CONECTAR SOCKET DESPUÉS DE LOGIN
+        this.socketService.connect();
       })
     );
   }
@@ -75,7 +93,7 @@ export class AuthService {
   // ===========================================================
   confirmarCuenta(token: string): Observable<any> {
 
-    return this._http.get(`${this.API_CONFIRMAR}/${token}`);
+    return this.http.get(`${this.API_CONFIRMAR}/${token}`);
 
   }
 
@@ -84,7 +102,7 @@ export class AuthService {
   // ===========================================================
   recuperarCuenta(username: string): Observable<any> {
 
-    return this._http.post(this.API_RECUPERAR, {
+    return this.http.post(this.API_RECUPERAR, {
       username
     });
 
@@ -95,51 +113,44 @@ export class AuthService {
   // ===========================================================
   resetPassword(token: string, nuevaPassword: string): Observable<any> {
 
-    return this._http.put(`${this.API_RESET_PASSWORD}/${token}`, {
+    return this.http.put(`${this.API_RESET_PASSWORD}/${token}`, {
       nuevaPassword
     });
 
   }
 
   // ===========================================================
-  // 5.- LOGOUT
+  // 5.- UTILIDADES
   // ===========================================================
+
+  // LOGOUT
   logout(): void {
 
+    // DESCONECTAR SOCKET
+    this.socketService.disconnect();
+
+    // LIMPIAR STORAGE
     localStorage.removeItem('token');
     localStorage.removeItem('usuario');
+    localStorage.removeItem('roles');
 
+    // LIMPIAR STATE
     this.currentUserSubject.next(null);
-
   }
 
-  // ===========================================================
-  // 6.- OBTENER TOKEN
-  // ===========================================================
+  // OBTENER TOKEN
   getToken(): string | null {
-
     return localStorage.getItem('token');
-
   }
 
-  // ===========================================================
-  // 7.- VERIFICAR LOGIN
-  // ===========================================================
+  // VERIFICAR LOGIN
   isAuthenticated(): boolean {
-
     const token = this.getToken();
-
-    if (!token) {
-      return false;
-    }
-
-    return !this.jwtHelper.isTokenExpired(token);
+    return token ? !this.jwtHelper.isTokenExpired(token) : false;
 
   }
 
-  // ===========================================================
-  // 8.- OBTENER USUARIO ACTUAL
-  // ===========================================================
+  // OBTENER USUARIO ACTUAL
   getCurrentUser(): Usuario | null {
     return this.currentUserSubject.value;
   }

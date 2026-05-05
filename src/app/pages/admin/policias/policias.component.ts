@@ -153,7 +153,7 @@ export class PoliciasComponent implements OnInit {
   }
 
   // - Ver policia
-  verPolicia(poli: any) {
+  verPolicia(poli: Policia) {
     this.policia_id = poli.id;
     this.mostrarModalInfo = true;
   }

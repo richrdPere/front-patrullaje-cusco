@@ -164,7 +164,7 @@ export class ZonasComponent implements OnInit {
     }
 
     const zona: ZonaPatrullaje = {
-      id: '',
+      id: 0,
       nombre: this.zonaForm.value.nombre,
       descripcion: this.zonaForm.value.descripcion,
       coordenadas: this.coordenadas,
@@ -242,7 +242,7 @@ export class ZonasComponent implements OnInit {
   // =========================================================
   // 4.- ELIMINAR ZONA
   // =========================================================
-  eliminarZona(idZona: string): void {
+  eliminarZona(idZona: number): void {
     if (confirm('¿Estás seguro de eliminar esta asignación?')) {
       this._zonaService.deleteZonaById(idZona).subscribe({
         next: (res) => {

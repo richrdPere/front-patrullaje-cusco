@@ -7,6 +7,6 @@ export const environment = {
 
   // URLS
   main_url_produccion: 'https://ba-pangeast2dio.onrender.com/api/',
-  main_url: 'http://localhost:4000/api/'
-
+  main_url: 'http://localhost:4000/api/',
+  socket_url: 'http://localhost:4000'
 }
