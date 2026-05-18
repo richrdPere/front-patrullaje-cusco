@@ -10,6 +10,7 @@ import { environment } from '@environments/environment';
 // Interface
 import { LoginResponse } from '../interfaces/login/loginResponse';
 import { Usuario } from '../interfaces/login/usuarioResponse';
+import { MapaTrackingService } from './mapa-tracking/mapa-tracking.service';
 
 @Injectable({
   providedIn: 'root'
@@ -32,7 +33,8 @@ export class AuthService {
 
   constructor(
     private http: HttpClient,
-    private socketService: SocketService
+    private socketService: SocketService,
+    private mapaTrackingService: MapaTrackingService
   ) {
     this.restoreSession();
   }
@@ -50,7 +52,11 @@ export class AuthService {
       this.socketService.connect();
 
     } else {
-      this.logout();
+      localStorage.removeItem('token');
+      localStorage.removeItem('usuario');
+      localStorage.removeItem('roles');
+
+      this.currentUserSubject.next(null);
     }
   }
 
@@ -83,7 +89,7 @@ export class AuthService {
         this.currentUserSubject.next(usuarioCompleto);
 
         // CONECTAR SOCKET DESPUÉS DE LOGIN
-        this.socketService.connect();
+        this.socketService.reconnect();
       })
     );
   }
@@ -128,6 +134,9 @@ export class AuthService {
 
     // DESCONECTAR SOCKET
     this.socketService.disconnect();
+
+    // LIMPIAR EL TRACKING
+    this.mapaTrackingService.limpiarTodo();
 
     // LIMPIAR STORAGE
     localStorage.removeItem('token');

@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
+import { Observable } from 'rxjs';
 
 // Environment
 import { environment } from '@environments/environment';
+
 
 
 @Injectable({
@@ -21,9 +23,15 @@ export class SocketService {
   // =========================================================
   connect(): void {
 
-    // - Evitar múltiples conexiones
-    if (this.socket && this.socket.connected) {
+    // YA CONECTADO
+    if (this.socket?.connected) {
       console.log('⚠️ Socket ya conectado');
+      return;
+    }
+
+    // YA INTENTANDO CONECTAR
+    if (this.socket?.active) {
+      console.log('⚠️ Socket reconectando...');
       return;
     }
 
@@ -31,14 +39,12 @@ export class SocketService {
 
     this.socket = io(this.API_BASE, {
       auth: { token },
-      transports: ['websocket'], // evita polling innecesario
+      transports: ['websocket'],
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 2000
     });
 
-
-    // - EVENTOS BASE
     this.socket.on('connect', () => {
       console.log('🟢 Socket conectado:', this.socket?.id);
     });
@@ -50,6 +56,7 @@ export class SocketService {
     this.socket.on('connect_error', (err) => {
       console.error('❌ Error conexión socket:', err.message);
     });
+
   }
 
   // =========================================================
@@ -97,5 +104,38 @@ export class SocketService {
   reconnect(): void {
     this.disconnect();
     this.connect();
+  }
+
+
+  // =========================================================
+  // LISTEN HANDLERS
+  // =========================================================
+  listen<T = any>(event: string): Observable<T> {
+
+    return new Observable((observer) => {
+
+      // AUTO CONECTAR
+      if (!this.socket) {
+        this.connect();
+      }
+
+      if (!this.socket) {
+        observer.error('Socket no inicializado');
+        return;
+      }
+
+      const handler = (data: T) => {
+        observer.next(data);
+      };
+
+      this.socket.on(event, handler);
+
+      // CLEANUP
+      return () => {
+        this.socket?.off(event, handler);
+      };
+
+    });
+
   }
 }

@@ -149,7 +149,7 @@
                       (change)="toggleSereno(sereno.id, $event)" />
 
                     <span>
-                      {{ sereno.nombre }} {{ sereno.apellidos }}
+                      {{ sereno.persona.nombres }} {{ sereno.persona.apellidos }}
                     </span>
 
                     <!-- Roles como badge -->
@@ -198,7 +198,7 @@
 
                       <!-- Nombre completo -->
                       <span>
-                        {{ policia.usuario.nombre }} {{ policia.usuario.apellidos }}
+                        {{ policia.label }}
                       </span>
 
                       <!-- Info adicional -->

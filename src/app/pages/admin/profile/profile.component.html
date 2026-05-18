@@ -1,0 +1,339 @@
+<div class="container-fluid py-4">
+
+  <!-- ===================================================== -->
+  <!-- LOADING -->
+  <!-- ===================================================== -->
+  <div class="row" *ngIf="cargando">
+    <div class="col-12 text-center py-5">
+      <div class="spinner-border text-primary"></div>
+      <p class="mt-3">Cargando perfil...</p>
+    </div>
+  </div>
+
+
+  <div class="row g-4" *ngIf="!cargando">
+
+    <!-- ===================================================== -->
+    <!-- PERFIL -->
+    <!-- ===================================================== -->
+    <div class="col-lg-4">
+
+      <div class="card shadow-sm border-0 rounded-4">
+
+        <div class="card-body text-center p-4">
+
+          <!-- FOTO -->
+          <div class="position-relative d-inline-block mb-3">
+
+            <img [src]="previewFoto || 'assets/img/user.png'" class="rounded-circle border shadow" width="180"
+              height="180" style="object-fit: cover;">
+
+            <!-- INPUT FOTO -->
+            <label for="inputFoto" class="btn btn-primary btn-sm position-absolute bottom-0 end-0 rounded-circle">
+              <i class="fas fa-camera"></i>
+            </label>
+
+            <input type="file" id="inputFoto" hidden accept="image/*" (change)="onChangePhoto($event)">
+
+          </div>
+
+          <!-- LOADING FOTO -->
+          @if(subiendoFoto){
+          <div class="mb-3">
+            <div class="spinner-border spinner-border-sm text-primary"></div>
+            <span class="ms-2">Subiendo foto...</span>
+          </div>
+          }
+
+          <!-- NOMBRE -->
+          <h4 class="fw-bold mb-1">
+            {{ usuario.persona.nombres }}
+            {{ usuario.persona.apellidos }}
+          </h4>
+
+          <!-- USERNAME -->
+          <p class="text-muted mb-2">
+            {{ usuario.username }}
+          </p>
+
+          <!-- ROLES -->
+          <div class="d-flex flex-wrap justify-content-center gap-2 mt-3">
+
+            @for(role of usuario.roles; track role){
+
+            <span class="badge bg-primary">
+              {{ role }}
+            </span>
+
+            }
+
+          </div>
+
+          <!-- ESTADO -->
+          <div class="mt-4">
+
+            <span class="badge" [ngClass]="usuario.estado ? 'bg-success' : 'bg-danger'">
+              {{ usuario.estado ? 'Activo' : 'Inactivo' }}
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- FORMULARIOS -->
+    <!-- ===================================================== -->
+    <div class="col-lg-8">
+
+      <!-- ===================================================== -->
+      <!-- INFORMACION PERSONAL -->
+      <!-- ===================================================== -->
+      <div class="card shadow-sm border-0 rounded-4 mb-4">
+
+        <div class="card-header bg-white border-0 pt-4 px-4">
+
+          <h5 class="fw-bold mb-0">
+            Información Personal
+          </h5>
+
+        </div>
+
+        <div class="card-body p-4">
+
+          <form [formGroup]="profileForm" (ngSubmit)="actualizarPerfil()">
+
+            <div class="row g-3">
+
+              <!-- NOMBRES -->
+              <div class="col-md-6">
+
+                <label class="form-label">
+                  Nombres
+                </label>
+
+                <input type="text" class="form-control" formControlName="nombres">
+
+                @if(campoInvalido('nombres')){
+                <small class="text-danger">
+                  El nombre es requerido
+                </small>
+                }
+
+              </div>
+
+              <!-- APELLIDOS -->
+              <div class="col-md-6">
+
+                <label class="form-label">
+                  Apellidos
+                </label>
+
+                <input type="text" class="form-control" formControlName="apellidos">
+
+                @if(campoInvalido('apellidos')){
+                <small class="text-danger">
+                  Los apellidos son requeridos
+                </small>
+                }
+
+              </div>
+
+              <!-- TELEFONO -->
+              <div class="col-md-6">
+
+                <label class="form-label">
+                  Teléfono
+                </label>
+
+                <input type="text" class="form-control" formControlName="telefono">
+
+              </div>
+
+              <!-- CORREO -->
+              <div class="col-md-6">
+
+                <label class="form-label">
+                  Correo
+                </label>
+
+                <input type="email" class="form-control" formControlName="correo">
+
+                @if(campoInvalido('correo')){
+                <small class="text-danger">
+                  Correo inválido
+                </small>
+                }
+
+              </div>
+
+              <!-- DIRECCION -->
+              <div class="col-12">
+
+                <label class="form-label">
+                  Dirección
+                </label>
+
+                <input type="text" class="form-control" formControlName="direccion">
+
+              </div>
+
+              <!-- DEPARTAMENTO -->
+              <div class="col-md-4">
+
+                <label class="form-label">
+                  Departamento
+                </label>
+
+                <input type="text" class="form-control" formControlName="departamento">
+
+              </div>
+
+              <!-- PROVINCIA -->
+              <div class="col-md-4">
+
+                <label class="form-label">
+                  Provincia
+                </label>
+
+                <input type="text" class="form-control" formControlName="provincia">
+
+              </div>
+
+              <!-- DISTRITO -->
+              <div class="col-md-4">
+
+                <label class="form-label">
+                  Distrito
+                </label>
+
+                <input type="text" class="form-control" formControlName="distrito">
+
+              </div>
+
+            </div>
+
+            <!-- BOTON -->
+            <div class="text-end mt-4">
+
+              <button type="submit" class="btn btn-primary px-4" [disabled]="cargando">
+
+                @if(cargando){
+                <span class="spinner-border spinner-border-sm me-2"></span>
+                }
+
+                Guardar cambios
+
+              </button>
+
+            </div>
+
+          </form>
+
+        </div>
+
+      </div>
+
+      <!-- ===================================================== -->
+      <!-- CAMBIAR PASSWORD -->
+      <!-- ===================================================== -->
+      <div class="card shadow-sm border-0 rounded-4">
+
+        <div class="card-header bg-white border-0 pt-4 px-4">
+
+          <h5 class="fw-bold mb-0">
+            Seguridad
+          </h5>
+
+        </div>
+
+        <div class="card-body p-4">
+
+          <form [formGroup]="passwordForm" (ngSubmit)="cambiarPassword()">
+
+            <div class="row g-3">
+
+              <!-- PASSWORD ACTUAL -->
+              <div class="col-md-4">
+
+                <label class="form-label">
+                  Contraseña actual
+                </label>
+
+                <input type="password" class="form-control" formControlName="password_actual">
+
+                @if(passwordCampoInvalido('password_actual')){
+                <small class="text-danger">
+                  Campo requerido
+                </small>
+                }
+
+              </div>
+
+              <!-- NUEVA PASSWORD -->
+              <div class="col-md-4">
+
+                <label class="form-label">
+                  Nueva contraseña
+                </label>
+
+                <input type="password" class="form-control" formControlName="password_nueva">
+
+                @if(passwordCampoInvalido('password_nueva')){
+                <small class="text-danger">
+                  Mínimo 6 caracteres
+                </small>
+                }
+
+              </div>
+
+              <!-- CONFIRMAR -->
+              <div class="col-md-4">
+
+                <label class="form-label">
+                  Confirmar contraseña
+                </label>
+
+                <input type="password" class="form-control" formControlName="confirmar_password">
+
+                @if(passwordCampoInvalido('confirmar_password')){
+                <small class="text-danger">
+                  Campo requerido
+                </small>
+                }
+
+              </div>
+
+            </div>
+
+            <!-- BOTON -->
+            <div class="text-end mt-4">
+
+              <button type="submit" class="btn btn-dark px-4" [disabled]="cambiandoPassword">
+
+                @if(cambiandoPassword){
+                <span class="spinner-border spinner-border-sm me-2"></span>
+                }
+
+                Cambiar contraseña
+
+              </button>
+
+            </div>
+
+          </form>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+
+</div>

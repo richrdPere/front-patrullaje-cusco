@@ -19,8 +19,7 @@
   <!-- BOTÓN ZONAS (OVERLAY) -->
   <!-- ========================= -->
   @if (!panelVisible) {
-  <button
-    (click)="mostrarPanel()"
+  <button (click)="mostrarPanel()"
     class="btn btn-primary btn-sm absolute top-4 right-8 z-30 flex items-center gap-1 shadow-lg">
     <i class="fa-solid fa-map-location-dot"></i>
     <span>Zonas</span>
@@ -41,9 +40,7 @@
           Zonas de Patrullaje
         </h2>
 
-        <button
-          (click)="ocultarPanel()"
-          class="btn btn-xs btn-ghost btn-circle">
+        <button (click)="ocultarPanel()" class="btn btn-xs btn-ghost btn-circle">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
@@ -55,12 +52,8 @@
         <li>
           <label class="flex items-center gap-2 cursor-pointer">
 
-            <input
-              type="checkbox"
-              class="checkbox checkbox-xs sm:checkbox-sm"
-              [checked]="zonasVisibles[zona.id]"
-              (change)="toggleZona(zona)"
-            />
+            <input type="checkbox" class="checkbox checkbox-xs sm:checkbox-sm" [checked]="zonasVisibles[zona.id]"
+              (change)="toggleZona(zona)" />
 
             <span class="text-xs sm:text-sm">
               {{ zona.nombre }}
@@ -75,5 +68,50 @@
     </div>
   </div>
   }
+
+  <!-- ========================= -->
+  <!-- PANEL TRACKING -->
+  <!-- ========================= -->
+  <div
+    class="absolute top-4 left-4 z-40 bg-base-100/90 backdrop-blur-md rounded-xl shadow-xl border border-base-200 p-3 min-w-55">
+
+    <div class="flex items-center justify-between mb-2 gap-3">
+
+      <h2 class="font-semibold text-sm">
+        Tracking Realtime
+      </h2>
+
+      <div class="flex items-center gap-2">
+
+        <span class="w-2 h-2 rounded-full" [class.bg-success]="trackingActivo" [class.bg-error]="!trackingActivo">
+        </span>
+
+        <span class="text-xs">
+          {{ trackingActivo ? 'Activo' : 'Sin conexión' }}
+        </span>
+
+      </div>
+
+    </div>
+
+    <div class="text-xs space-y-1">
+
+      <div class="flex justify-between">
+        <span>Serenos activos:</span>
+        <span class="font-semibold">
+          {{ cantidadSerenos }}
+        </span>
+      </div>
+
+      <div class="flex justify-between">
+        <span>Mapa:</span>
+        <span class="text-success font-semibold">
+          Online
+        </span>
+      </div>
+
+    </div>
+
+  </div>
 
 </div>

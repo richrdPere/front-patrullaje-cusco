@@ -1,6 +1,7 @@
 
 import { Component, ElementRef, ViewChild, AfterViewInit, HostListener, OnDestroy } from '@angular/core';
 import { Lugar } from 'src/app/interfaces/lugar';
+import { Subscription } from 'rxjs';
 
 // Services
 import { GoogleMapsLoaderService } from 'src/app/services/google-maps-loader.service';
@@ -9,6 +10,9 @@ import { SocketService } from 'src/app/services/socket.service';
 
 // Interfaces
 import { ZonaPatrullaje } from 'src/app/interfaces/zonaPatrullaje';
+import { TrackingService } from 'src/app/services/mapa-tracking/tracking.service';
+import { MapaTrackingService } from 'src/app/services/mapa-tracking/mapa-tracking.service';
+import { TrackingStoreService } from 'src/app/services/mapa-tracking/tracking-store.service';
 
 
 @Component({
@@ -30,6 +34,8 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
   // MARCADORES
   marcadores: google.maps.Marker[] = [];
   infoWindows: google.maps.InfoWindow[] = [];
+  trackingActivo = false;
+  cantidadSerenos = 0;
 
   // ZONAS
   zonas: ZonaPatrullaje[] = [];
@@ -37,8 +43,11 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
   poligonos: Record<number, google.maps.Polygon> = {};
 
   // SERENOS Y ALERTAS
-  serenoMarkers: { [userId: number]: google.maps.Marker } = {};
+  // serenoMarkers: { [userId: number]: google.maps.Marker } = {};
   alertMarkers: google.maps.Marker[] = [];
+
+  private trackingSub!: Subscription;
+  private alertaSub!: Subscription;
 
 
 
@@ -63,81 +72,80 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
   ];
 
   constructor(
-    private socketService: SocketService,
     private mapsLoader: GoogleMapsLoaderService,
-    private zonaService: ZonaService
+    private zonaService: ZonaService,
+    private trackingService: TrackingService,
+    private mapaTrackingService: MapaTrackingService,
+    private trackingStoreService: TrackingStoreService
   ) { }
 
   ngOnDestroy(): void {
-    this.socketService.off('tracking');
-    this.socketService.off('alerta_sereno');
-    this.socketService.off('notificacion');
-    this.socketService.off('patrullaje_iniciado');
-    this.socketService.off('patrullaje_finalizado');
-    this.socketService.off('nuevo_patrullaje');
-    this.socketService.off('patrullaje_cancelado');
+    this.trackingSub?.unsubscribe();
+    this.alertaSub?.unsubscribe();
   }
 
   async ngAfterViewInit() {
+
+    // CARGAR GOOGLE MAPS
     await this.mapsLoader.load();
-    this.initSocketMapa();
+
+    // CREAR MAPA
     this.initMapa();
+
+    // RECONSTRUIR SERENOS ACTIVOS
+    this.mapaTrackingService
+      .reconstruirMarcadores(this.map);
+
+    // CARGAR ZONAS
     this.loadZonas();
-    this.renderMarcadores();
+
+    // INICIAR TRACKING
+    this.initTracking();
+
+    this.cantidadSerenos =
+      this.mapaTrackingService.obtenerCantidadSerenos();
+
     this.mapaCargado = true;
   }
 
   // =====================================================
   // SOCKET
   // =====================================================
-  initSocketMapa() {
-    //this.socketService.connect();
-    this.initSocketEvents();
-  }
-
-  initSocketEvents() {
-
+  initTracking() {
+    console.log('🛰️ Escuchando tracking realtime...');
     // TRACKING
-    this.socketService.on('tracking', (data) => {
-      this.actualizarMarcadorSereno(data);
-    });
+    this.trackingSub =
+      this.trackingStoreService.tracking$
+        .subscribe({
+          next: (trackingMap) => {
+            trackingMap.forEach((tracking) => {
+              this.trackingActivo = true;
+              this.mapaTrackingService
+                .actualizarTracking(
+                  this.map,
+                  tracking
+                );
+            });
+            this.cantidadSerenos = trackingMap.size;
+          },
 
-    // ALERTA
-    this.socketService.on('alerta_sereno', (data) => {
-      this.mostrarAlerta(data);
-    });
+          error: (err) => {
+            console.error('❌ Error tracking:', err);
+          }
+        });
 
-    // NOTIFICACIONES
-    this.socketService.on('notificacion', (message) => {
-      console.log('🔔 Notificación:', message);
-    });
-
-    // PATRULLAJE
-    this.socketService.on('patrullaje_iniciado', (data) => {
-      console.log('🟢 Patrullaje iniciado:', data);
-    });
-
-    this.socketService.on('patrullaje_finalizado', (data) => {
-      console.log('🔴 Patrullaje finalizado:', data);
-    });
-
-    // NUEVO PATRULLAJE (🔥 IMPORTANTE)
-    this.socketService.on('nuevo_patrullaje', (patrullaje) => {
-      console.log('📡 Nuevo patrullaje:', patrullaje);
-
-      if (patrullaje.zona?.coordenadas) {
-        this.dibujarZonaPatrullaje(patrullaje.zona);
-      }
-    });
-
-
-
-    // =========================
-    // CANCELACIÓN
-    // =========================
-    this.socketService.on('patrullaje_cancelado', (data) => {
-      console.log('❌ Patrullaje cancelado:', data);
-    });
+    // ALERTAS
+    this.alertaSub = this.trackingService
+      .listenAlertas()
+      .subscribe({
+        next: (data) => {
+          console.log('🚨 ALERTA RECIBIDA:', data);
+          this.mostrarAlerta(data);
+        },
+        error: (err) => {
+          console.error('❌ Error alerta:', err);
+        }
+      });
   }
 
   dibujarZonaPatrullaje(zona: any) {
@@ -152,29 +160,6 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
     });
 
     polygon.setMap(this.map);
-  }
-
-  actualizarMarcadorSereno(data: any) {
-    const { userId, lat, lng } = data;
-
-    const position = new google.maps.LatLng(lat, lng);
-
-    // Si ya existe → mover
-    if (this.serenoMarkers[userId]) {
-      this.serenoMarkers[userId].setPosition(position);
-      return;
-    }
-
-    // Si no existe → crear
-    const marker = new google.maps.Marker({
-      position,
-      map: this.map,
-      icon: {
-        url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png'
-      }
-    });
-
-    this.serenoMarkers[userId] = marker;
   }
 
   mostrarAlerta(data: any) {
@@ -217,39 +202,6 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
   }
 
   // =====================================================
-  // MARCADORES
-  // =====================================================
-  private renderMarcadores() {
-    this.lugares.forEach(lugar => this.createMarker(lugar));
-  }
-
-  private createMarker(lugar: Lugar) {
-
-    const marker = new google.maps.Marker({
-      map: this.map,
-      position: { lat: lugar.lat, lng: lugar.lng },
-      animation: google.maps.Animation.DROP,
-      draggable: true
-    });
-
-    const infoWindow = new google.maps.InfoWindow({
-      content: `<b>${lugar.nombre}</b>`
-    });
-
-    marker.addListener('click', () => {
-      this.infoWindows.forEach(iw => iw.close());
-      infoWindow.open(this.map, marker);
-    });
-
-    marker.addListener('dblclick', () => {
-      marker.setMap(null);
-    });
-
-    this.marcadores.push(marker);
-    this.infoWindows.push(infoWindow);
-  }
-
-  // =====================================================
   // ZONAS
   // =====================================================
   loadZonas(): void {
@@ -281,8 +233,6 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
     } else {
       // Determinar color según el riesgo
       this.showZona(zona);
-
-
     }
   }
 
@@ -307,10 +257,10 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
     this.fitZonaBounds(zona);
   }
 
-  private hideZona(zonaId: number) {
-    this.poligonos[zonaId]?.setMap(null);
-    this.zonasVisibles[zonaId] = false;
-  }
+  // private hideZona(zonaId: number) {
+  //   this.poligonos[zonaId]?.setMap(null);
+  //   this.zonasVisibles[zonaId] = false;
+  // }
 
   private getColorByRiesgo(riesgo: string): string {
     switch (riesgo) {
@@ -376,46 +326,4 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
   onMouseUp() {
     this.isDragging = false;
   }
-
-  // agregarMarcador(marcador: Lugar) {
-
-  //   const latLng = new google.maps.LatLng(marcador.lat, marcador.lng);
-
-  //   const marker = new google.maps.Marker({
-  //     map: this.map,
-  //     animation: google.maps.Animation.DROP,
-  //     position: latLng,
-  //     draggable: true
-  //   });
-
-  //   this.marcadores.push(marker);
-
-  //   const contenido = `<b>${marcador.nombre}</b>`;
-  //   const infoWindow = new google.maps.InfoWindow({
-  //     content: contenido
-  //   });
-
-  //   this.infoWindows.push(infoWindow);
-
-
-  //   // Mostrar el info window
-  //   google.maps.event.addDomListener(marker, 'click', () => {
-  //     this.infoWindows.forEach(infoW => infoW.close());
-  //     infoWindow.open(this.map, marker);
-  //   });
-
-  //   // Disparar un evento de socket, para borrar el marcador
-  //   google.maps.event.addDomListener(marker, 'dblclick', () => {
-  //     marker.setMap(null);
-  //   });
-
-  //   // Disparar un evento de socket, para mover el marcador
-  //   // google.maps.event.addDomListener(marker, 'drag', (coors: { "": any; }) => {
-  //   //   const nuevoMarcador = {
-  //   //     lat: coors.LatLng.lat(),
-  //   //     lng: coors.LatLng.lng(),
-  //   //     nombre: marcador.nombre
-  //   //   }
-  //   // });
-  // }
 }

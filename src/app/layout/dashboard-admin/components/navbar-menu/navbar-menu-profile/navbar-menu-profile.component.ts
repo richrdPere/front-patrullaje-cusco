@@ -6,7 +6,7 @@ import iziToast from 'izitoast';
 
 // Servicio
 import { AuthService } from 'src/app/services/auth.service';
-import { PerfilService } from 'src/app/services/perfil.service';
+import { PerfilService } from 'src/app/services/profile.service';
 
 // Interface
 export interface MenuOptions {
@@ -54,12 +54,12 @@ export class NavbarMenuProfileComponent {
     {
       icon: 'assets/icons/navbar/perfil.svg',
       label: 'Perfil',
-      route: '/app/perfil',
+      route: '/admin/perfil',
     },
     {
       icon: 'assets/icons/navbar/settings.svg',
       label: 'Configuración',
-      route: '/app/configuracion',
+      route: '/admin/configuracion',
     },
     {
       icon: 'assets/icons/navbar/sign_out.svg',

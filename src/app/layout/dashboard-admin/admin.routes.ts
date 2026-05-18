@@ -64,8 +64,8 @@ export const adminRoutes: Routes = [
       {
         path: 'perfil',
         loadComponent: () =>
-          import('../../pages/admin/perfil/components/perfil/perfil.component')
-            .then(m => m.PerfilComponent),
+          import('../../pages/admin/profile/profile.component')
+            .then(m => m.ProfileComponent),
         data: { roles: ['ADMIN', 'SERENO', 'OPERADOR', 'GERENTE_SERENAZGO', 'SUPERVISOR_SERENAZGO'] }
       },
 

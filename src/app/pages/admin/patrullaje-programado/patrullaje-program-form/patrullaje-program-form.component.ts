@@ -169,10 +169,14 @@ export class PatrullajeProgramFormComponent implements OnInit, OnChanges {
       policias: this.policiaService.getAllPolicias()
     }).subscribe({
       next: (resp: any) => {
+
+        console.log("Datos serenos", resp.serenos);
+        console.log("Datos policias", resp.policias);
+
         this.zonas = resp.zonas.zonas;
         this.unidades = resp.unidades.unidades;
-        this.serenos = resp.serenos.serenos;
-        this.policias = resp.policias.policias;
+        this.serenos = resp.serenos.data;
+        this.policias = resp.policias.data;
       },
       error: (err) => {
         console.error('Error cargando datos', err);
