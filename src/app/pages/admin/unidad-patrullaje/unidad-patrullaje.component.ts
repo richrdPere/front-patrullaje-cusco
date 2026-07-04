@@ -63,13 +63,10 @@ export class UnidadPatrullajeComponent implements OnInit {
       next: (res) => {
 
         console.log("UNIDADES: ", res);
-        this.unidades = res.data;
-
-        this.totalItems = res.total;
-        this.currentPage = res.page;
-
-        this.totalPages = Math.ceil(res.total / res.limit);
-
+        this.unidades = res.data.rows;
+        this.totalItems = res.data.total;
+        this.currentPage = res.data.page;
+        this.totalPages = res.data.totalPages; // Math.ceil(res.total / res.limit);
         this.isLoading = false;
       },
       error: (err) => {

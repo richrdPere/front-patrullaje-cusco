@@ -3,14 +3,15 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { JwtHelperService } from "@auth0/angular-jwt";
 import { SocketService } from './socket.service';
+import { MapaTrackingService } from './mapa-tracking/mapa-tracking.service';
 
 // Environment
 import { environment } from '@environments/environment';
 
 // Interface
+import { ApiResponse } from '../pages/shared/interfaces/api-response';
 import { LoginResponse } from '../interfaces/login/loginResponse';
 import { Usuario } from '../interfaces/login/usuarioResponse';
-import { MapaTrackingService } from './mapa-tracking/mapa-tracking.service';
 
 @Injectable({
   providedIn: 'root'
@@ -63,11 +64,11 @@ export class AuthService {
   // ===========================================================
   // 1.- LOGIN
   // ===========================================================
-  login(username: string, password: string): Observable<LoginResponse> {
+  login(username: string, password: string): Observable<ApiResponse<LoginResponse>> {
 
     const headers = new HttpHeaders().set('Content-Type', 'application/json');
 
-    return this.http.post<LoginResponse>(
+    return this.http.post<ApiResponse<LoginResponse>>(
       this.API_LOGIN,
       { username, password },
       { headers }
@@ -76,14 +77,15 @@ export class AuthService {
       tap((res) => {
 
         const usuarioCompleto: Usuario = {
-          ...res.usuario,
-          roles: res.roles
+          ...res.data.usuario,
+          roles: res.data.roles
         };
 
+        console.log("Usuario completo: ", usuarioCompleto);
         // GUARDAR
-        localStorage.setItem('token', res.token);
+        localStorage.setItem('token', res.data.token);
         localStorage.setItem('usuario', JSON.stringify(usuarioCompleto));
-        localStorage.setItem('roles', JSON.stringify(res.roles))
+        localStorage.setItem('roles', JSON.stringify(res.data.roles))
 
         // STATE
         this.currentUserSubject.next(usuarioCompleto);

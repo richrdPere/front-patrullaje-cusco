@@ -66,13 +66,10 @@ export class PatrullajeProgramadoComponent implements OnInit {
       next: (res) => {
 
         console.log("UNIDADES: ", res);
-        this.patrullajes = res.data;
-
-        this.totalItems = res.total;
-        this.currentPage = res.page;
-
-        this.totalPages = Math.ceil(res.total / res.limit);
-
+        this.patrullajes = res.data.rows;
+        this.totalItems = res.data.total;
+        this.currentPage = res.data.page;
+        this.totalPages = res.data.totalPages;
         this.isLoading = false;
       },
       error: (err) => {

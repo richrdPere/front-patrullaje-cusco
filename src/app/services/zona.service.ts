@@ -6,6 +6,10 @@ import { Observable } from 'rxjs';
 import { environment } from '@environments/environment';
 import { ZonaPatrullaje } from './../interfaces/zonaPatrullaje';
 
+// Interfaces
+import { ApiResponse } from '../pages/shared/interfaces/api-response';
+import { SelectResponse } from '../pages/shared/interfaces/select-response';
+
 @Injectable({ providedIn: 'root' })
 export class ZonaService {
 
@@ -53,9 +57,9 @@ export class ZonaService {
   // ===========================================================
   // 2.- Obtener zonas
   // ===========================================================
-  obtenerZonas(): Observable<any[]> {
+  obtenerZonas(): Observable<ApiResponse<SelectResponse<ZonaPatrullaje>>> {
     const headers = this.getAuthHeaders().headers;
-    return this.http.get<any[]>(this.API_LISTAR_ZONAS, { headers });
+    return this.http.get<ApiResponse<SelectResponse<ZonaPatrullaje>>>(this.API_LISTAR_ZONAS, { headers });
   }
 
   // ===========================================================

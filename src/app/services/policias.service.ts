@@ -6,8 +6,11 @@ import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 // Interfaces
-import { PaginadoResponse } from '../interfaces/login/loginResponse';
+import { ApiResponse } from '../pages/shared/interfaces/api-response';
+import { PaginadoResponse } from '../pages/shared/interfaces/paginado-response';
+
 import { CrearPoliciaResponse, DeletePoliciaResponse, PoliciaDetalleResponse, PoliciaListResponse, PoliciaSelectResponse, UpdatePoliciaResponse } from '../interfaces/policia/policia_response';
+import { Policia } from '../interfaces/policia/IPolicia';
 
 @Injectable({
   providedIn: 'root'
@@ -63,7 +66,7 @@ export class PoliciasService {
     limit?: number;
     nombres?: string;
     dni?: string;
-  }): Observable<PoliciaListResponse> {
+  }): Observable<ApiResponse<PaginadoResponse<Policia>>> {
 
     let params = new HttpParams();
 
@@ -75,7 +78,7 @@ export class PoliciasService {
 
     const headers = this.getAuthHeaders().headers;
 
-    return this.http.get<PoliciaListResponse>(this.API_GET_POLICIAS_PAGINATED, { params, headers });
+    return this.http.get<ApiResponse<PaginadoResponse<Policia>>>(this.API_GET_POLICIAS_PAGINATED, { params, headers });
   }
 
   // ===========================================================

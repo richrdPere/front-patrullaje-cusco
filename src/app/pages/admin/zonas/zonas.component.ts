@@ -127,11 +127,11 @@ export class ZonasComponent implements OnInit {
   // 1.- OBTENER TODAS LAS ZONAS
   // =========================================================
   obtenerZonas() {
-
-
     this._zonaService.obtenerZonas().subscribe({
-      next: (res:any) => {
-        this.zonas = res.zonas; // Guardar lAS ZONAS
+      next: (res) => {
+        this.zonas = res.data.rows // Guardar lAS ZONAS
+
+        console.log("OBTENIENDO ZOANS: ", this.zonas);
 
         // Inicializar visibilidad
         this.zonas.forEach(zona => {

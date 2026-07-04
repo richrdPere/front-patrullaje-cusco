@@ -75,12 +75,11 @@ export class UsuariosComponent implements OnInit {
     }
     ).subscribe({
       next: (res) => {
+        this.usuarios = res.data.rows;
+        this.totalItems = res.data.total;
+        this.currentPage = res.data.limit;
 
-        this.usuarios = res.data;
-        this.totalItems = res.total;
-        this.currentPage = res.page;
-
-        this.totalPages = res.totalPages;
+        this.totalPages = res.data.totalPages;
 
         this.isLoading = false;
       },

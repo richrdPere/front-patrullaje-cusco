@@ -38,8 +38,6 @@ export class PatrullajeProgramFormComponent implements OnInit, OnChanges {
   // Formulario
   formPatrullaje!: FormGroup;
 
-
-
   // Ancho del modal
   modalWidthClass = 'max-w-4xl'; // default
   setModalWidth(size: 'sm' | 'md' | 'lg' | 'xl' | 'full') {
@@ -65,6 +63,7 @@ export class PatrullajeProgramFormComponent implements OnInit, OnChanges {
 
   ngOnInit(): void {
     this.initFormPatrullaje();
+    this.initFechaHoraActual();
     this.getAllData();
 
     this.setModalWidth('lg');
@@ -257,6 +256,25 @@ export class PatrullajeProgramFormComponent implements OnInit, OnChanges {
   // ====================================
   // Helpers methods
   // ====================================
+  initFechaHoraActual(): void {
+    const ahora = new Date();
+
+    // FORMATO FECHA: YYYY-MM-DD
+    const fecha = ahora.toISOString().split('T')[0];
+
+    // FORMATO HORA: HH:mm
+    const horas = ahora.getHours().toString().padStart(2, '0');
+    const minutos = ahora.getMinutes().toString().padStart(2, '0');
+
+    const horaActual = `${horas}:${minutos}`;
+
+    this.formPatrullaje.patchValue({
+      fecha: fecha,
+      hora_inicio: horaActual,
+      // hora_fin: horaActual
+    });
+  }
+
   cerrarModal() {
     this.formPatrullaje.reset();
     this.modoEdicion = false;

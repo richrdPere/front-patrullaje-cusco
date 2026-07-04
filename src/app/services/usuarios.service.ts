@@ -6,6 +6,9 @@ import { Observable } from 'rxjs';
 import { environment } from '@environments/environment';
 
 // Interfaces
+import { ApiResponse } from '../pages/shared/interfaces/api-response';
+import { PaginadoResponse } from '../pages/shared/interfaces/paginado-response';
+
 import {
   Usuario,
   UsuarioListResponse,
@@ -76,7 +79,7 @@ export class UsuarioService {
       dni?: string;
       rol?: string;
     }
-  ): Observable<UsuarioListResponse> {
+  ): Observable<ApiResponse<PaginadoResponse<Usuario>>> {
 
     let params = new HttpParams()
     Object.entries(filters).forEach(([key, value]) => {
@@ -85,7 +88,7 @@ export class UsuarioService {
       }
     });
 
-    return this.http.get<UsuarioListResponse>(this.API_GET_USUARIOS_PAGINATED, { params, ...this.getAuthHeaders() });
+    return this.http.get<ApiResponse<PaginadoResponse<Usuario>>>(this.API_GET_USUARIOS_PAGINATED, { params, ...this.getAuthHeaders() });
   }
 
   // =========================================================

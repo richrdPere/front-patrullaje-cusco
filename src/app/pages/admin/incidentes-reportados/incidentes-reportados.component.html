@@ -1,7 +1,7 @@
 <div class="p-6 min-h-full bg-base-300 text-base-content overflow-auto transition-colors duration-300">
 
   <!-- Titulo -->
-  <h1 class="text-2xl font-bold mb-5 text-base-content ">Operativos Programados</h1>
+  <h1 class="text-2xl font-bold mb-5 text-base-content ">Incidentes Reportados</h1>
 
   <!-- Header -->
   <div class="p-4 mb-7 card bg-base-100 shadow-md">
@@ -31,16 +31,9 @@
     </div>
   </div>
 
-  <!-- Modal Crear patrullaje  -->
-  <patrullaje-program-form [mostrarModal]="mostrarModal" [modoEdicion]="modoEdicion"
-    [patrullajeSeleccionado]="patrullajeSeleccionado" (modalCerrado)="cerrarModal()"
-    (patrullajeCreado)="getPatrullajePaginado()"></patrullaje-program-form>
-
-
   <!-- Modal Ver patrullaje -->
-  <patrullaje-program-info [mostrarModal]="mostrarModalInfo" [patrullaje_id]="patrullaje_id"
-    (modalCerrado)="cerrarModalInfo()"></patrullaje-program-info>
-
+  <!-- <patrullaje-program-info [mostrarModal]="mostrarModalInfo" [patrullaje_id]="patrullaje_id"
+    (modalCerrado)="cerrarModalInfo()"></patrullaje-program-info> -->
 
   <!-- Tabla -->
   <div class="p-6 min-h-auto bg-base-100 rounded-xl shadow-xl">
@@ -62,14 +55,14 @@
         </div>
 
         <!-- Botónes -->
-        <div class="flex flex-row justify-center items-center gap-4">
+        <!-- <div class="flex flex-row justify-center items-center gap-4">
 
           <button class="btn btn-primary text-base-content hover:text-white bg-info hover:bg-primary border-none"
             (click)="abrirModal()">
             <i class="fa-solid fa-plus mr-1"></i>
             Operativo
           </button>
-        </div>
+        </div> -->
 
       </div>
 
@@ -79,12 +72,12 @@
         <thead class="bg-base-300/90">
           <tr>
             <th>#</th>
-            <th>Descripcion</th>
-            <th>Hora Inicio</th>
-            <th>Hora Final</th>
+            <th>Fecha</th>
+            <th>Sereno</th>
+            <th>Tipo de Incidente</th>
+            <th>Zona</th>
             <th>Estado</th>
-            <th>Actualización</th>
-            <th>Acciones</th>
+            <th>Turno</th>
           </tr>
         </thead>
         <tbody>
@@ -94,33 +87,33 @@
           </tr>
           }
 
-          @for (patrulla of patrullajes; track patrulla.id; let i = $index) {
+          @for (incidente of incidentes; track incidente.id; let i = $index) {
           <tr class="hover ">
 
             <!-- Numeracion -->
             <td>{{i + 1}}</td>
 
             <!-- Descripcion -->
-            <td>{{ patrulla.descripcion }}</td>
+            <td>{{ incidente.descripcion }}</td>
 
             <!-- Hora Inicio -->
             <th>
-              {{patrulla.hora_inicio}}
+              {{incidente.hora_inicio}}
             </th>
 
             <!-- Hora Fin -->
-            <td>{{patrulla.hora_fin}}</td>
+            <td>{{incidente.hora_fin}}</td>
 
             <!-- Estado -->
             <td>
               <span class="badge badge-soft badge-info font-semibold">
-                {{ patrulla.estado }}
+                {{ incidente.estado }}
               </span>
             </td>
 
             <!-- Actualización -->
             <td>
-              {{ patrulla.updatedAt | date: 'dd/MM/yyyy, hh:mm a' }}
+              {{ incidente.updatedAt | date: 'dd/MM/yyyy, hh:mm a' }}
             </td>
 
             <!-- ACCIONES PRINCIPALES  -->
@@ -128,24 +121,19 @@
 
               <div class="flex justify-start items-center gap-1">
                 <!-- Ver -->
-                <button class="btn btn-ghost btn-circle btn-md" (click)="verPatrullaje(patrulla)">
+                <button class="btn btn-ghost btn-circle btn-md" (click)="verPatrullaje(incidente)">
                   <i class="fa-solid fa-eye"></i>
                 </button>
 
-                <!-- Agregar tiempo -->
-                <button class="btn btn-ghost btn-circle btn-md">
-                  <i class="fa-solid fa-angles-right"></i>
-                </button>
-
                 <!-- Editar -->
-                <button class="btn btn-ghost btn-circle btn-md" (click)="editarPatrullaje(patrulla)">
+                <!-- <button class="btn btn-ghost btn-circle btn-md" (click)="editarPatrullaje(incidente)">
                   <i class="fa-solid fa-pencil"></i>
-                </button>
+                </button> -->
 
                 <!-- Eliminar -->
-                <button class="btn btn-ghost btn-circle btn-md" (click)="eliminarPatrullaje(patrulla)">
+                <!-- <button class="btn btn-ghost btn-circle btn-md" (click)="eliminarPatrullaje(incidente)">
                   <i class="fa-solid fa-trash"></i>
-                </button>
+                </button> -->
 
               </div>
 
@@ -159,13 +147,13 @@
 
       </table>
 
-      @if (!isLoading && patrullajes.length === 0) {
+      @if (!isLoading && incidentes.length === 0) {
       <div class="flex flex-col items-center justify-center my-10 text-center text-base-content/70">
         <img src="assets/img/empty-folder.png" alt="Sin solicitudes" class="w-40 h-40 mb-6 opacity-80" />
         <h3 class="text-lg font-semibold text-base-content mb-2">
-          No hay operativos registrados
+          No hay incidentes registrados
         </h3>
-        <p class="text-sm max-w-md">Cuando se asignen nuevos operativos, aparecerán aquí automáticamente.</p>
+        <p class="text-sm max-w-md">Cuando se envien nuevos incidentes, aparecerán aquí automáticamente.</p>
       </div>}
 
       <!-- Paginación -->
@@ -185,4 +173,5 @@
 
 
   </div>
+
 </div>

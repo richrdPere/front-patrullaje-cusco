@@ -5,7 +5,10 @@ import { Observable } from 'rxjs';
 //Environment
 import { environment } from '@environments/environment';
 import { ZonaPatrullaje } from './../interfaces/zonaPatrullaje';
-import { PaginadoResponse } from '../interfaces/login/loginResponse';
+import { PaginadoResponse } from '../pages/shared/interfaces/paginado-response';
+import { ApiResponse } from '../pages/shared/interfaces/api-response';
+import { IPatrullajeDetalle } from '../interfaces/patrullaje_programado/IPatrullajeProgramadoInfo';
+// import { PaginadoResponse } from '../interfaces/login/loginResponse';
 
 @Injectable({ providedIn: 'root' })
 export class PatrullajeProgramadoService {
@@ -63,7 +66,7 @@ export class PatrullajeProgramadoService {
     limit?: number;
     fecha?: string,
     descripcion?: string
-  }): Observable<PaginadoResponse> {
+  }): Observable<ApiResponse<PaginadoResponse<IPatrullajeDetalle>>> {
 
     let params = new HttpParams();
 
@@ -74,7 +77,8 @@ export class PatrullajeProgramadoService {
     });
 
     const headers = this.getAuthHeaders().headers;
-    return this.http.get<PaginadoResponse>(this.API_GET_PATRULLAJES_PAGINATED, { params, headers });
+
+    return this.http.get<ApiResponse<PaginadoResponse<IPatrullajeDetalle>>>(this.API_GET_PATRULLAJES_PAGINATED, { params, headers });
   }
 
   // ===========================================================

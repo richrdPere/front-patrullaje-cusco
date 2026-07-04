@@ -3,14 +3,6 @@ import { Component, ElementRef, QueryList, ViewChildren, ChangeDetectorRef } fro
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { combineLatest, Subscription } from 'rxjs';
 
-// interface MenuOptions {
-//   icon: string;
-//   label: string;
-//   route: string;
-//   sublabel: string;
-//   roles: string[];  //  NUEVO
-// }
-
 type NavItem = {
   name: string;
   icon: string;
@@ -55,9 +47,15 @@ export class SideMenuOptionsComponent {
     },
     {
       icon: "assets/icons/sidebar/policy.svg",
-      name: "Operativos",
+      name: "Patrullaje",
       roles: ['ADMIN', 'GERENTE_SERENAZGO', 'SERENO'],
-      path: "/admin/patrullaje-programado",
+      subItems: [
+        { name: "Operativos Programados", path: "/admin/patrullaje-programado" },
+        // { name: "Patrullajes Activos", path: "/admin/patrullaje-activos" },
+        { name: "Incidentes Reportados", path: "/admin/incidentes-reportados" },
+        { name: "Historial de Patrullajes", path: "/admin/historial-patrullaje" },
+
+      ]
     },
 
 

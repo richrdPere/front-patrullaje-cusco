@@ -12,9 +12,6 @@ import { AuthService } from 'src/app/services/auth.service';
 // Interface
 import { Usuario } from 'src/app/interfaces/login/usuarioResponse';
 
-
-
-
 @Component({
   selector: 'app-dash-admin',
   imports: [RouterOutlet, SidebarMenuComponent, CapitalizePipe, NavbarMenuComponent],

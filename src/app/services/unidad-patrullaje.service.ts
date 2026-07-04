@@ -6,7 +6,9 @@ import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 // Interfaces
-import { PaginadoResponse } from '../interfaces/login/loginResponse';
+import { ApiResponse } from '../pages/shared/interfaces/api-response';
+import { Vehiculo } from '../interfaces/vehiculo';
+import { PaginadoResponse } from '../pages/shared/interfaces/paginado-response';
 
 export interface UltimoCodigoResponse {
   codigo: string;
@@ -59,7 +61,7 @@ export class UnidadPatrullajeService {
     descripcion?: string;
   }
 
-  ): Observable<PaginadoResponse> {
+  ): Observable<ApiResponse<PaginadoResponse<Vehiculo>>> {
 
     let params = new HttpParams();
 
@@ -71,7 +73,7 @@ export class UnidadPatrullajeService {
 
     const headers = this.getAuthHeaders().headers;
 
-    return this.http.get<PaginadoResponse>(this.API_LISTAR_UNIDADES, { params, headers });
+    return this.http.get<ApiResponse<PaginadoResponse<Vehiculo>>>(this.API_LISTAR_UNIDADES, { params, headers });
   }
 
   // ===========================================================

@@ -73,12 +73,10 @@ export class PoliciasComponent implements OnInit {
     ).subscribe({
       next: (res) => {
 
-        this.policias = res.data;
-        this.totalItems = res.total;
-        this.currentPage = res.page;
-
-        this.totalPages = Math.ceil(res.total / res.limit);
-
+        this.policias = res.data.rows;
+        this.totalItems = res.data.total;
+        this.currentPage = res.data.page;
+        this.totalPages = res.data.totalPages;
         this.isLoading = false;
       },
       error: (err) => {

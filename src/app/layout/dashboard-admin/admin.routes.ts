@@ -60,6 +60,20 @@ export const adminRoutes: Routes = [
         data: { roles: ['ADMIN', 'OPERADOR', 'GERENTE_SERENAZGO', 'SUPERVISOR_SERENAZGO'] }
       },
 
+      // Incidentes reportados
+      {
+        path: 'incidentes-reportados',
+        loadComponent: () => import('../../pages/admin/incidentes-reportados/incidentes-reportados.component').then(m => m.IncidentesReportadosComponent),
+        data: { roles: ['ADMIN', 'OPERADOR', 'GERENTE_SERENAZGO', 'SUPERVISOR_SERENAZGO'] }
+      },
+
+      // Historial patrullaje
+      {
+        path: 'historial-patrullaje',
+        loadComponent: () => import('../../pages/admin/historial-patrullaje/historial-patrullaje.component').then(m => m.HistorialPatrullajeComponent),
+        data: { roles: ['ADMIN', 'OPERADOR', 'GERENTE_SERENAZGO', 'SUPERVISOR_SERENAZGO'] }
+      },
+
       // Perfil
       {
         path: 'perfil',
