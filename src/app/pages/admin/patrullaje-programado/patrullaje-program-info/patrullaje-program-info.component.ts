@@ -52,8 +52,10 @@ export class PatrullajeProgramInfoComponent {
     this.loading = true;
 
     this.patrullajeService.getPatrullajeProgramadoById(this.patrullaje_id!).subscribe({
-      next: (data) => {
-        this.p = data;
+      next: (res) => {
+        this.p = res.data;
+
+
         this.loading = false;
 
       },

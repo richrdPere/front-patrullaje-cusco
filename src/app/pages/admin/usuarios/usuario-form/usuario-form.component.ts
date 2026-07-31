@@ -73,7 +73,7 @@ export class UsuarioFormComponent implements OnInit, OnChanges {
         nombres: user.persona.nombres,
         apellidos: user.persona.apellidos,
         correo: user.correo,
-        // roles: user.roles,
+        roles: user.roles,
         telefono: user.persona.telefono,
         documento_identidad: user.persona.documento_identidad,
         direccion: user.persona.direccion,

@@ -1,6 +1,7 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
 
 // Service
@@ -15,7 +16,6 @@ import { PatrullajeProgramInfoComponent } from "./patrullaje-program-info/patrul
   styles: ``
 })
 export class PatrullajeProgramadoComponent implements OnInit {
-
 
   // Unidad patrullaje
   patrullajes: any[] = [];
@@ -43,7 +43,8 @@ export class PatrullajeProgramadoComponent implements OnInit {
   pageSizeOptions = [5, 10, 20, 50];
 
   constructor(
-    private patrullajeService: PatrullajeProgramadoService
+    private patrullajeService: PatrullajeProgramadoService,
+    private router: Router
   ) { }
 
 
@@ -133,6 +134,19 @@ export class PatrullajeProgramadoComponent implements OnInit {
     this.mostrarModal = true;
   }
 
+  // - Ver historial
+  verHistorial(patrulla: any): void {
+    if (!patrulla?.id) {
+      return;
+    }
+
+    this.router.navigate([
+      '/admin',
+      'patrullaje-programado',
+      patrulla.id
+    ]);
+  }
+
   // - Ver patrullaje
   verPatrullaje(patrullaje: any) {
     this.patrullaje_id = patrullaje.id;
@@ -159,6 +173,29 @@ export class PatrullajeProgramadoComponent implements OnInit {
   // ================================
   // Helpers methods
   // ================================
+  getEstadoClass(estado: string): string {
+
+    switch (estado) {
+
+      case 'PROGRAMADO':
+        return 'badge-soft badge-secondary';
+
+      case 'ASIGNADO':
+        return 'badge-soft badge-primary';
+
+      case 'ACEPTADO':
+        return 'badge-soft badge-info';
+
+      case 'EN_CURSO':
+        return 'badge-soft badge-success';
+
+      case 'FINALIZADO':
+        return 'badge-soft badge-dark';
+
+      default:
+        return 'badge-soft badge-light';
+    }
+  }
 
   onPageSizeChange() {
     this.currentPage = 1; // vuelve a la primera página

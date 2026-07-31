@@ -35,6 +35,18 @@ export class SideMenuOptionsComponent {
       roles: ['ADMIN', 'GERENTE_SERENAZGO', 'SERENO'],
     },
     {
+      icon: "assets/icons/sidebar/panel.svg",
+      name: "Panel de Control",
+      path: "/admin/panel-control",
+      roles: ['ADMIN', 'GERENTE_SERENAZGO', 'SERENO'],
+    },
+    {
+      icon: "assets/icons/sidebar/alerta.svg",
+      name: "Alertas",
+      path: "/admin/alertas",
+      roles: ['ADMIN', 'GERENTE_SERENAZGO'],
+    },
+    {
       icon: "assets/icons/sidebar/dashboard.svg",
       name: "Vigilancia",
       roles: ['ADMIN', 'GERENTE_SERENAZGO', 'SERENO'],
@@ -68,7 +80,7 @@ export class SideMenuOptionsComponent {
       roles: ['ADMIN', 'GERENTE_SERENAZGO', 'SERENO'],
       subItems: [
         { name: "Reportes", path: "/admin/reportes" },
-        { name: "Alertas", path: "/admin/alertas" },
+        // { name: "Alertas", path: "/admin/alertas" },
         { name: "Etiquetas", path: "/admin/etiquetas" },
       ],
     },

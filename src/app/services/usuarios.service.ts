@@ -94,8 +94,8 @@ export class UsuarioService {
   // =========================================================
   // 4. Obtener usuario por ID
   // =========================================================
-  getUsuarioById(id: number): Observable<UsuarioDetalleResponse> {
-    return this.http.get<UsuarioDetalleResponse>(`${this.API_GET_USUARIO_BY_ID}${id}`, this.getAuthHeaders());
+  getUsuarioById(id: number): Observable<ApiResponse<UsuarioDetalleResponse>> {
+    return this.http.get<ApiResponse<UsuarioDetalleResponse>>(`${this.API_GET_USUARIO_BY_ID}${id}`, this.getAuthHeaders());
   }
 
   // =========================================================

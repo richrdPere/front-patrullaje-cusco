@@ -12,20 +12,25 @@ import { ZonaService } from 'src/app/services/zona.service';
 
 // Interface
 import { ZonaPatrullaje } from 'src/app/interfaces/zonaPatrullaje';
+import { CommonModule } from '@angular/common';
 
 declare var google: any;
 
 @Component({
   selector: 'app-zonas',
-  imports: [FormsModule, ReactiveFormsModule, UppercaseDirective],
+  imports: [FormsModule, ReactiveFormsModule, CommonModule, UppercaseDirective],
   templateUrl: './zonas.component.html',
   styles: ``
 })
 export class ZonasComponent implements OnInit {
 
+  // Poligon maps
+  private vertices: google.maps.LatLng[] = [];
+  private clickListener!: google.maps.MapsEventListener;
+  private tempPolygon!: google.maps.Polygon;
+  drawing = false;
 
   // Zonas
-  // zonas: any[] = [];
   isLoading = true;
 
   mostrarModal = false;
@@ -43,7 +48,7 @@ export class ZonasComponent implements OnInit {
 
   // Estado reactivo con Signal (opcional moderno)
   map!: google.maps.Map;
-  drawingManager!: google.maps.drawing.DrawingManager;
+  // drawingManager!: google.maps.drawing.DrawingManager;
   polygon!: google.maps.Polygon;
   zonaForm!: FormGroup;
   coordenadas: { lat: number, lng: number }[] = [];
@@ -54,6 +59,14 @@ export class ZonasComponent implements OnInit {
 
   @ViewChild('mapContainer') mapaElement!: ElementRef;
 
+
+  nivel_riesgo = [
+    { id: 'alto', nombre: 'ALTO' },
+    { id: 'medio', nombre: 'MEDIO' },
+    { id: 'bajo', nombre: 'BAJO' },
+
+  ];
+
   constructor(
     private mapsLoader: GoogleMapsLoaderService,
     //private fb: FormBuilder,
@@ -62,14 +75,15 @@ export class ZonasComponent implements OnInit {
 
   ngOnInit(): void {
     this.zonaForm = this.fb.group({
+      id: [null],
       nombre: ['', Validators.required],
       descripcion: ['', Validators.required],
-      riesgo: ['', Validators.required],
+      riesgo: [null, Validators.required],
     });
 
     this.mapsLoader.load().then(() => {
       this.initMap();
-      this.initDrawingManager();
+      // this.initDrawingManager();
     });
 
     this.obtenerZonas();
@@ -82,46 +96,70 @@ export class ZonasComponent implements OnInit {
     });
   }
 
-  initDrawingManager(): void {
-    this.drawingManager = new google.maps.drawing.DrawingManager({
-      drawingMode: google.maps.drawing.OverlayType.POLYGON,
-      drawingControl: true,
-      drawingControlOptions: {
-        position: google.maps.ControlPosition.TOP_CENTER,
-        drawingModes: [google.maps.drawing.OverlayType.POLYGON,],
-      },
+  initDraw() {
+    this.drawing = true;
+    this.vertices = [];
 
-      //     drawingControlOptions: {
-      //       position: google.maps.ControlPosition.TOP_CENTER,
-      //       drawingModes: [
-      //         google.maps.drawing.OverlayType.MARKER,
-      //         google.maps.drawing.OverlayType.CIRCLE,
-      //         google.maps.drawing.OverlayType.POLYGON,
-      //         google.maps.drawing.OverlayType.POLYLINE,
-      //         google.maps.drawing.OverlayType.RECTANGLE,
-      //       ]
-      //     },
+    if (this.tempPolygon) {
+      this.tempPolygon.setMap(null);
+    }
+
+    this.tempPolygon = new google.maps.Polygon({
+      paths: [],
+      editable: true,
+      strokeColor: "#FF0000",
+      strokeOpacity: 1,
+      strokeWeight: 2,
+      fillColor: "#FF0000",
+      fillOpacity: 0.35
     });
-    this.drawingManager.setMap(this.map);
 
-    google.maps.event.addListener(this.drawingManager, 'overlaycomplete', (event: any) => {
-      if (event.type === 'polygon') {
-        const path = event.overlay.getPath();
-        this.coordenadas = [];
+    this.tempPolygon.setMap(this.map);
 
-        for (let i = 0; i < path.getLength(); i++) {
-          const point = path.getAt(i);
-          this.coordenadas.push({ lat: point.lat(), lng: point.lng() });
-        }
-
-        // Guardamos la referencia al polígono para poder eliminarlo después
-        this.polygon = event.overlay;
-
-        // Desactivamos el modo dibujo
-        this.drawingManager.setDrawingMode(null);
-      }
+    this.clickListener = this.map.addListener("click", (e: google.maps.MapMouseEvent) => {
+      if (!e.latLng) return;
+      this.vertices.push(e.latLng);
+      this.tempPolygon.setPath(this.vertices);
     });
   }
+
+  finishedDraw() {
+
+    if (this.vertices.length < 3) {
+
+      Swal.fire({
+        icon: 'warning',
+        title: 'Polígono incompleto',
+        text: 'Debe agregar al menos tres vértices para definir la zona.'
+      });
+
+      return;
+    }
+
+    google.maps.event.removeListener(this.clickListener);
+    this.tempPolygon.setEditable(false);
+    this.coordenadas = this.vertices.map(v => ({
+      lat: v.lat(),
+      lng: v.lng()
+    }));
+    this.polygon = this.tempPolygon;
+    this.drawing = false;
+  }
+
+  cancelDraw() {
+    if (this.clickListener) {
+      google.maps.event.removeListener(this.clickListener);
+    }
+
+    if (this.tempPolygon) {
+      this.tempPolygon.setMap(null);
+    }
+    this.vertices = [];
+    this.coordenadas = [];
+    this.drawing = false;
+  }
+
+
 
   // =========================================================
   // 1.- OBTENER TODAS LAS ZONAS
@@ -153,13 +191,22 @@ export class ZonasComponent implements OnInit {
   // 2.- REGISTRAR NUEVA ZONA
   // =========================================================
   guardarZona(): void {
-    if (!this.polygon) {
-      alert('Debes dibujar una zona en el mapa.');
+    if (!this.polygon || this.coordenadas.length < 3) {
+
+      Swal.fire({
+        icon: 'warning',
+        title: 'Zona no definida',
+        text: 'Debe dibujar el perímetro de la zona antes de registrarla.'
+      });
       return;
     }
 
     if (this.zonaForm.invalid) {
-      alert('Completa los datos del formulario.');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Formulario incompleto',
+        text: 'Completa todos los campos obligatorios.'
+      });
       return;
     }
 
@@ -171,26 +218,34 @@ export class ZonasComponent implements OnInit {
       riesgo: this.zonaForm.value.riesgo,
     };
 
-    // console.log('Zona creada:', zona);
-    // Aquí podrías enviar zona a un backend con HttpClient
-
     this._zonaService.crearZona(zona).subscribe({
       next: (res) => {
-        alert('Zona registrada con éxito');
+        Swal.fire({
+          icon: 'success',
+          title: 'Zona registrada',
+          text: res.message,
+          timer: 1800,
+          showConfirmButton: false
+        });
+
         this.zonaForm.reset();
         this.coordenadas = [];
 
         // Elimina el polígono actual del mapa
         this.polygon.setMap(null);
         this.polygon = undefined!;
-        this.drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
+        // this.drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON);
 
         // Cargar Zonas
         this.obtenerZonas();
       },
       error: (err) => {
         console.error(err);
-        alert('Error al registrar la zona');
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: err?.message ?? 'Ocurrió un error al registrar la zona.'
+        });
       }
     });
   }
@@ -210,8 +265,8 @@ export class ZonasComponent implements OnInit {
     } else {
       // Determinar color según el riesgo
       const color =
-        zona.riesgo === 'Alto' ? '#FF0000' :       // Rojo
-          zona.riesgo === 'Medio' ? '#FFA500' :      // Naranja
+        zona.riesgo === 'alto' ? '#FF0000' :       // Rojo
+          zona.riesgo === 'medio' ? '#FFA500' :      // Naranja
             '#0AD962';
 
       // Mostrar
@@ -243,21 +298,49 @@ export class ZonasComponent implements OnInit {
   // 4.- ELIMINAR ZONA
   // =========================================================
   eliminarZona(idZona: number): void {
-    if (confirm('¿Estás seguro de eliminar esta asignación?')) {
+
+    Swal.fire({
+      title: '¿Eliminar zona?',
+      text: 'Esta acción no se puede deshacer.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#6c757d',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      reverseButtons: true
+    }).then((result) => {
+
+      if (!result.isConfirmed) return;
+
       this._zonaService.deleteZonaById(idZona).subscribe({
+
         next: (res) => {
-          console.log('Asignación eliminada:', res);
-          this.obtenerZonas(); //  Vuelve a cargar la lista
+
+          Swal.fire({
+            icon: 'success',
+            title: 'Zona eliminada',
+            text: res.message,
+            timer: 1800,
+            showConfirmButton: false
+          });
+
+          this.obtenerZonas();
         },
+
         error: (err) => {
-          console.error('Error al eliminar la asignación:', err);
-          alert('Ocurrió un error al eliminar la asignación.');
+
+          console.error('Error al eliminar la zona:', err);
+
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: err?.error?.message || 'Ocurrió un error al eliminar la zona.'
+          });
         }
       });
-    }
+    });
   }
-
-
 
   onSearchChange() {
     throw new Error('Method not implemented.');

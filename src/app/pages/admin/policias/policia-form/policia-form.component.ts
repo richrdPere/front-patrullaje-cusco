@@ -43,11 +43,11 @@ export class PoliciaFormComponent implements OnInit, OnChanges {
   grados = [
     { id: 'SUBOFICIAL', nombre: 'Suboficial' },
     { id: 'OFICIAL', nombre: 'Oficial' },
-    { id: 'CABO', nombre: 'Cabo' },
+    // { id: 'CABO', nombre: 'Cabo' },
     { id: 'TENIENTE', nombre: 'Teniente' },
-    { id: 'CAPITAN', nombre: 'Capitán' },
-    { id: 'MAYOR', nombre: 'Mayor' },
-    { id: 'COMANDANTE', nombre: 'Comandante' }
+    // { id: 'CAPITAN', nombre: 'Capitán' },
+    // { id: 'MAYOR', nombre: 'Mayor' },
+    // { id: 'COMANDANTE', nombre: 'Comandante' }
   ];
 
   modalWidthClass = 'max-w-4xl'; // default

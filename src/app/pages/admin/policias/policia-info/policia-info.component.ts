@@ -55,7 +55,7 @@ export class PoliciaInfoComponent {
       next: (data) => {
 
         console.log("GET POLICIA: ", data);
-        this.policia = data;
+        this.policia = data.data;
         this.loading = false;
 
       },

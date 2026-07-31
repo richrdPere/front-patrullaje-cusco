@@ -1,0 +1,624 @@
+<div class="min-h-full overflow-auto bg-base-300 p-6 text-base-content transition-colors duration-300">
+
+  <!-- TÍTULO -->
+  <div class="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-base-content">
+        Alertas y notificaciones
+      </h1>
+
+      <p class="mt-1 text-sm text-base-content/60">
+        Gestione las alertas emitidas desde la central de serenazgo.
+      </p>
+    </div>
+
+    <button type="button" class="btn btn-primary" (click)="abrirModalCrearAlerta()">
+      <i class="fa-solid fa-plus"></i>
+      Nueva alerta
+    </button>
+  </div>
+
+
+  <!-- FILTROS -->
+  <div class="card mb-7 bg-base-100 shadow-md">
+    <div class="card-body p-5">
+      <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div class="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <!-- Estado -->
+          <div class="form-control">
+            <label class="label" for="filtro-estado">
+              <span class="label-text font-medium">
+                Estado
+              </span>
+            </label>
+
+            <select id="filtro-estado" class="select select-bordered w-full" [(ngModel)]="filtros.estado"
+              (ngModelChange)="onSearchChange()">
+              <option value="">
+                Todos los estados
+              </option>
+
+              @for (estado of estados; track estado) {
+              <option [value]="estado">
+                {{ formatearTextoEnum(estado) }}
+              </option>
+              }
+            </select>
+          </div>
+
+          <!-- Tipo -->
+          <div class="form-control">
+            <label class="label" for="filtro-tipo">
+              <span class="label-text font-medium">
+                Tipo de alerta
+              </span>
+            </label>
+
+            <select id="filtro-tipo" class="select select-bordered w-full" [(ngModel)]="filtros.tipo"
+              (ngModelChange)="onSearchChange()">
+              <option value="">
+                Todos los tipos
+              </option>
+
+              @for (tipo of tipos; track tipo) {
+              <option [value]="tipo">
+                {{ formatearTextoEnum(tipo) }}
+              </option>
+              }
+            </select>
+          </div>
+
+          <!-- Prioridad -->
+          <div class="form-control">
+            <label class="label" for="filtro-prioridad">
+              <span class="label-text font-medium">
+                Prioridad
+              </span>
+            </label>
+
+            <select id="filtro-prioridad" class="select select-bordered w-full" [(ngModel)]="filtros.prioridad"
+              (ngModelChange)="onSearchChange()">
+              <option value="">
+                Todas las prioridades
+              </option>
+
+              @for (
+              prioridad of prioridades;
+              track prioridad
+              ) {
+              <option [value]="prioridad">
+                {{ formatearTextoEnum(prioridad) }}
+              </option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <!-- Acciones de filtro -->
+        <div class="flex shrink-0 flex-wrap gap-2">
+          <button type="button" class="btn btn-primary" [disabled]="cargandoAlertas" (click)="aplicarFiltros()">
+            <i class="fa-solid fa-filter"></i>
+            Aplicar
+          </button>
+
+          <button type="button" class="btn btn-ghost" [disabled]="
+              cargandoAlertas ||
+              !tieneFiltrosActivos()
+            " (click)="limpiarFiltros()">
+            <i class="fa-solid fa-eraser"></i>
+            Limpiar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- FORMULARIO CREAR / EDITAR -->
+  <alerta-form [mostrarModal]="mostrarModalAlerta" [modoEdicion]="modoEdicionAlerta"
+    [alertaSeleccionada]="alertaFormularioSeleccionada" (modalCerrado)="cerrarModalAlerta()"
+    (alertaCreada)="onAlertaCreada($event)" />
+
+
+  <!-- TABLA -->
+  <div class="min-h-auto rounded-xl bg-base-100 p-6 shadow-xl">
+    <div class="overflow-hidden rounded-lg border border-base-300/90 shadow">
+      <!-- Header de tabla -->
+      <div class="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+        <!-- Cantidad por página -->
+        <div class="flex items-center gap-2 text-sm">
+          <label for="limite-alertas">
+            Mostrar:
+          </label>
+
+          <select id="limite-alertas" class="select select-bordered select-sm w-auto" [ngModel]="limite"
+            (ngModelChange)="cambiarLimite($event)">
+            <option [ngValue]="5">5</option>
+            <option [ngValue]="10">10</option>
+            <option [ngValue]="20">20</option>
+            <option [ngValue]="50">50</option>
+          </select>
+
+          <span>
+            registros por página
+          </span>
+        </div>
+
+        <!-- Resumen -->
+        <div class="text-sm text-base-content/60">
+          Total:
+          <span class="font-semibold text-base-content">
+            {{ totalRegistros }}
+          </span>
+          alertas
+        </div>
+      </div>
+
+      <!-- Tabla -->
+      <div class="overflow-x-auto">
+        <table class="table w-full">
+          <thead class="bg-base-300/90">
+            <tr>
+              <th>#</th>
+              <th>Alerta</th>
+              <th>Tipo</th>
+              <th>Prioridad</th>
+              <th>Estado</th>
+              <th>Confirmación</th>
+              <th>Fecha</th>
+              <th class="text-center">Acciones</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <!-- Cargando -->
+            @if (cargandoAlertas) {
+            <tr>
+              <td colspan="8" class="py-10 text-center">
+                <div class="flex flex-col items-center justify-center gap-3">
+                  <span class="loading loading-spinner loading-md text-primary"></span>
+
+                  <span class="text-sm text-base-content/60">
+                    Cargando alertas emitidas...
+                  </span>
+                </div>
+              </td>
+            </tr>
+            }
+
+            <!-- Registros -->
+            @if (!cargandoAlertas) {
+            @for (
+            alerta of alertas;
+            track alerta.id;
+            let i = $index
+            ) {
+            <tr class="hover:bg-base-200/50">
+              <!-- Numeración -->
+              <td>
+                {{
+                (paginaActual - 1) *
+                limite +
+                i +
+                1
+                }}
+              </td>
+
+              <!-- Alerta -->
+              <td>
+                <div class="max-w-xs">
+                  <p class="truncate font-semibold text-base-content" [title]="alerta.titulo">
+                    {{ alerta.titulo }}
+                  </p>
+
+                  <p class="mt-1 line-clamp-2 text-xs text-base-content/60" [title]="alerta.descripcion">
+                    {{ alerta.descripcion }}
+                  </p>
+                </div>
+              </td>
+
+              <!-- Tipo -->
+              <td>
+                <span class="badge badge-outline">
+                  {{
+                  formatearTextoEnum(
+                  alerta.tipo
+                  )
+                  }}
+                </span>
+              </td>
+
+              <!-- Prioridad -->
+              <td>
+                <span [ngClass]="
+                        obtenerClasePrioridad(
+                          alerta.prioridad
+                        )
+                      ">
+                  {{
+                  formatearTextoEnum(
+                  alerta.prioridad
+                  )
+                  }}
+                </span>
+              </td>
+
+              <!-- Estado -->
+              <td>
+                <span [ngClass]="
+                        obtenerClaseEstado(
+                          alerta.estado
+                        )
+                      ">
+                  {{
+                  formatearTextoEnum(
+                  alerta.estado
+                  )
+                  }}
+                </span>
+              </td>
+
+              <!-- Confirmación -->
+              <td>
+                @if (
+                alerta.requiere_confirmacion
+                ) {
+                <div class="flex items-center gap-2 text-success">
+                  <i class="fa-solid fa-circle-check"></i>
+
+                  <span class="text-sm">
+                    Requerida
+                  </span>
+                </div>
+                } @else {
+                <div class="flex items-center gap-2 text-base-content/50">
+                  <i class="fa-solid fa-circle-minus"></i>
+
+                  <span class="text-sm">
+                    No requerida
+                  </span>
+                </div>
+                }
+              </td>
+
+              <!-- Fecha -->
+              <td>
+                <div class="whitespace-nowrap">
+                  <p class="text-sm">
+                    {{
+                    alerta.createdAt
+                    | date:
+                    'dd/MM/yyyy'
+                    }}
+                  </p>
+
+                  <p class="text-xs text-base-content/50">
+                    {{
+                    alerta.createdAt
+                    | date:
+                    'hh:mm a'
+                    }}
+                  </p>
+                </div>
+              </td>
+
+              <!-- Acciones -->
+              <td>
+                <div class="flex items-center justify-center gap-1">
+                  <!-- Ver destinatarios -->
+                  <div class="tooltip" data-tip="Ver destinatarios">
+                    <button type="button" class="btn btn-circle btn-ghost btn-sm" [disabled]="
+                            cargandoDestinatarios
+                          " (click)="
+                            verDestinatarios(alerta)
+                          ">
+                      <i class="fa-solid fa-users"></i>
+                    </button>
+                  </div>
+
+                  <!-- Editar -->
+                  <div class="tooltip" data-tip="Editar alerta">
+                    <button type="button" class="btn btn-circle btn-ghost btn-sm" [disabled]="
+                            alerta.estado ===
+                              'CANCELADA' ||
+                            alerta.estado ===
+                              'EXPIRADA'
+                          " (click)="
+                            abrirModalEditarAlerta(
+                              alerta
+                            )
+                          ">
+                      <i class="fa-solid fa-pencil"></i>
+                    </button>
+                  </div>
+
+                  <!-- Cancelar -->
+                  <div class="tooltip" data-tip="Cancelar alerta">
+                    <button type="button" class="btn btn-circle btn-ghost btn-sm text-error" [disabled]="
+                            !puedeCancelarAlerta(
+                              alerta
+                            ) ||
+                            estaCancelando(
+                              alerta.id
+                            )
+                          " (click)="
+                            cancelarAlerta(alerta)
+                          ">
+                      @if (
+                      estaCancelando(
+                      alerta.id
+                      )
+                      ) {
+                      <span class="loading loading-spinner loading-xs"></span>
+                      } @else {
+                      <i class="fa-solid fa-ban"></i>
+                      }
+                    </button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            }
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Sin registros -->
+      @if (
+      !cargandoAlertas &&
+      alertas.length === 0
+      ) {
+      <div class="flex flex-col items-center justify-center px-6 py-14 text-center text-base-content/70">
+        <img src="assets/img/empty-folder.png" alt="Sin alertas" class="mb-5 h-36 w-36 opacity-80" />
+
+        <h3 class="mb-2 text-lg font-semibold text-base-content">
+          No hay alertas registradas
+        </h3>
+
+        <p class="max-w-md text-sm">
+          Las alertas emitidas desde la central aparecerán en esta sección.
+        </p>
+
+        @if (tieneFiltrosActivos()) {
+        <button type="button" class="btn btn-ghost btn-sm mt-4" (click)="limpiarFiltros()">
+          Limpiar filtros
+        </button>
+        }
+      </div>
+      }
+
+      <!-- ==================================================== -->
+      <!-- PAGINACIÓN -->
+      <!-- ==================================================== -->
+
+      @if (
+      !cargandoAlertas &&
+      totalRegistros > 0
+      ) {
+      <div class="flex flex-col gap-4 bg-base-300/90 p-4 text-sm sm:flex-row sm:items-center sm:justify-between">
+        <span class="text-base-content/70">
+          Mostrando
+          <strong>{{ registroInicial }}</strong>
+          a
+          <strong>{{ registroFinal }}</strong>
+          de
+          <strong>{{ totalRegistros }}</strong>
+          registros
+        </span>
+
+        <div class="join">
+          <!-- Anterior -->
+          <button type="button" class="join-item btn btn-sm" [disabled]="
+                paginaActual === 1 ||
+                cargandoAlertas
+              " (click)="paginaAnterior()">
+            <i class="fa-solid fa-chevron-left"></i>
+            Anterior
+          </button>
+
+          <!-- Páginas visibles -->
+          @for (
+          pagina of paginasVisibles;
+          track pagina
+          ) {
+          <button type="button" class="join-item btn btn-sm" [class.btn-active]="
+                  pagina === paginaActual
+                " [class.btn-primary]="
+                  pagina === paginaActual
+                " (click)="cambiarPagina(pagina)">
+            {{ pagina }}
+          </button>
+          }
+
+          <!-- Siguiente -->
+          <button type="button" class="join-item btn btn-sm" [disabled]="
+                paginaActual >= totalPaginas ||
+                cargandoAlertas
+              " (click)="paginaSiguiente()">
+            Siguiente
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL DE DESTINATARIOS -->
+  <!-- ======================================================== -->
+
+  @if (mostrarModalDestinatarios) {
+  <div class="modal modal-open" role="dialog" aria-modal="true">
+    <!-- Fondo -->
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" (click)="cerrarDetalleDestinatarios()"></div>
+
+    <!-- Contenido -->
+    <div class="modal-box relative z-10 w-11/12 max-w-3xl overflow-hidden p-0">
+      <!-- Cabecera -->
+      <div class="flex items-start justify-between gap-4 border-b border-base-300 px-6 py-5">
+        <div>
+          <h3 class="text-lg font-bold">
+            Destinatarios de la alerta
+          </h3>
+
+          <p class="mt-1 text-sm text-base-content/60">
+            {{
+            alertaDetalleSeleccionada?.titulo
+            }}
+          </p>
+        </div>
+
+        <button type="button" class="btn btn-circle btn-ghost btn-sm" [disabled]="
+              cargandoDestinatarios
+            " (click)="
+              cerrarDetalleDestinatarios()
+            ">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Cuerpo -->
+      <div class="max-h-[60vh] overflow-y-auto p-6">
+        @if (cargandoDestinatarios) {
+        <div class="flex min-h-48 flex-col items-center justify-center gap-3">
+          <span class="loading loading-spinner loading-md text-primary"></span>
+
+          <p class="text-sm text-base-content/60">
+            Cargando destinatarios...
+          </p>
+        </div>
+        }
+        @else {
+        @if (
+        destinatariosDetalle.length === 0
+        ) {
+        <div class="flex min-h-48 flex-col items-center justify-center text-center">
+          <i class="fa-solid fa-users-slash mb-4 text-4xl text-base-content/30"></i>
+
+          <h4 class="font-semibold">
+            Sin destinatarios
+          </h4>
+
+          <p class="mt-1 text-sm text-base-content/60">
+            No se encontraron destinatarios asociados a esta alerta.
+          </p>
+        </div>
+        } @else {
+        <div class="space-y-3">
+          @for (
+          destinatario of destinatariosDetalle;
+          track
+          destinatario.id ??
+          destinatario.usuario_id
+          ) {
+          <div
+            class="flex flex-col gap-4 rounded-xl border border-base-300 bg-base-100 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex min-w-0 items-center gap-3">
+              <!-- <div class="avatar placeholder">
+                <div class="w-11 rounded-full bg-primary text-primary-content">
+                  <span>
+                    {{
+                    destinatario.usuario_id
+
+                  </span>
+
+                  <span>
+                    {{
+                    destinatario.destinatario
+                    ?.username
+                    ?.charAt(0)
+                    ?.toUpperCase() ??
+                    'S'
+                    }}
+                  </span>
+                </div>
+              </div> -->
+
+              <div class="avatar shrink-0">
+                <div class="w-12 rounded-full overflow-hidden bg-base-200">
+                  <img [src]="  destinatario.destinatario?.persona?.foto_perfil || 'assets/img/default-avatar.png'"
+                    [alt]="destinatario.destinatario
+                  ?.persona
+                  ?.nombres" class="h-full w-full object-cover" />
+                </div>
+              </div>
+
+              <div class="min-w-0">
+                <p class="truncate font-semibold">
+
+
+                  {{
+                  destinatario.destinatario
+                  ?.persona
+                  ?.nombres ??
+                  destinatario.destinatario
+                  ?.username ??
+                  'Sereno'
+                  }}
+                </p>
+
+                <p class="truncate text-xs text-base-content/50">
+
+
+                  {{
+                  destinatario.destinatario
+                  ?.username
+                  ? '@' +
+                  destinatario
+                  .destinatario
+                  ?.username
+                  : 'Sin nombre de usuario'
+                  }}
+                </p>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+              @if (
+              destinatario.fecha_leida
+              ) {
+              <span class="badge badge-success badge-outline">
+                Leída
+              </span>
+              } @else {
+              <span class="badge badge-warning badge-outline">
+                No leída
+              </span>
+              }
+
+              @if (
+              destinatario.estado
+              ) {
+              <span class="badge badge-ghost">
+                {{
+                formatearTextoEnum(
+                destinatario.estado
+                )
+                }}
+              </span>
+              }
+            </div>
+          </div>
+          }
+        </div>
+        }
+        }
+      </div>
+
+
+      <!-- Acciones -->
+      <div class="flex justify-end border-t border-base-300 px-6 py-4">
+        <button type="button" class="btn btn-ghost" [disabled]="
+              cargandoDestinatarios
+            " (click)="
+              cerrarDetalleDestinatarios()
+            ">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+  }
+</div>

@@ -3,13 +3,29 @@ import { RoleGuard } from './guards/role.guard';
 
 export const routes: Routes = [
 
-  // --- Layout publico ----
+  // =========================================================
+  // Layout público
+  // =========================================================
   {
     path: '',
     loadChildren: () => import('./layout/dashboard-auth/auth.routes'),
   },
 
-  // --- Layout Admin ----
+  // =========================================================
+  // Acceso denegado
+  // =========================================================
+  {
+    path: 'acceso-denegado',
+    loadComponent: () =>
+      import(
+        './pages/shared/components/access-denied/access-denied.component'
+      ).then(m => m.AccessDeniedComponent),
+  },
+
+
+  // =========================================================
+  // Layout administrativo
+  // =========================================================
   {
     path: 'admin',
     canActivate: [RoleGuard],
@@ -18,11 +34,13 @@ export const routes: Routes = [
   },
 
 
-  // --- Ruta Not Page ----
+  // =========================================================
+  // Página no encontrada
+  // =========================================================
   {
     path: '**',
     loadComponent: () =>
-      import('./pages/shared/not-found/not-found.component').then(
+      import('./pages/shared/components/not-found/not-found.component').then(
         (m) => m.NotFoundComponent
       ),
   },

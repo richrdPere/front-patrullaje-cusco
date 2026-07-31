@@ -84,8 +84,8 @@ export class PoliciasService {
   // ===========================================================
   // 4.- Obtener policia por ID
   // ===========================================================
-  getPoliciaById(id: number): Observable<PoliciaDetalleResponse> {
-    return this.http.get<PoliciaDetalleResponse>(`${this.API_GET_POLICIA_BY_ID}${id}`);
+  getPoliciaById(id: number): Observable<ApiResponse<PoliciaDetalleResponse>> {
+    return this.http.get<ApiResponse<PoliciaDetalleResponse>>(`${this.API_GET_POLICIA_BY_ID}${id}`);
   }
 
   // ===========================================================

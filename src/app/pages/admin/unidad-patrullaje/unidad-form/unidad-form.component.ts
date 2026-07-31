@@ -132,9 +132,9 @@ export class UnidadFormComponent implements OnInit, OnChanges {
       .subscribe(resp => {
 
 
-        console.log("codigo: ", resp.codigo);
+        console.log("codigo: ", resp.data.codigo);
         this.formUnidad.patchValue({
-          codigo: resp.codigo
+          codigo: resp.data.codigo
         });
       });
   }

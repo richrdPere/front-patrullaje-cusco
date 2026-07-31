@@ -207,7 +207,7 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
   loadZonas(): void {
     this.zonaService.obtenerZonas().subscribe({
       next: (res: any) => {
-        this.zonas = res.zonas;
+        this.zonas = res.data.rows;
 
         // Inicializar estado
         this.zonas.forEach(z => {
@@ -264,8 +264,8 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
 
   private getColorByRiesgo(riesgo: string): string {
     switch (riesgo) {
-      case 'Alto': return '#FF0000';
-      case 'Medio': return '#FFA500';
+      case 'alto': return '#FF0000';
+      case 'medio': return '#FFA500';
       default: return '#0AD962';
     }
   }

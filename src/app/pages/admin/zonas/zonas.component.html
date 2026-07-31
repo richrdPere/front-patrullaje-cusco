@@ -4,10 +4,7 @@
   <!-- Titulo -->
   <h1 class="text-2xl font-bold mb-5 text-base-content ">Gestión de Zonas</h1>
 
-  <!-- <div #mapContainer class="w-full h-[500px] rounded-xl shadow border"></div> -->
-  <div class="p-4 min-h-[calc(150vh-15rem)] card bg-base-100 shadow-md">
-    <!-- <h2 class="text-xl font-bold mb-4">Registrar Zona de Patrullaje</h2> -->
-
+  <div class="p-4 mb-7 card bg-base-100 shadow-md">
     <form [formGroup]="zonaForm">
 
       <div class="flex flex-col lg:flex-row gap-6">
@@ -21,14 +18,14 @@
               appUppercase />
             <!-- Descripción -->
             <textarea placeholder="Descripción" formControlName="descripcion" class="textarea textarea-bordered w-full "
-              rows="4" appUppercase></textarea>
+              rows="4"></textarea>
 
             <!-- Riesgo -->
             <select formControlName="riesgo" class="select select-bordered w-full ">
-              <option value="" disabled selected>Seleccione nivel de riesgo</option>
-              <option value="Alto">Alto</option>
-              <option value="Medio">Medio</option>
-              <option value="Bajo">Bajo</option>
+              <option [ngValue]="null">Seleccionar nivel de riesgo</option>
+              <option *ngFor="let g of nivel_riesgo" [value]="g.id">
+                {{ g.nombre }}
+              </option>
             </select>
 
             <!-- Botón -->
@@ -91,8 +88,52 @@
         <!-- Mapa: lado derecho -->
         <div class="lg:w-2/3 w-full">
           <div class="card bg-base-300 rounded-xl p-4 shadow-md h-full">
-            <div #mapContainer id="map" class="w-full min-h-full rounded border"></div>
+
+            <!-- Barra de herramientas -->
+            <div class="flex justify-between items-center mb-3 flex-wrap gap-3">
+
+              <!-- Botones -->
+              <div class="flex flex-wrap gap-2">
+
+                <button type="button" class="btn btn-primary btn-sm inline-flex items-center gap-2" (click)="initDraw()"
+                  [disabled]="drawing">
+
+                  <i class="fa-solid fa-map"></i>
+                  <span>Iniciar dibujo</span>
+
+                </button>
+
+                <button type="button" class="btn btn-success btn-sm inline-flex items-center gap-2"
+                  (click)="finishedDraw()" [disabled]="!drawing">
+
+                  <i class="fa-solid fa-check"></i>
+                  <span>Finalizar</span>
+
+                </button>
+
+                <button type="button" class="btn btn-error btn-sm inline-flex items-center gap-2" (click)="cancelDraw()"
+                  [disabled]="!drawing">
+
+                  <i class="fa-solid fa-xmark"></i>
+                  <span>Cancelar</span>
+
+                </button>
+
+              </div>
+
+              <!-- Badge -->
+              <div class="badge badge-info badge-lg whitespace-nowrap">
+
+                Vértices: {{ coordenadas.length }}
+
+              </div>
+
+            </div>
+            <div #mapContainer id="map" class="w-full flex-1  rounded border">
+            </div>
           </div>
+
+
         </div>
       </div>
 

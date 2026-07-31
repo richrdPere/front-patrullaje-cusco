@@ -24,6 +24,7 @@ export class LoginComponent implements OnInit {
   public token: any = '';
 
   loading = false;
+  showPassword = false;
   errorMessage = '';
 
   constructor(
@@ -55,6 +56,10 @@ export class LoginComponent implements OnInit {
     });
   }
 
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+  }
+
 
   login() {
     if (this.formLogin.invalid) return;
@@ -65,7 +70,6 @@ export class LoginComponent implements OnInit {
     this.authService.login(username!, password!).subscribe({
 
       next: (res) => {
-        // console.log('Login exitoso:', res);
 
         // Save token & user
         iziToast.success({

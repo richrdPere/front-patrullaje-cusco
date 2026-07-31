@@ -127,6 +127,8 @@ export class PatrullajeProgramFormComponent implements OnInit, OnChanges {
 
       const patrullaje = this.patrullajeSeleccionado;
 
+      console.log("PATRULLAJE UPDATE: ", patrullaje);
+
       // Transformando a ids
       const serenosIds = patrullaje.serenos.map((s: any) => s.id);
       const policiasIds = patrullaje.policias.map((p: any) => p.id);
@@ -169,11 +171,11 @@ export class PatrullajeProgramFormComponent implements OnInit, OnChanges {
     }).subscribe({
       next: (resp: any) => {
 
-        console.log("Datos serenos", resp.serenos);
-        console.log("Datos policias", resp.policias);
+        console.log("SERENOS: ", resp.serenos.data);
+        console.log("POLICIAS: ", resp.policias.data);
 
-        this.zonas = resp.zonas.zonas;
-        this.unidades = resp.unidades.unidades;
+        this.zonas = resp.zonas.data.rows;
+        this.unidades = resp.unidades.data.unidades;
         this.serenos = resp.serenos.data;
         this.policias = resp.policias.data;
       },

@@ -1,0 +1,238 @@
+<div class="p-6 space-y-6">
+
+  <!-- HEADER -->
+  <div class="flex items-center justify-between">
+    <div>
+
+      <h1 class="text-2xl font-bold">
+        Detalle del Patrullaje
+      </h1>
+
+      <p class="text-sm text-gray-500">
+        Patrullaje #{{ patrullaje?.id }}
+      </p>
+
+    </div>
+
+    <button class="btn btn-outline" (click)="volver()">
+      ← Volver
+    </button>
+
+  </div>
+
+
+  <!-- LOADING -->
+  <div *ngIf="loading" class="flex justify-center py-20">
+    <span class="loading loading-spinner loading-lg"></span>
+  </div>
+
+  <!-- CONTENIDO -->
+  <div *ngIf="!loading && patrullaje" class="space-y-6">
+
+    <!-- INFORMACIÓN -->
+    <div class="card bg-base-100 shadow">
+      <div class="card-body">
+        <h2 class="card-title">
+          Información
+        </h2>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-5 mt-4">
+          <div>
+            <p class="text-xs text-gray-500">
+              Estado
+            </p>
+
+            <span class="badge badge-primary">
+              {{ patrullaje.estado }}
+            </span>
+          </div>
+
+          <div>
+            <p class="text-xs text-gray-500">
+              Fecha
+            </p>
+
+            <p>
+              {{ patrullaje.fecha }}
+            </p>
+          </div>
+
+          <div>
+            <p class="text-xs text-gray-500">
+              Hora Inicio
+            </p>
+
+            <p>
+              {{ patrullaje.hora_inicio }}
+            </p>
+          </div>
+
+          <div>
+            <p class="text-xs text-gray-500">
+              Hora Fin
+            </p>
+            <p>
+              {{ patrullaje.hora_fin }}
+            </p>
+          </div>
+        </div>
+
+        <div class="mt-5">
+          <p class="text-xs text-gray-500">
+            Descripción
+          </p>
+          <p>
+            {{ patrullaje.descripcion }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- PERSONAL -->
+    <div class="card bg-base-100 shadow">
+      <div class="card-body">
+        <h2 class="card-title">
+          Personal Asignado
+        </h2>
+
+        <div class="overflow-x-auto mt-4">
+          <table class="table table-zebra">
+            <thead>
+              <tr>
+                <th>Tipo</th>
+                <th>Nombre</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr *ngFor="let persona of patrullaje.personal">
+                <td>
+                  {{ persona.tipo_personal }}
+                </td>
+                <td>
+                  {{ persona.nombre }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- UNIDAD -->
+    <div class="card bg-base-100 shadow">
+      <div class="card-body">
+        <h2 class="card-title">
+          Unidad
+        </h2>
+        <div class="grid grid-cols-3 gap-5 mt-4">
+          <div>
+            <p class="text-xs text-gray-500">
+              Código
+            </p>
+
+            <p>
+              {{ patrullaje.unidad.codigo }}
+            </p>
+
+          </div>
+
+          <div>
+            <p class="text-xs text-gray-500">
+              Tipo
+            </p>
+
+            <p>
+              {{ patrullaje.unidad.tipo }}
+            </p>
+          </div>
+
+          <div>
+            <p class="text-xs text-gray-500">
+              Placa
+            </p>
+
+            <p>
+              {{ patrullaje.unidad.placa }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ZONA -->
+    <div class="card bg-base-100 shadow">
+      <div class="card-body">
+        <h2 class="card-title">
+          Zona
+        </h2>
+
+        <div class="space-y-3 mt-4">
+          <div>
+            <span class="font-semibold">
+              Nombre:
+            </span>
+            {{ patrullaje.zona.nombre }}
+          </div>
+
+          <div>
+            <span class="font-semibold">
+              Riesgo:
+            </span>
+            {{ patrullaje.zona.riesgo }}
+          </div>
+          <div>
+            <span class="font-semibold">
+              Descripción:
+            </span>
+            {{ patrullaje.zona.descripcion }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTORIAL -->
+    <div class="card bg-base-100 shadow">
+      <div class="card-body">
+        <div class="flex justify-between items-center">
+          <h2 class="card-title">
+            Historial
+          </h2>
+
+          <button class="btn btn-primary btn-sm">
+            Nuevo Registro
+          </button>
+        </div>
+
+        <div *ngIf="historial.length === 0" class="text-center py-10 text-gray-400">
+          No existen registros.
+        </div>
+
+        <div *ngFor="let item of historial" class="border rounded-xl p-4 mt-4">
+          <div class="flex justify-between">
+            <div>
+              <h3 class="font-semibold">
+                {{ item.titulo }}
+              </h3>
+
+              <p class="text-sm text-gray-500">
+                {{ item.fecha_hora }}
+              </p>
+            </div>
+
+            <div>
+              <span class="badge badge-outline">
+                {{ item.tipo }}
+              </span>
+            </div>
+          </div>
+
+          <div class="mt-3">
+            {{ item.descripcion }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

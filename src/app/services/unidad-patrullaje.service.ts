@@ -108,14 +108,14 @@ export class UnidadPatrullajeService {
   // 6.- Obtener ultimo codigo
   // ===========================================================
   getUltimoCodigo() {
-    return this.http.get<UltimoCodigoResponse>(this.API_GET_ULTIMO_CODIGO);
+    return this.http.get<ApiResponse<UltimoCodigoResponse>>(this.API_GET_ULTIMO_CODIGO);
   }
 
   // ===========================================================
   // 7.- Obtener todas las unidades
   // ===========================================================
-  getAllUnidades() {
-    return this.http.get<any>(`${this.API_ALL_UNIDADES}`);
+  getAllUnidades(): Observable<ApiResponse<any>>  {
+    return this.http.get<ApiResponse<any>>(`${this.API_ALL_UNIDADES}`);
   }
 
 }

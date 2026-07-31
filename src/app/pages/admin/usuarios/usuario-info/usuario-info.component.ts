@@ -57,7 +57,7 @@ export class UsuarioInfoComponent {
       next: (data) => {
 
         console.log("GET USUARIO: ", data);
-        this.usuario = data;
+        this.usuario = data.data;
         this.loading = false;
 
       },

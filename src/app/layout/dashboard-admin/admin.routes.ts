@@ -8,6 +8,7 @@ export const adminRoutes: Routes = [
     path: '',
     component: DashAdminComponent,
     canActivate: [RoleGuard],
+    canActivateChild: [RoleGuard],
     data: { roles: ['ADMIN', 'SERENO', 'SUPERVISOR_SERENAZGO', 'GERENTE_SERENAZGO', 'OPERADOR'] },
     children: [
 
@@ -22,6 +23,13 @@ export const adminRoutes: Routes = [
       {
         path: 'panel-control',
         loadComponent: () => import('../../pages/admin/panel-patrullaje/panel-patrullaje.component').then(m => m.PanelPatrullajeComponent),
+        data: { roles: ['ADMIN', 'OPERADOR', 'GERENTE_SERENAZGO', 'SUPERVISOR_SERENAZGO'] }
+      },
+
+      // Alerta
+      {
+        path: 'alertas',
+        loadComponent: () => import('../../pages/admin/alertas/alertas.component').then(m => m.AlertasComponent),
         data: { roles: ['ADMIN', 'OPERADOR', 'GERENTE_SERENAZGO', 'SUPERVISOR_SERENAZGO'] }
       },
 
@@ -58,6 +66,17 @@ export const adminRoutes: Routes = [
         path: 'patrullaje-programado',
         loadComponent: () => import('../../pages/admin/patrullaje-programado/patrullaje-programado.component').then(m => m.PatrullajeProgramadoComponent),
         data: { roles: ['ADMIN', 'OPERADOR', 'GERENTE_SERENAZGO', 'SUPERVISOR_SERENAZGO'] }
+      },
+
+      // Detalle del patrullaje
+      {
+        path: 'patrullaje-programado/:id',
+        loadComponent: () =>
+          import('../../pages/admin/patrullaje-programado/patrullaje-detalle/patrullaje-detalle.component')
+            .then(m => m.PatrullajeDetalleComponent),
+        data: {
+          roles: ['ADMIN', 'OPERADOR', 'GERENTE_SERENAZGO', 'SUPERVISOR_SERENAZGO']
+        }
       },
 
       // Incidentes reportados

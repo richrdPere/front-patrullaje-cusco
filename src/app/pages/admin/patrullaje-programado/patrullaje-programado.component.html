@@ -113,7 +113,7 @@
 
             <!-- Estado -->
             <td>
-              <span class="badge badge-soft badge-info font-semibold">
+              <span class="badge font-semibold" [ngClass]="getEstadoClass(patrulla.estado)">
                 {{ patrulla.estado }}
               </span>
             </td>
@@ -133,8 +133,13 @@
                 </button>
 
                 <!-- Agregar tiempo -->
-                <button class="btn btn-ghost btn-circle btn-md">
+                <!-- <button class="btn btn-ghost btn-circle btn-md">
                   <i class="fa-solid fa-angles-right"></i>
+                </button> -->
+
+                <!-- Historial -->
+                <button class="btn btn-ghost btn-circle btn-md" (click)="verHistorial(patrulla)">
+                  <i class="fa-solid fa-clock-rotate-left"></i>
                 </button>
 
                 <!-- Editar -->
@@ -146,6 +151,8 @@
                 <button class="btn btn-ghost btn-circle btn-md" (click)="eliminarPatrullaje(patrulla)">
                   <i class="fa-solid fa-trash"></i>
                 </button>
+
+
 
               </div>
 
