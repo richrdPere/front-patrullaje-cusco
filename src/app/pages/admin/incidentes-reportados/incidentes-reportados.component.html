@@ -1,177 +1,425 @@
-<div class="p-6 min-h-full bg-base-300 text-base-content overflow-auto transition-colors duration-300">
+<div class="min-h-full overflow-auto bg-base-300 p-6
+         text-base-content transition-colors duration-300">
 
-  <!-- Titulo -->
-  <h1 class="text-2xl font-bold mb-5 text-base-content ">Incidentes Reportados</h1>
+  <!-- ===================================================== -->
+  <!-- TÍTULO -->
+  <!-- ===================================================== -->
+  <div class="mb-5 flex flex-col gap-3
+           sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-base-content">
+        Incidentes reportados
+      </h1>
 
-  <!-- Header -->
-  <div class="p-4 mb-7 card bg-base-100 shadow-md">
-    <!-- CONTENEDOR PRINCIPAL -->
-    <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 py-4">
+      <p class="mt-1 text-sm text-base-content/60">
+        Consulte y supervise los incidentes registrados por el personal de serenazgo.
+      </p>
+    </div>
 
-      <!--  BUSCADOR -->
-      <div class="flex flex-col md:flex-row gap-4 items-center w-full md:w-auto">
+    <button type="button" class="btn btn-outline btn-sm" [disabled]="isLoading" (click)="recargarIncidencias()">
+      <i class="fa-solid fa-rotate-right" [class.fa-spin]="isLoading"></i>
 
-        <!-- Input descripcion -->
-        <div class="relative w-full md:max-w-xs">
-          <input type="text" class="input input-bordered w-full bg-base-100 rounded-md h-11 pl-10 pr-4 text-sm
-                 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Buscar por descripción"
-            autocomplete="off" [(ngModel)]="descripcionBusqueda" (ngModelChange)="onSearchChange()" />
-          <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+      Actualizar
+    </button>
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- FILTROS -->
+  <!-- ===================================================== -->
+  <div class="card mb-7 bg-base-100 shadow-md">
+    <div class="card-body p-4">
+
+      <div class="flex flex-col gap-4
+               md:flex-row md:items-end md:justify-between">
+
+        <div class="grid w-full grid-cols-1 gap-4
+                 md:grid-cols-2 lg:max-w-3xl">
+
+          <!-- Buscar por descripción -->
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text font-medium">
+                Descripción
+              </span>
+            </label>
+
+            <div class="relative">
+              <input type="text" class="input input-bordered h-11 w-full
+                       bg-base-100 pl-10 text-sm" placeholder="Buscar por descripción" autocomplete="off"
+                [(ngModel)]="descripcionBusqueda" (ngModelChange)="onSearchChange()" />
+
+              <i class="fa-solid fa-magnifying-glass
+                       absolute left-3 top-1/2
+                       -translate-y-1/2 text-base-content/40"></i>
+            </div>
+          </div>
+
+          <!-- Buscar por fecha -->
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text font-medium">
+                Fecha
+              </span>
+            </label>
+
+            <div class="relative">
+              <input type="date" class="input input-bordered h-11 w-full
+                       bg-base-100 pl-10 text-sm" [(ngModel)]="fechaBusqueda" (change)="onFiltroChange()" />
+
+              <i class="fa-solid fa-calendar-days
+                       absolute left-3 top-1/2
+                       -translate-y-1/2 text-base-content/40"></i>
+            </div>
+          </div>
         </div>
 
-        <!-- Filtro Fecha -->
-        <div class="relative w-full md:max-w-xs">
-          <input type="date" class="input input-bordered w-full bg-base-100 rounded-md h-11 pl-10 pr-4 text-sm
-           focus:outline-none focus:ring-2 focus:ring-indigo-500" [(ngModel)]="fechaBusqueda"
-            (change)="onSearchChange()" />
+        <!-- Limpiar filtros -->
+        <button type="button" class="btn btn-ghost" [disabled]="
+            !descripcionBusqueda &&
+            !fechaBusqueda
+          " (click)="limpiarFiltros()">
+          <i class="fa-solid fa-filter-circle-xmark"></i>
+          Limpiar
+        </button>
 
-          <i class="fa fa-calendar absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-        </div>
       </div>
     </div>
   </div>
 
-  <!-- Modal Ver patrullaje -->
-  <!-- <patrullaje-program-info [mostrarModal]="mostrarModalInfo" [patrullaje_id]="patrullaje_id"
-    (modalCerrado)="cerrarModalInfo()"></patrullaje-program-info> -->
+  <!-- ===================================================== -->
+  <!-- MODAL DETALLE -->
+  <!-- ===================================================== -->
 
-  <!-- Tabla -->
-  <div class="p-6 min-h-auto bg-base-100 rounded-xl shadow-xl">
-    <div class="overflow-x-auto text-base-content border border-base-300/90 shadow rounded-lg">
-      <!-- Header acciones -->
-      <div class="flex justify-between items-center p-5">
+  <!--
+  <app-incidencia-info
+    *ngIf="mostrarModalInfo && incidente_id"
+    [incidenciaId]="incidente_id"
+    (cerrar)="cerrarModalInfo()"
+    (estadoActualizado)="getIncidentesPaginado()"
+  />
+  -->
 
-        <!-- Selector de cantidad -->
-        <div class="flex items-center gap-2 text-sm">
-          <label>Mostrar:</label>
+  <!-- ===================================================== -->
+  <!-- TABLA -->
+  <!-- ===================================================== -->
+  <div class="rounded-xl bg-base-100 p-4 shadow-xl sm:p-6">
 
-          <select class="select select-bordered select-sm w-auto" [(ngModel)]="limit" (change)="cambiarLimite()">
-            <option *ngFor="let size of pageSizeOptions" [ngValue]="size">
-              {{ size }}
-            </option>
-          </select>
+    <!-- Acciones superiores -->
+    <div class="mb-4 flex flex-col gap-4
+             sm:flex-row sm:items-center sm:justify-between">
 
-          <span>items por página</span>
-        </div>
+      <!-- Selector de cantidad -->
+      <div class="flex flex-wrap items-center gap-2 text-sm">
+        <label for="pageSize">
+          Mostrar:
+        </label>
 
-        <!-- Botónes -->
-        <!-- <div class="flex flex-row justify-center items-center gap-4">
+        <select id="pageSize" class="select select-bordered select-sm w-auto" [(ngModel)]="limit"
+          (change)="cambiarLimite()">
+          @for (size of pageSizeOptions; track size) {
+          <option [ngValue]="size">
+            {{ size }}
+          </option>
+          }
+        </select>
 
-          <button class="btn btn-primary text-base-content hover:text-white bg-info hover:bg-primary border-none"
-            (click)="abrirModal()">
-            <i class="fa-solid fa-plus mr-1"></i>
-            Operativo
-          </button>
-        </div> -->
-
+        <span class="text-base-content/60">
+          registros por página
+        </span>
       </div>
 
-      <!-- Tabla  -->
+      <!-- Resumen -->
+      <div class="text-sm text-base-content/60">
+        Total:
+        <span class="font-semibold text-base-content">
+          {{ totalItems }}
+        </span>
+        incidentes
+      </div>
+    </div>
+
+    <div class="overflow-x-auto rounded-lg
+             border border-base-300/90">
       <table class="table w-full">
 
+        <!-- Encabezado -->
         <thead class="bg-base-300/90">
           <tr>
             <th>#</th>
-            <th>Fecha</th>
+            <th>Fecha y hora</th>
             <th>Sereno</th>
-            <th>Tipo de Incidente</th>
+            <th>Tipo</th>
+            <th>Descripción</th>
             <th>Zona</th>
+            <th>Evidencias</th>
             <th>Estado</th>
-            <th>Turno</th>
+            <th class="text-center">Acciones</th>
           </tr>
         </thead>
+
         <tbody>
+
+          <!-- Loading -->
           @if (isLoading) {
           <tr>
-            <td colspan="7" class="text-center py-4 text-base-content/70">Cargando unidades...</td>
+            <td colspan="9">
+              <div class="flex items-center justify-center
+                         gap-3 py-10 text-base-content/60">
+                <span class="loading loading-spinner loading-md"></span>
+                Cargando incidentes...
+              </div>
+            </td>
           </tr>
           }
 
-          @for (incidente of incidentes; track incidente.id; let i = $index) {
-          <tr class="hover ">
+          <!-- Error -->
+          @if (!isLoading && errorMessage) {
+          <tr>
+            <td colspan="9">
+              <div role="alert" class="alert alert-error m-4">
+                <i class="fa-solid fa-circle-exclamation"></i>
 
-            <!-- Numeracion -->
-            <td>{{i + 1}}</td>
+                <span>
+                  {{ errorMessage }}
+                </span>
 
-            <!-- Descripcion -->
-            <td>{{ incidente.descripcion }}</td>
+                <button type="button" class="btn btn-sm" (click)="recargarIncidencias()">
+                  Reintentar
+                </button>
+              </div>
+            </td>
+          </tr>
+          }
 
-            <!-- Hora Inicio -->
-            <th>
-              {{incidente.hora_inicio}}
-            </th>
+          <!-- Incidencias -->
+          @for (
+          incidente of incidentes;
+          track incidente.id;
+          let i = $index
+          ) {
+          <tr class="hover">
 
-            <!-- Hora Fin -->
-            <td>{{incidente.hora_fin}}</td>
+            <!-- Numeración paginada -->
+            <td class="font-medium">
+              {{
+              (currentPage - 1) * limit + i + 1
+              }}
+            </td>
 
-            <!-- Estado -->
+            <!-- Fecha y hora -->
+            <td class="whitespace-nowrap">
+              <div class="flex flex-col">
+                <span class="font-medium">
+                  {{
+                  incidente.fecha_hora
+                  | date: 'dd/MM/yyyy'
+                  }}
+                </span>
+
+                <span class="text-xs text-base-content/60">
+                  {{
+                  incidente.fecha_hora
+                  | date: 'hh:mm a'
+                  }}
+                </span>
+              </div>
+            </td>
+
+            <!-- Sereno -->
             <td>
-              <span class="badge badge-soft badge-info font-semibold">
-                {{ incidente.estado }}
+              <div class="flex min-w-40 flex-col">
+                <span class="font-medium">
+                  {{
+                  incidente.usuario?.persona?.nombres
+                  || 'Sin nombres'
+                  }}
+                  {{
+                  incidente.usuario?.persona?.apellidos
+                  || ''
+                  }}
+                </span>
+
+                <span class="text-xs text-base-content/60">
+                  {{
+                  incidente.usuario?.username
+                  || 'Sin usuario'
+                  }}
+                </span>
+              </div>
+            </td>
+
+            <!-- Tipo -->
+            <td>
+              <span class="badge badge-outline whitespace-nowrap" [ngClass]="{
+                    'badge-error':
+                      incidente.tipo === 'ROBO' ||
+                      incidente.tipo === 'VIOLENCIA',
+
+                    'badge-warning':
+                      incidente.tipo === 'ACCIDENTE' ||
+                      incidente.tipo === 'SOSPECHOSO',
+
+                    'badge-info':
+                      incidente.tipo === 'INCENDIO',
+
+                    'badge-neutral':
+                      incidente.tipo === 'OTRO'
+                  }">
+                {{
+                incidente.tipo.replaceAll('_', ' ')
+                }}
               </span>
             </td>
 
-            <!-- Actualización -->
+            <!-- Descripción -->
             <td>
-              {{ incidente.updatedAt | date: 'dd/MM/yyyy, hh:mm a' }}
+              <p class="max-w-xs truncate" [title]="incidente.descripcion">
+                {{ incidente.descripcion }}
+              </p>
             </td>
 
-            <!-- ACCIONES PRINCIPALES  -->
-            <td class="text-right relative">
+            <!-- Zona -->
+            <td>
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-location-dot
+                           text-primary"></i>
 
-              <div class="flex justify-start items-center gap-1">
-                <!-- Ver -->
-                <button class="btn btn-ghost btn-circle btn-md" (click)="verPatrullaje(incidente)">
+                <span>
+                  {{
+                  incidente.zona?.nombre
+                  || 'Sin zona'
+                  }}
+                </span>
+              </div>
+            </td>
+
+            <!-- Evidencias -->
+            <td>
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-paperclip
+                           text-base-content/50"></i>
+
+                <span class="font-medium">
+                  {{ incidente.total_evidencias }}
+                </span>
+              </div>
+            </td>
+
+            <!-- Estado -->
+            <td>
+              <span class="badge badge-soft whitespace-nowrap font-semibold" [ngClass]="{
+                    'badge-warning':
+                      incidente.estado === 'REPORTADO',
+
+                    'badge-info':
+                      incidente.estado === 'EN_PROCESO',
+
+                    'badge-success':
+                      incidente.estado === 'ATENDIDO',
+
+                    'badge-neutral':
+                      incidente.estado === 'CERRADO'
+                  }">
+                {{
+                incidente.estado.replaceAll('_', ' ')
+                }}
+              </span>
+            </td>
+
+            <!-- Acciones -->
+            <td>
+              <div class="flex justify-center">
+
+                <button type="button" class="btn btn-ghost btn-circle btn-sm" title="Ver detalle"
+                  (click)="verIncidente(incidente)">
                   <i class="fa-solid fa-eye"></i>
                 </button>
 
-                <!-- Editar -->
-                <!-- <button class="btn btn-ghost btn-circle btn-md" (click)="editarPatrullaje(incidente)">
-                  <i class="fa-solid fa-pencil"></i>
-                </button> -->
-
-                <!-- Eliminar -->
-                <!-- <button class="btn btn-ghost btn-circle btn-md" (click)="eliminarPatrullaje(incidente)">
-                  <i class="fa-solid fa-trash"></i>
-                </button> -->
-
               </div>
-
             </td>
           </tr>
           }
 
-
         </tbody>
-
-
       </table>
 
-      @if (!isLoading && incidentes.length === 0) {
-      <div class="flex flex-col items-center justify-center my-10 text-center text-base-content/70">
-        <img src="assets/img/empty-folder.png" alt="Sin solicitudes" class="w-40 h-40 mb-6 opacity-80" />
-        <h3 class="text-lg font-semibold text-base-content mb-2">
+      <!-- Estado vacío -->
+      @if (
+      !isLoading &&
+      !errorMessage &&
+      incidentes.length === 0
+      ) {
+      <div class="flex flex-col items-center justify-center
+                 px-6 py-12 text-center">
+        <img src="assets/img/empty-folder.png" alt="No hay incidentes registrados"
+          class="mb-5 h-32 w-32 object-contain opacity-70" />
+
+        <h3 class="mb-2 text-lg font-semibold">
           No hay incidentes registrados
         </h3>
-        <p class="text-sm max-w-md">Cuando se envien nuevos incidentes, aparecerán aquí automáticamente.</p>
-      </div>}
 
-      <!-- Paginación -->
-      <div class="flex justify-end items-center p-4 text-sm text-base-content bg-base-300/90">
-        <span> Página {{ page }} de {{ totalPages }} registros</span>
-        <div class="join ml-4 gap-2">
-          <button class="join-item btn btn-sm" [disabled]="page === 1" (click)="cambiarPagina(page - 1)">
+        <p class="max-w-md text-sm text-base-content/60">
+          No se encontraron incidentes que coincidan con los filtros seleccionados.
+        </p>
+      </div>
+      }
+
+      <!-- ================================================= -->
+      <!-- PAGINACIÓN -->
+      <!-- ================================================= -->
+      @if (!isLoading && totalItems > 0) {
+      <div class="flex flex-col gap-4
+                 border-t border-base-300
+                 bg-base-200/50 p-4
+                 sm:flex-row sm:items-center sm:justify-between">
+
+        <!-- Resumen -->
+        <span class="text-sm text-base-content/70">
+          Mostrando
+          <strong>{{ desdeRegistro }}</strong>
+          a
+          <strong>{{ hastaRegistro }}</strong>
+          de
+          <strong>{{ totalItems }}</strong>
+          registros
+        </span>
+
+        <div class="flex flex-wrap items-center gap-2">
+
+          <!-- Anterior -->
+          <button type="button" class="btn btn-sm" [disabled]="currentPage <= 1 || isLoading"
+            (click)="cambiarPagina(currentPage - 1)">
+            <i class="fa-solid fa-chevron-left"></i>
             Anterior
           </button>
 
-          <button class="join-item btn btn-sm" [disabled]="page === totalItems" (click)="cambiarPagina(page + 1)">
+          <!-- Páginas -->
+          <div class="join">
+            @for (
+            numeroPagina of paginasVisibles;
+            track numeroPagina
+            ) {
+            <button type="button" class="join-item btn btn-sm" [class.btn-primary]="
+                    numeroPagina === currentPage
+                  " (click)="cambiarPagina(numeroPagina)">
+              {{ numeroPagina }}
+            </button>
+            }
+          </div>
+
+          <!-- Siguiente -->
+          <button type="button" class="btn btn-sm" [disabled]="
+                currentPage >= totalPages ||
+                isLoading
+              " (click)="cambiarPagina(currentPage + 1)">
             Siguiente
+            <i class="fa-solid fa-chevron-right"></i>
           </button>
+
         </div>
       </div>
+      }
+
     </div>
-
-
   </div>
-
 </div>

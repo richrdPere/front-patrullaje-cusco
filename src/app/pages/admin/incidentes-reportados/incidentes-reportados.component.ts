@@ -1,9 +1,17 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { finalize } from 'rxjs';
 
 // Service
 import { IncidenciasService } from 'src/app/services/incidencias.service';
+
+// Interfaces
+import {
+  IncidenciaPaginada,
+  IncidenciasPaginadasData,
+  IncidenciasPaginadasFilters,
+} from 'src/app/interfaces/incidencia/incidencias.interface';
 
 @Component({
   selector: 'app-incidentes-reportados',
@@ -11,21 +19,23 @@ import { IncidenciasService } from 'src/app/services/incidencias.service';
   templateUrl: './incidentes-reportados.component.html',
   styles: ``
 })
-export class IncidentesReportadosComponent implements OnInit {
-
+export class IncidentesReportadosComponent implements OnInit, OnDestroy {
 
   // Incidentes Reportados
-  incidentes: any[] = [];
+  incidentes: IncidenciasPaginadasData['data'] = [];
   incidente_id: number | null = null;
   isLoading = true;
+  errorMessage = '';
 
+
+  // Modal
   mostrarModalInfo = false;
-
-  searchTimeout: any;
 
   // Search
   descripcionBusqueda: string = '';
   fechaBusqueda: string = '';
+
+  searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
   // Paginado
   page = 1;
@@ -38,51 +48,82 @@ export class IncidentesReportadosComponent implements OnInit {
 
   constructor(
     private incidenciasService: IncidenciasService
-  ) { }
+  ) { console.log('1. Constructor IncidentesReportadosComponent'); }
 
 
   ngOnInit(): void {
+    console.log('2. ngOnInit IncidentesReportadosComponent');
     this.getIncidentesPaginado();
 
+  }
+
+  ngOnDestroy(): void {
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
+    }
   }
 
   // - Patrullaje paginado
   getIncidentesPaginado() {
     this.isLoading = true;
+    this.errorMessage = '';
 
-    this.incidenciasService.getIncidentesPaginated({
+    const filters: IncidenciasPaginadasFilters = {
       page: this.page,
       limit: this.limit,
-      descripcion: this.descripcionBusqueda?.trim() || '',
-      fecha: this.fechaBusqueda?.trim() || '',
+      mode: "web"
+    };
 
-    }).subscribe({
+
+    this.incidenciasService.getIncidentesPaginated(filters).subscribe({
       next: (res) => {
 
         console.log("INCIEDENTES: ", res);
-        this.incidentes = res.data;
+        const paginacion = res.data;
 
-        this.totalItems = res.total;
-        this.currentPage = res.page;
-        this.totalPages = res.totalPages;
+
+        this.incidentes = paginacion.data ?? [];
+
+        this.totalItems = paginacion.total ?? 0;
+        this.currentPage = paginacion.page ?? this.page;
+        this.limit = paginacion.limit ?? this.limit;
+        this.totalPages = paginacion.totalPages ?? 0;
+
+        this.page = this.currentPage;
+
+        console.log('Incidencias paginadas:', this.incidentes);
+
         this.isLoading = false;
       },
       error: (err) => {
         console.error(err);
         this.isLoading = false;
+
+        this.incidentes = [];
+        this.totalItems = 0;
+        this.totalPages = 0;
+
+        this.errorMessage =
+          err?.error?.message ||
+          err?.message ||
+          'No se pudieron obtener las incidencias.';
       }
     });
   }
 
   // - Ver incidente
-  verPatrullaje(patrullaje: any) {
-    this.incidente_id = patrullaje.id;
+  verIncidente(
+    incidente: IncidenciasPaginadasData['data'][number]
+  ): void {
+    this.incidente_id = incidente.id;
     this.mostrarModalInfo = true;
   }
 
   // - Buscador
   onSearchChange() {
-    clearTimeout(this.searchTimeout);
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
+    }
 
     this.searchTimeout = setTimeout(() => {
       this.page = 1;
@@ -90,12 +131,16 @@ export class IncidentesReportadosComponent implements OnInit {
     }, 300);
   }
 
+
   // ================================
   // Helpers methods
   // ================================
+  recargarIncidencias(): void {
+    this.getIncidentesPaginado();
+  }
 
-  onPageSizeChange() {
-    this.currentPage = 1; // vuelve a la primera página
+  onPageSizeChange(): void {
+    this.cambiarLimite();
   }
 
   onFiltroChange() {
@@ -104,7 +149,8 @@ export class IncidentesReportadosComponent implements OnInit {
   }
 
   cambiarPagina(nuevaPagina: number) {
-    if (nuevaPagina < 1 || nuevaPagina > this.totalPages) return;
+    if (nuevaPagina < 1 || nuevaPagina > this.totalPages || nuevaPagina === this.page ||
+      this.isLoading) return;
     this.page = nuevaPagina;
     this.getIncidentesPaginado();
   }
@@ -120,4 +166,76 @@ export class IncidentesReportadosComponent implements OnInit {
     this.mostrarModalInfo = false;
     this.incidente_id = null;
   }
+
+  limpiarFiltros(): void {
+    this.descripcionBusqueda = '';
+    this.fechaBusqueda = '';
+
+    this.page = 1;
+
+    this.getIncidentesPaginado();
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Helpers de paginación
+  |--------------------------------------------------------------------------
+  */
+
+  get desdeRegistro(): number {
+    if (this.totalItems === 0) {
+      return 0;
+    }
+
+    return (
+      (this.currentPage - 1) * this.limit + 1
+    );
+  }
+
+  get hastaRegistro(): number {
+    return Math.min(
+      this.currentPage * this.limit,
+      this.totalItems
+    );
+  }
+
+  get paginasVisibles(): number[] {
+    if (this.totalPages <= 0) {
+      return [];
+    }
+
+    const rango = 2;
+
+    const inicio = Math.max(
+      1,
+      this.currentPage - rango
+    );
+
+    const fin = Math.min(
+      this.totalPages,
+      this.currentPage + rango
+    );
+
+    return Array.from(
+      {
+        length: fin - inicio + 1,
+      },
+      (_, index) => inicio + index
+    );
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | TrackBy
+  |--------------------------------------------------------------------------
+  */
+
+  trackByIncidenciaId(
+    index: number,
+    incidente: IncidenciasPaginadasData['data'][number]
+  ): number {
+    return incidente.id;
+  }
+
+
 }

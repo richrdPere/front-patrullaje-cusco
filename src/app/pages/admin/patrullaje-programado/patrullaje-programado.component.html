@@ -42,6 +42,15 @@
     (modalCerrado)="cerrarModalInfo()"></patrullaje-program-info>
 
 
+  <!-- Modal Ver recorrido -->
+  @if (
+  mostrarModalRecorrido &&
+  patrullajeRecorridoId !== null
+  ) {
+  <patrullaje-recorrido [patrullajeId]="patrullajeRecorridoId" (cerrar)="cerrarModalRecorrido()" />
+  }
+
+
   <!-- Tabla -->
   <div class="p-6 min-h-auto bg-base-100 rounded-xl shadow-xl">
     <div class="overflow-x-auto text-base-content border border-base-300/90 shadow rounded-lg">
@@ -136,6 +145,17 @@
                 <!-- <button class="btn btn-ghost btn-circle btn-md">
                   <i class="fa-solid fa-angles-right"></i>
                 </button> -->
+
+                <!-- Ver Recorrido -->
+                @if (
+                patrulla.estado === 'EN_CURSO'
+                || patrulla.estado === 'FINALIZADO'
+                ) {
+                <button type="button" class="btn btn-ghost btn-circle btn-md" title="Ver recorrido GPS"
+                  (click)="verRecorrido(patrulla.id)">
+                  <i class="fa-solid fa-route"></i>
+                </button>
+                }
 
                 <!-- Historial -->
                 <button class="btn btn-ghost btn-circle btn-md" (click)="verHistorial(patrulla)">

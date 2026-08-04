@@ -1,57 +1,106 @@
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  HostListener,
+  OnDestroy,
+  ViewChild
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Subject, takeUntil } from 'rxjs';
 
-import { Component, ElementRef, ViewChild, AfterViewInit, HostListener, OnDestroy } from '@angular/core';
+// Interfaces
 import { Lugar } from 'src/app/interfaces/lugar';
-import { Subscription } from 'rxjs';
+import { ZonaPatrullaje } from 'src/app/interfaces/zonaPatrullaje';
+import { TrackingPayload } from 'src/app/interfaces/tracking.interface';
 
 // Services
 import { GoogleMapsLoaderService } from 'src/app/services/google-maps-loader.service';
 import { ZonaService } from 'src/app/services/zona.service';
-import { SocketService } from 'src/app/services/socket.service';
-
-// Interfaces
-import { ZonaPatrullaje } from 'src/app/interfaces/zonaPatrullaje';
 import { TrackingService } from 'src/app/services/mapa-tracking/tracking.service';
 import { MapaTrackingService } from 'src/app/services/mapa-tracking/mapa-tracking.service';
 import { TrackingStoreService } from 'src/app/services/mapa-tracking/tracking-store.service';
 
 
+
+interface AlertaMapaPayload {
+  lat: number;
+  lng: number;
+  userId?: number;
+  usuarioId?: number;
+  titulo?: string;
+  descripcion?: string;
+}
+
 @Component({
   selector: 'mapa-patrullaje',
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './mapa-patrullaje.component.html',
   styles: ``
 })
 export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
 
+  @ViewChild('map')
+  mapaElement!: ElementRef<HTMLDivElement>;
 
-  @ViewChild('map') mapaElement!: ElementRef;
-  @ViewChild('zonaPanel') zonaPanel!: ElementRef;
+  @ViewChild('zonaPanel')
+  zonaPanel!: ElementRef<HTMLElement>;
 
+  // =====================================================
+  // DESTRUCCIÓN DE OBSERVABLES
+  // =====================================================
+
+  private readonly destroy$ =
+    new Subject<void>();
+
+  // =====================================================
   // MAPA
-  map!: google.maps.Map;
-  panelVisible: boolean = true;
+  // =====================================================
 
-  // MARCADORES
-  marcadores: google.maps.Marker[] = [];
-  infoWindows: google.maps.InfoWindow[] = [];
+  map!: google.maps.Map;
+
+  mapaCargado = false;
+  panelVisible = true;
+
+  // =====================================================
+  // TRACKING
+  // =====================================================
+
   trackingActivo = false;
   cantidadSerenos = 0;
 
+  /**
+   * Último timestamp procesado por sereno.
+   *
+   * Evita volver a actualizar marcadores
+   * cuando el store emite nuevamente todo el Map.
+   */
+  private readonly ultimoTrackingProcesado =
+    new Map<number, number>();
+
+  // =====================================================
+  // ALERTAS
+  // =====================================================
+
+  alertMarkers: google.maps.Marker[] = [];
+
+  /**
+   * Timeouts usados para retirar marcadores de alerta.
+   * Se limpian cuando el componente es destruido.
+   */
+  private readonly alertaTimeouts =
+    new Set<ReturnType<typeof setTimeout>>();
+
+  // =====================================================
   // ZONAS
+  // =====================================================
   zonas: ZonaPatrullaje[] = [];
   zonasVisibles: Record<number, boolean> = {};
   poligonos: Record<number, google.maps.Polygon> = {};
 
-  // SERENOS Y ALERTAS
-  // serenoMarkers: { [userId: number]: google.maps.Marker } = {};
-  alertMarkers: google.maps.Marker[] = [];
-
-  private trackingSub!: Subscription;
-  private alertaSub!: Subscription;
-
-
-
-  mapaCargado = false;
+  // =====================================================
+  // LUGARES DE REFERENCIA
+  // =====================================================
 
   lugares: Lugar[] = [
     {
@@ -71,259 +120,918 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
     }
   ];
 
+  // =====================================================
+  // PANEL ARRASTRABLE
+  // =====================================================
+
+  private isDragging = false;
+
+  private offset = {
+    x: 0,
+    y: 0
+  };
+
   constructor(
-    private mapsLoader: GoogleMapsLoaderService,
-    private zonaService: ZonaService,
-    private trackingService: TrackingService,
-    private mapaTrackingService: MapaTrackingService,
-    private trackingStoreService: TrackingStoreService
+    private readonly mapsLoader:
+      GoogleMapsLoaderService,
+
+    private readonly zonaService:
+      ZonaService,
+
+    private readonly trackingService:
+      TrackingService,
+
+    private readonly mapaTrackingService:
+      MapaTrackingService,
+
+    private readonly trackingStoreService:
+      TrackingStoreService
   ) { }
 
+  // =====================================================
+  // CICLO DE VIDA
+  // =====================================================
+
+  async ngAfterViewInit(): Promise<void> {
+    try {
+      // 1. Cargar API Google Maps
+      await this.mapsLoader.load();
+
+      // 2. Crear mapa
+      this.initMapa();
+
+      // 3. Reconstruir marcadores persistidos
+      this.mapaTrackingService.reconstruirMarcadores(this.map);
+
+      // 4. Cargar zonas
+      this.loadZonas();
+
+      // 5. Escuchar tracking y alertas
+      this.initTracking();
+
+      // 6. Sincronizar estado inicial
+      this.cantidadSerenos = this.mapaTrackingService.obtenerCantidadSerenos();
+
+      this.trackingActivo = this.cantidadSerenos > 0;
+
+      this.mapaCargado = true;
+
+      console.log("Cantidad de serenos activos:", this.cantidadSerenos);
+      console.log(
+        '🗺️ Mapa de patrullaje cargado correctamente'
+      );
+    } catch (error) {
+      this.mapaCargado = false;
+
+      console.error(
+        '❌ No se pudo inicializar el mapa:',
+        error
+      );
+    }
+  }
+
   ngOnDestroy(): void {
-    this.trackingSub?.unsubscribe();
-    this.alertaSub?.unsubscribe();
-  }
+    // Finalizar observables
+    this.destroy$.next();
+    this.destroy$.complete();
 
-  async ngAfterViewInit() {
+    // Detener movimiento del panel
+    this.isDragging = false;
 
-    // CARGAR GOOGLE MAPS
-    await this.mapsLoader.load();
+    // Limpiar marcadores temporales de alerta
+    this.alertMarkers.forEach(marker => {
+      marker.setMap(null);
+    });
 
-    // CREAR MAPA
-    this.initMapa();
+    this.alertMarkers = [];
 
-    // RECONSTRUIR SERENOS ACTIVOS
-    this.mapaTrackingService
-      .reconstruirMarcadores(this.map);
+    // Limpiar timeouts pendientes
+    this.alertaTimeouts.forEach(timeout => {
+      clearTimeout(timeout);
+    });
 
-    // CARGAR ZONAS
-    this.loadZonas();
+    this.alertaTimeouts.clear();
 
-    // INICIAR TRACKING
-    this.initTracking();
-
-    this.cantidadSerenos =
-      this.mapaTrackingService.obtenerCantidadSerenos();
-
-    this.mapaCargado = true;
+    /*
+     * No se llama limpiarTodo() porque el servicio
+     * conserva los marcadores para reconstruirlos
+     * cuando el usuario regrese al componente.
+     *
+     * limpiarTodo() debe reservarse para logout.
+     */
   }
 
   // =====================================================
-  // SOCKET
+  // INICIALIZAR TRACKING
   // =====================================================
-  initTracking() {
-    console.log('🛰️ Escuchando tracking realtime...');
-    // TRACKING
-    this.trackingSub =
-      this.trackingStoreService.tracking$
-        .subscribe({
-          next: (trackingMap) => {
-            trackingMap.forEach((tracking) => {
-              this.trackingActivo = true;
-              this.mapaTrackingService
-                .actualizarTracking(
-                  this.map,
-                  tracking
-                );
-            });
-            this.cantidadSerenos = trackingMap.size;
-          },
-
-          error: (err) => {
-            console.error('❌ Error tracking:', err);
-          }
-        });
-
-    // ALERTAS
-    this.alertaSub = this.trackingService
-      .listenAlertas()
+  private initTracking(): void {
+    this.trackingStoreService
+      .tracking$
+      .pipe(
+        takeUntil(this.destroy$)
+      )
       .subscribe({
-        next: (data) => {
-          console.log('🚨 ALERTA RECIBIDA:', data);
-          this.mostrarAlerta(data);
+        next: trackingMap => {
+          this.procesarTrackingMap(
+            trackingMap
+          );
         },
-        error: (err) => {
-          console.error('❌ Error alerta:', err);
+        error: error => {
+          console.error(
+            '❌ Error en tracking:',
+            error
+          );
         }
       });
+
+    this.trackingService
+      .listenAlertas()
+      .pipe(
+        takeUntil(this.destroy$)
+      )
+      .subscribe({
+        next: data => {
+          this.mostrarAlerta(
+            data as AlertaMapaPayload
+          );
+        },
+        error: error => {
+          console.error(
+            '❌ Error en alertas:',
+            error
+          );
+        }
+      });
+
+    this.trackingService
+      .unirseCentralTracking();
+  }
+  // private initTracking(): void {
+  //   console.log(
+  //     '🛰️ Escuchando tracking en tiempo real...'
+  //   );
+
+  //   this.trackingService.unirseCentralTracking();
+
+  //   this.trackingStoreService
+  //     .tracking$
+  //     .pipe(
+  //       takeUntil(this.destroy$)
+  //     )
+  //     .subscribe({
+  //       next: trackingMap => {
+  //         this.procesarTrackingMap(
+  //           trackingMap
+  //         );
+  //       },
+
+  //       error: error => {
+  //         console.error(
+  //           '❌ Error en el estado global de tracking:',
+  //           error
+  //         );
+  //       }
+  //     });
+
+  //   this.trackingService
+  //     .listenAlertas()
+  //     .pipe(
+  //       takeUntil(this.destroy$)
+  //     )
+  //     .subscribe({
+  //       next: data => {
+  //         console.log(
+  //           '🚨 Alerta recibida:',
+  //           data
+  //         );
+
+  //         this.mostrarAlerta(
+  //           data as AlertaMapaPayload
+  //         );
+  //       },
+
+  //       error: error => {
+  //         console.error(
+  //           '❌ Error escuchando alertas:',
+  //           error
+  //         );
+  //       }
+  //     });
+  // }
+
+  // =====================================================
+  // PROCESAR ESTADO DE TRACKING
+  // =====================================================
+
+  private procesarTrackingMap(
+    trackingMap:
+      ReadonlyMap<number, TrackingPayload>
+  ): void {
+
+    if (!this.map) {
+      return;
+    }
+
+    const usuariosActuales =
+      new Set<number>(
+        trackingMap.keys()
+      );
+
+    /*
+     * Eliminar del mapa usuarios que ya no
+     * aparecen en el TrackingStoreService.
+     */
+    for (
+      const usuarioId
+      of this.ultimoTrackingProcesado.keys()
+    ) {
+      if (
+        !usuariosActuales.has(usuarioId)
+      ) {
+        this.mapaTrackingService
+          .removerSereno(usuarioId);
+
+        this.ultimoTrackingProcesado
+          .delete(usuarioId);
+      }
+    }
+
+    /*
+     * Procesar únicamente ubicaciones nuevas.
+     */
+    trackingMap.forEach(
+      (
+        tracking: TrackingPayload,
+        usuarioId: number
+      ) => {
+
+        if (
+          !this.debeProcesarTracking(
+            tracking
+          )
+        ) {
+          return;
+        }
+
+        this.mapaTrackingService
+          .actualizarTracking(
+            this.map,
+            tracking
+          );
+
+        const timestamp =
+          new Date(
+            tracking.realtime.timestamp
+          ).getTime();
+
+        this.ultimoTrackingProcesado.set(
+          usuarioId,
+          timestamp
+        );
+      }
+    );
+
+    this.cantidadSerenos =
+      trackingMap.size;
+
+    this.trackingActivo =
+      this.cantidadSerenos > 0;
   }
 
-  dibujarZonaPatrullaje(zona: any) {
+  /**
+   * Verifica si el tracking recibido es más
+   * reciente que el último procesado.
+   */
+  private debeProcesarTracking(
+    tracking: TrackingPayload
+  ): boolean {
 
-    const polygon = new google.maps.Polygon({
-      paths: zona.coordenadas,
-      strokeColor: '#0AD962',
-      strokeOpacity: 0.8,
-      strokeWeight: 2,
-      fillColor: '#0AD962',
-      fillOpacity: 0.25
-    });
+    if (
+      !tracking ||
+      !tracking.realtime ||
+      !tracking.gps
+    ) {
+      return false;
+    }
 
-    polygon.setMap(this.map);
-  }
+    const timestamp =
+      new Date(
+        tracking.realtime.timestamp
+      ).getTime();
 
-  mostrarAlerta(data: any) {
-    const { lat, lng, userId } = data;
+    if (
+      !Number.isFinite(timestamp)
+    ) {
+      console.warn(
+        '⚠️ Tracking con fecha inválida:',
+        tracking
+      );
 
-    const marker = new google.maps.Marker({
-      position: { lat, lng },
-      map: this.map,
-      icon: {
-        url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png'
-      },
-      animation: google.maps.Animation.BOUNCE
-    });
+      return false;
+    }
 
-    this.alertMarkers.push(marker);
+    const ultimoTimestamp =
+      this.ultimoTrackingProcesado.get(
+        tracking.usuarioId
+      );
 
-    const info = new google.maps.InfoWindow({
-      content: `<b>🚨 ALERTA</b><br>Sereno ID: ${userId}`
-    });
+    if (
+      ultimoTimestamp !== undefined &&
+      timestamp <= ultimoTimestamp
+    ) {
+      return false;
+    }
 
-    info.open(this.map, marker);
-
-    // Auto eliminar después de tiempo
-    setTimeout(() => {
-      marker.setMap(null);
-    }, 10000);
+    return true;
   }
 
   // =====================================================
   // MAPA
   // =====================================================
-  private initMapa() {
-    const center = new google.maps.LatLng(-13.540348, -71.982898);
 
-    this.map = new google.maps.Map(this.mapaElement.nativeElement, {
-      center,
-      zoom: 15,
-      mapTypeId: google.maps.MapTypeId.ROADMAP
+  private initMapa(): void {
+    const center = {
+      lat: -13.540348,
+      lng: -71.982898
+    };
+
+    this.map =
+      new google.maps.Map(
+        this.mapaElement.nativeElement,
+        {
+          center,
+          zoom: 15,
+          mapTypeId:
+            google.maps.MapTypeId.ROADMAP,
+
+          streetViewControl: false,
+          fullscreenControl: true,
+          mapTypeControl: true,
+
+          gestureHandling: 'greedy'
+        }
+      );
+  }
+
+  // =====================================================
+  // ALERTAS
+  // =====================================================
+
+  private mostrarAlerta(
+    data: AlertaMapaPayload
+  ): void {
+
+    if (!this.map) {
+      return;
+    }
+
+    const lat =
+      Number(data?.lat);
+
+    const lng =
+      Number(data?.lng);
+
+    if (
+      !Number.isFinite(lat) ||
+      !Number.isFinite(lng)
+    ) {
+      console.warn(
+        '⚠️ Alerta sin coordenadas válidas:',
+        data
+      );
+
+      return;
+    }
+
+    if (
+      lat < -90 ||
+      lat > 90 ||
+      lng < -180 ||
+      lng > 180
+    ) {
+      console.warn(
+        '⚠️ Coordenadas de alerta fuera de rango:',
+        data
+      );
+
+      return;
+    }
+
+    const usuarioId =
+      data.usuarioId ??
+      data.userId ??
+      null;
+
+    const marker =
+      new google.maps.Marker({
+        position: {
+          lat,
+          lng
+        },
+
+        map: this.map,
+
+        title:
+          data.titulo ??
+          'Alerta de serenazgo',
+
+        icon: {
+          url:
+            'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
+
+          scaledSize:
+            new google.maps.Size(
+              44,
+              44
+            )
+        },
+
+        animation:
+          google.maps.Animation.BOUNCE
+      });
+
+    this.alertMarkers.push(
+      marker
+    );
+
+    const infoWindow =
+      new google.maps.InfoWindow({
+        content: `
+          <div style="
+            width:240px;
+            font-family:Arial,sans-serif;
+          ">
+            <div style="
+              color:#DC2626;
+              font-weight:700;
+              font-size:15px;
+              margin-bottom:8px;
+            ">
+              🚨 ${this.escapeHtml(
+          data.titulo ??
+          'ALERTA DE SERENAZGO'
+        )}
+            </div>
+
+            ${data.descripcion
+            ? `
+                  <div style="
+                    margin-bottom:8px;
+                    color:#374151;
+                  ">
+                    ${this.escapeHtml(
+              data.descripcion
+            )}
+                  </div>
+                `
+            : ''
+          }
+
+            <div style="
+              font-size:12px;
+              color:#6B7280;
+            ">
+              ${usuarioId !== null
+            ? `Sereno ID: ${usuarioId}`
+            : 'Usuario no identificado'
+          }
+            </div>
+          </div>
+        `
+      });
+
+    infoWindow.open({
+      map: this.map,
+      anchor: marker
     });
+
+    this.map.panTo({
+      lat,
+      lng
+    });
+
+    const timeout =
+      setTimeout(() => {
+
+        marker.setMap(null);
+        infoWindow.close();
+
+        this.alertMarkers =
+          this.alertMarkers.filter(
+            currentMarker =>
+              currentMarker !== marker
+          );
+
+        this.alertaTimeouts.delete(
+          timeout
+        );
+
+      }, 10_000);
+
+    this.alertaTimeouts.add(
+      timeout
+    );
   }
 
   // =====================================================
   // ZONAS
   // =====================================================
+
   loadZonas(): void {
-    this.zonaService.obtenerZonas().subscribe({
-      next: (res: any) => {
-        this.zonas = res.data.rows;
+    this.zonaService
+      .obtenerZonas()
+      .pipe(
+        takeUntil(this.destroy$)
+      )
+      .subscribe({
+        next: (response: any) => {
+          this.zonas =
+            response?.data?.rows ?? [];
 
-        // Inicializar estado
-        this.zonas.forEach(z => {
-          this.zonasVisibles[z.id] = false;
-        });
-      },
-      error: (err) => {
-        console.error('Error al obtener zonas:', err);
-      }
+          this.zonas.forEach(zona => {
+            this.zonasVisibles[
+              zona.id
+            ] = false;
+          });
+        },
 
-    });
+        error: error => {
+          console.error(
+            '❌ Error obteniendo zonas:',
+            error
+          );
+        }
+      });
   }
 
-  toggleZona(zona: ZonaPatrullaje) {
-    const visible = this.zonasVisibles[zona.id];
+  toggleZona(
+    zona: ZonaPatrullaje
+  ): void {
+
+    const visible =
+      this.zonasVisibles[
+      zona.id
+      ];
 
     if (visible) {
-      // Ocultar
-      if (this.poligonos[zona.id]) {
-        this.poligonos[zona.id].setMap(null);
+      const poligono =
+        this.poligonos[
+        zona.id
+        ];
+
+      if (poligono) {
+        poligono.setMap(null);
       }
-      this.zonasVisibles[zona.id] = false;
-    } else {
-      // Determinar color según el riesgo
-      this.showZona(zona);
+
+      this.zonasVisibles[
+        zona.id
+      ] = false;
+
+      return;
+    }
+
+    this.showZona(zona);
+  }
+
+  private showZona(
+    zona: ZonaPatrullaje
+  ): void {
+
+    if (
+      !Array.isArray(
+        zona.coordenadas
+      ) ||
+      zona.coordenadas.length === 0
+    ) {
+      console.warn(
+        '⚠️ Zona sin coordenadas:',
+        zona
+      );
+
+      return;
+    }
+
+    const color =
+      this.getColorByRiesgo(
+        zona.riesgo
+      );
+
+    /*
+     * Reutilizar polígono si ya fue creado.
+     */
+    const poligonoExistente =
+      this.poligonos[
+      zona.id
+      ];
+
+    if (poligonoExistente) {
+      poligonoExistente.setMap(
+        this.map
+      );
+
+      this.zonasVisibles[
+        zona.id
+      ] = true;
+
+      this.fitZonaBounds(zona);
+
+      return;
+    }
+
+    const polygon =
+      new google.maps.Polygon({
+        paths:
+          zona.coordenadas,
+
+        strokeColor:
+          color,
+
+        strokeOpacity:
+          0.8,
+
+        strokeWeight:
+          2,
+
+        fillColor:
+          color,
+
+        fillOpacity:
+          0.35,
+
+        clickable:
+          true
+      });
+
+    polygon.setMap(
+      this.map
+    );
+
+    this.poligonos[
+      zona.id
+    ] = polygon;
+
+    this.zonasVisibles[
+      zona.id
+    ] = true;
+
+    this.fitZonaBounds(
+      zona
+    );
+  }
+
+  private getColorByRiesgo(
+    riesgo: string
+  ): string {
+
+    switch (
+    riesgo?.toLowerCase()
+    ) {
+      case 'alto':
+        return '#DC2626';
+
+      case 'medio':
+        return '#F59E0B';
+
+      default:
+        return '#16A34A';
     }
   }
 
-  private showZona(zona: ZonaPatrullaje) {
+  private fitZonaBounds(
+    zona: ZonaPatrullaje
+  ): void {
 
-    const color = this.getColorByRiesgo(zona.riesgo);
+    if (
+      !zona.coordenadas?.length
+    ) {
+      return;
+    }
 
-    const polygon = new google.maps.Polygon({
-      paths: zona.coordenadas,
-      strokeColor: color,
-      strokeOpacity: 0.8,
-      strokeWeight: 2,
-      fillColor: color,
-      fillOpacity: 0.35
-    });
+    const bounds =
+      new google.maps.LatLngBounds();
 
-    polygon.setMap(this.map);
+    zona.coordenadas
+      .forEach(coord => {
 
-    this.poligonos[zona.id] = polygon;
-    this.zonasVisibles[zona.id] = true;
+        const lat =
+          Number(coord.lat);
 
-    this.fitZonaBounds(zona);
-  }
+        const lng =
+          Number(coord.lng);
 
-  // private hideZona(zonaId: number) {
-  //   this.poligonos[zonaId]?.setMap(null);
-  //   this.zonasVisibles[zonaId] = false;
-  // }
+        if (
+          Number.isFinite(lat) &&
+          Number.isFinite(lng)
+        ) {
+          bounds.extend({
+            lat,
+            lng
+          });
+        }
+      });
 
-  private getColorByRiesgo(riesgo: string): string {
-    switch (riesgo) {
-      case 'alto': return '#FF0000';
-      case 'medio': return '#FFA500';
-      default: return '#0AD962';
+    if (!bounds.isEmpty()) {
+      this.map.fitBounds(
+        bounds
+      );
     }
   }
 
-  private fitZonaBounds(zona: ZonaPatrullaje) {
-    const bounds = new google.maps.LatLngBounds();
+  // =====================================================
+  // MÉTODO OPCIONAL PARA DIBUJAR ZONA DIRECTAMENTE
+  // =====================================================
 
-    zona.coordenadas.forEach(coord => {
-      bounds.extend(new google.maps.LatLng(coord.lat, coord.lng));
-    });
+  dibujarZonaPatrullaje(
+    zona: {
+      coordenadas:
+      google.maps.LatLngLiteral[];
+    }
+  ): void {
 
-    this.map.fitBounds(bounds);
+    if (
+      !this.map ||
+      !zona?.coordenadas?.length
+    ) {
+      return;
+    }
+
+    const polygon =
+      new google.maps.Polygon({
+        paths:
+          zona.coordenadas,
+
+        strokeColor:
+          '#0AD962',
+
+        strokeOpacity:
+          0.8,
+
+        strokeWeight:
+          2,
+
+        fillColor:
+          '#0AD962',
+
+        fillOpacity:
+          0.25,
+
+        map:
+          this.map
+      });
+
+    /*
+     * Este método crea un polígono temporal.
+     * Si luego quieres eliminarlo, debes guardarlo.
+     */
+    console.log(
+      '🟢 Zona temporal dibujada:',
+      polygon
+    );
   }
 
   // =====================================================
-  // PANEL UI
+  // PANEL
   // =====================================================
-  mostrarPanel() {
+
+  mostrarPanel(): void {
     this.panelVisible = true;
   }
 
-  ocultarPanel() {
+  ocultarPanel(): void {
     this.panelVisible = false;
   }
 
   // =====================================================
   // DRAG PANEL
   // =====================================================
-  private isDragging = false;
-  private offset = { x: 0, y: 0 };
+  @HostListener(
+    'document:mousedown',
+    ['$event']
+  )
+  onMouseDown(
+    event: MouseEvent
+  ): void {
 
-  @HostListener('document:mousedown', ['$event'])
-  onMouseDown(event: MouseEvent) {
-    if (!this.zonaPanel?.nativeElement.contains(event.target)) return;
+    const panel =
+      this.zonaPanel
+        ?.nativeElement;
+
+    if (
+      !panel ||
+      !panel.contains(
+        event.target as Node
+      )
+    ) {
+      return;
+    }
+
+    /*
+     * Evitar arrastrar el panel cuando
+     * se interactúa con inputs o botones.
+     */
+    const target =
+      event.target as HTMLElement;
+
+    if (
+      target.closest(
+        'button, input, select, textarea, a'
+      )
+    ) {
+      return;
+    }
 
     this.isDragging = true;
 
-    const rect = this.zonaPanel.nativeElement.getBoundingClientRect();
+    const rect =
+      panel.getBoundingClientRect();
 
     this.offset = {
-      x: event.clientX - rect.left,
-      y: event.clientY - rect.top,
+      x:
+        event.clientX -
+        rect.left,
+
+      y:
+        event.clientY -
+        rect.top
     };
   }
 
-  @HostListener('document:mousemove', ['$event'])
-  onMouseMove(event: MouseEvent) {
-    if (!this.isDragging) return;
+  @HostListener(
+    'document:mousemove',
+    ['$event']
+  )
+  onMouseMove(
+    event: MouseEvent
+  ): void {
 
-    const panel = this.zonaPanel.nativeElement as HTMLElement;
+    if (
+      !this.isDragging
+    ) {
+      return;
+    }
 
-    panel.style.left = `${event.clientX - this.offset.x}px`;
-    panel.style.top = `${event.clientY - this.offset.y}px`;
-    panel.style.right = 'auto';
+    const panel =
+      this.zonaPanel
+        ?.nativeElement;
+
+    if (!panel) {
+      return;
+    }
+
+    const maxLeft = window.innerWidth - panel.offsetWidth;
+
+    const maxTop = window.innerHeight - panel.offsetHeight;
+
+    const left =
+      Math.min(
+        Math.max(
+          event.clientX -
+          this.offset.x,
+          0
+        ),
+        Math.max(maxLeft, 0)
+      );
+
+    const top =
+      Math.min(
+        Math.max(
+          event.clientY -
+          this.offset.y,
+          0
+        ),
+        Math.max(maxTop, 0)
+      );
+
+    panel.style.left =
+      `${left}px`;
+
+    panel.style.top =
+      `${top}px`;
+
+    panel.style.right =
+      'auto';
   }
 
-  @HostListener('document:mouseup')
-  onMouseUp() {
+  @HostListener(
+    'document:mouseup'
+  )
+  onMouseUp(): void {
     this.isDragging = false;
+  }
+
+  // =====================================================
+  // SEGURIDAD HTML
+  // =====================================================
+
+  private escapeHtml(
+    value: string
+  ): string {
+
+    return String(value)
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
   }
 }

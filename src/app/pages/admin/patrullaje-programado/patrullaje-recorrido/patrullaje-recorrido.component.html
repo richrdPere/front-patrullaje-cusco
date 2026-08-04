@@ -1,0 +1,657 @@
+<div class="modal modal-open z-[100]" role="dialog" aria-modal="true" aria-labelledby="titulo-recorrido">
+  <!-- ===================================================== -->
+  <!-- CONTENEDOR DEL MODAL -->
+  <!-- ===================================================== -->
+  <div class="modal-box flex h-[95dvh] w-[96vw] max-w-7xl flex-col
+           overflow-hidden bg-base-100 p-0 shadow-2xl">
+
+    <!-- ===================================================== -->
+    <!-- HEADER -->
+    <!-- ===================================================== -->
+    <header class="flex shrink-0 items-center justify-between gap-3
+             border-b border-base-200 bg-base-100 px-4 py-3
+             sm:px-6 sm:py-4">
+      <div class="flex min-w-0 items-center gap-3">
+
+        <div class="flex h-10 w-10 shrink-0 items-center justify-center
+                 rounded-xl bg-primary/10 text-primary sm:h-11 sm:w-11">
+          <i class="fa-solid fa-route text-lg"></i>
+        </div>
+
+        <div class="min-w-0">
+
+          <h2 id="titulo-recorrido" class="truncate text-base font-bold text-base-content sm:text-lg">
+            Recorrido GPS del patrullaje #{{ patrullajeId }}
+          </h2>
+
+          <p class="mt-0.5 text-xs text-base-content/60 sm:text-sm">
+            Visualización del trazado registrado durante el patrullaje.
+          </p>
+
+        </div>
+
+      </div>
+
+      <div class="flex shrink-0 items-center gap-1 sm:gap-2">
+
+        <!-- ACTUALIZAR -->
+        <button type="button" class="btn btn-ghost btn-sm gap-2" title="Actualizar recorrido" [disabled]="cargando"
+          (click)="recargarRecorrido()">
+          <i class="fa-solid fa-rotate-right" [class.fa-spin]="cargando"></i>
+
+          <span class="hidden sm:inline">
+            Actualizar
+          </span>
+        </button>
+
+        <!-- CERRAR -->
+        <button type="button" class="btn btn-circle btn-ghost btn-sm" aria-label="Cerrar recorrido" title="Cerrar"
+          (click)="cerrarModal()">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+
+      </div>
+    </header>
+
+    <!-- ===================================================== -->
+    <!-- CONTENIDO -->
+    <!-- ===================================================== -->
+    <main class="grid min-h-0 flex-1 grid-cols-1
+             lg:grid-cols-[minmax(0,1fr)_340px]">
+
+      <!-- =================================================== -->
+      <!-- MAPA -->
+      <!-- =================================================== -->
+      <section class="relative min-h-[420px] overflow-hidden bg-base-200
+               lg:min-h-0" aria-label="Mapa del recorrido del patrullaje">
+
+        <!-- CONTENEDOR GOOGLE MAPS -->
+        <div #mapaRecorrido class="absolute inset-0 h-full w-full"></div>
+
+        <!-- ESTADO DEL MAPA -->
+        <div class="pointer-events-none absolute left-3 top-3 z-10
+                 rounded-xl border border-base-200 bg-base-100/90
+                 px-3 py-2 shadow-lg backdrop-blur-md">
+          <div class="flex items-center gap-2">
+
+            <span class="h-2.5 w-2.5 rounded-full" [class.bg-success]="mapaCargado" [class.animate-pulse]="mapaCargado"
+              [class.bg-warning]="!mapaCargado"></span>
+
+            <span class="text-xs font-semibold">
+              {{ mapaCargado ? 'Mapa disponible' : 'Inicializando mapa' }}
+            </span>
+
+          </div>
+        </div>
+
+        <!-- LOADING -->
+        @if (cargando) {
+        <div class="absolute inset-0 z-30 flex items-center justify-center
+                   bg-base-100/75 p-4 backdrop-blur-sm">
+          <div class="flex max-w-sm items-center gap-4 rounded-2xl
+                     border border-base-200 bg-base-100 px-5 py-4
+                     shadow-xl">
+            <span class="loading loading-spinner loading-md shrink-0 text-primary"></span>
+
+            <div>
+              <p class="text-sm font-bold">
+                Cargando recorrido
+              </p>
+
+              <p class="mt-0.5 text-xs text-base-content/60">
+                Obteniendo y procesando los puntos GPS registrados.
+              </p>
+            </div>
+          </div>
+        </div>
+        }
+
+        <!-- ERROR -->
+        @if (error && !cargando) {
+        <div class="absolute inset-0 z-30 flex items-center justify-center
+                   bg-base-100/85 p-4 backdrop-blur-sm">
+          <div class="w-full max-w-md rounded-2xl border border-error/20
+                     bg-base-100 p-6 text-center shadow-xl">
+            <div class="mx-auto flex h-14 w-14 items-center justify-center
+                       rounded-full bg-error/10 text-error">
+              <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+            </div>
+
+            <h3 class="mt-4 text-base font-bold">
+              No se pudo cargar el recorrido
+            </h3>
+
+            <p class="mt-2 text-sm text-base-content/60">
+              {{ error }}
+            </p>
+
+            <button type="button" class="btn btn-primary btn-sm mt-5 gap-2" (click)="recargarRecorrido()">
+              <i class="fa-solid fa-rotate-right"></i>
+              Reintentar
+            </button>
+          </div>
+        </div>
+        }
+
+        <!-- SIN PUNTOS GPS -->
+        @if (
+        recorrido &&
+        recorrido.puntos.length === 0 &&
+        !cargando &&
+        !error
+        ) {
+        <div class="absolute inset-0 z-20 flex items-center justify-center
+                   bg-base-100/80 p-4 backdrop-blur-sm">
+          <div class="max-w-sm text-center">
+
+            <div class="mx-auto flex h-16 w-16 items-center justify-center
+                       rounded-full bg-base-200 text-base-content/40">
+              <i class="fa-solid fa-route text-2xl"></i>
+            </div>
+
+            <h3 class="mt-4 text-base font-bold">
+              Sin recorrido registrado
+            </h3>
+
+            <p class="mt-2 text-sm text-base-content/60">
+              Este patrullaje todavía no posee puntos GPS válidos para
+              dibujar el recorrido.
+            </p>
+
+            <button type="button" class="btn btn-outline btn-sm mt-5 gap-2" (click)="recargarRecorrido()">
+              <i class="fa-solid fa-rotate-right"></i>
+              Volver a consultar
+            </button>
+
+          </div>
+        </div>
+        }
+
+        <!-- LEYENDA FLOTANTE -->
+        @if (
+        recorrido &&
+        recorrido.puntos.length > 0 &&
+        !cargando &&
+        !error
+        ) {
+        <div class="absolute bottom-3 left-3 z-10 rounded-xl
+                   border border-base-200 bg-base-100/90 p-3
+                   shadow-lg backdrop-blur-md">
+          <p class="mb-2 text-[11px] font-bold uppercase tracking-wide
+                      text-base-content/60">
+            Leyenda
+          </p>
+
+          <div class="space-y-2 text-xs">
+
+            <div class="flex items-center gap-2">
+              <span class="flex h-6 w-6 items-center justify-center
+                         rounded-full bg-primary text-[10px]
+                         font-bold text-primary-content">
+                I
+              </span>
+
+              <span>Inicio del recorrido</span>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <span class="flex h-6 w-6 items-center justify-center
+                         rounded-full bg-secondary text-[10px]
+                         font-bold text-secondary-content">
+                F
+              </span>
+
+              <span>
+                {{
+                recorrido.patrullaje.estado === 'FINALIZADO'
+                ? 'Fin del recorrido'
+                : 'Última ubicación'
+                }}
+              </span>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <span class="h-1 w-7 rounded-full bg-purple-600"></span>
+              <span>Trazado GPS</span>
+            </div>
+
+          </div>
+        </div>
+        }
+
+      </section>
+
+      <!-- =================================================== -->
+      <!-- PANEL DE INFORMACIÓN -->
+      <!-- =================================================== -->
+      <aside class="max-h-[42dvh] overflow-y-auto border-t border-base-200
+               bg-base-100 p-4
+               lg:max-h-none lg:border-l lg:border-t-0 lg:p-5">
+
+        @if (recorrido) {
+        <div class="space-y-5">
+
+          <!-- ============================================= -->
+          <!-- ESTADO -->
+          <!-- ============================================= -->
+          <section>
+            <div class="flex items-start justify-between gap-3">
+
+              <div>
+                <h3 class="text-sm font-bold">
+                  Estado del patrullaje
+                </h3>
+
+                <p class="mt-1 text-xs text-base-content/60">
+                  Situación actual del recorrido.
+                </p>
+              </div>
+
+              <span class="badge shrink-0 font-semibold" [class.badge-success]="
+                    recorrido.patrullaje.estado === 'EN_CURSO'
+                  " [class.badge-neutral]="
+                    recorrido.patrullaje.estado === 'FINALIZADO'
+                  " [class.badge-info]="
+                    recorrido.patrullaje.estado === 'ASIGNADO'
+                  " [class.badge-warning]="
+                    recorrido.patrullaje.estado === 'PROGRAMADO'
+                    || recorrido.patrullaje.estado === 'ACEPTADO'
+                  ">
+                {{ recorrido.patrullaje.estado }}
+              </span>
+
+            </div>
+
+            @if (recorrido.patrullaje.estado === 'EN_CURSO') {
+            <div class="mt-3 flex items-start gap-2 rounded-xl
+                         border border-success/20 bg-success/10 p-3">
+              <span class="mt-1 h-2 w-2 shrink-0 animate-pulse
+                           rounded-full bg-success"></span>
+
+              <p class="text-xs leading-relaxed">
+                El patrullaje se encuentra activo. El recorrido puede
+                continuar recibiendo nuevos puntos GPS.
+              </p>
+            </div>
+            }
+          </section>
+
+          <div class="divider my-0"></div>
+
+          <!-- ============================================= -->
+          <!-- RESUMEN -->
+          <!-- ============================================= -->
+          <section>
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-chart-simple text-primary"></i>
+
+              <h3 class="text-sm font-bold">
+                Resumen del recorrido
+              </h3>
+            </div>
+
+            <div class="mt-3 grid grid-cols-2 gap-2 lg:grid-cols-1">
+
+              <!-- DISTANCIA KM -->
+              <div class="rounded-xl border border-base-200
+                         bg-base-200/40 p-3">
+                <div class="flex items-center justify-between gap-2">
+
+                  <div>
+                    <p class="text-xs text-base-content/60">
+                      Distancia total
+                    </p>
+
+                    <p class="mt-1 text-lg font-bold">
+                      {{
+                      recorrido.resumen.distanciaKilometros
+                      | number:'1.2-2'
+                      }}
+                      <span class="text-xs font-normal text-base-content/60">
+                        km
+                      </span>
+                    </p>
+                  </div>
+
+                  <div class="flex h-9 w-9 items-center justify-center
+                             rounded-lg bg-primary/10 text-primary">
+                    <i class="fa-solid fa-road"></i>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- PUNTOS GPS -->
+              <div class="rounded-xl border border-base-200
+                         bg-base-200/40 p-3">
+                <div class="flex items-center justify-between gap-2">
+
+                  <div>
+                    <p class="text-xs text-base-content/60">
+                      Puntos GPS
+                    </p>
+
+                    <p class="mt-1 text-lg font-bold">
+                      {{ recorrido.resumen.totalPuntos }}
+                    </p>
+                  </div>
+
+                  <div class="flex h-9 w-9 items-center justify-center
+                             rounded-lg bg-secondary/10 text-secondary">
+                    <i class="fa-solid fa-location-dot"></i>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- VELOCIDAD PROMEDIO -->
+              <div class="rounded-xl border border-base-200
+                         bg-base-200/40 p-3">
+                <div class="flex items-center justify-between gap-2">
+
+                  <div>
+                    <p class="text-xs text-base-content/60">
+                      Velocidad promedio
+                    </p>
+
+                    <p class="mt-1 text-lg font-bold">
+                      {{
+                      recorrido.resumen.velocidadPromedioKmh
+                      | number:'1.1-2'
+                      }}
+                      <span class="text-xs font-normal text-base-content/60">
+                        km/h
+                      </span>
+                    </p>
+                  </div>
+
+                  <div class="flex h-9 w-9 items-center justify-center
+                             rounded-lg bg-accent/10 text-accent">
+                    <i class="fa-solid fa-gauge-high"></i>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- DISTANCIA METROS -->
+              <div class="rounded-xl border border-base-200
+                         bg-base-200/40 p-3">
+                <div class="flex items-center justify-between gap-2">
+
+                  <div>
+                    <p class="text-xs text-base-content/60">
+                      Distancia en metros
+                    </p>
+
+                    <p class="mt-1 text-lg font-bold">
+                      {{
+                      recorrido.resumen.distanciaMetros
+                      | number:'1.0-2'
+                      }}
+                      <span class="text-xs font-normal text-base-content/60">
+                        m
+                      </span>
+                    </p>
+                  </div>
+
+                  <div class="flex h-9 w-9 items-center justify-center
+                             rounded-lg bg-info/10 text-info">
+                    <i class="fa-solid fa-ruler"></i>
+                  </div>
+
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          <div class="divider my-0"></div>
+
+          <!-- ============================================= -->
+          <!-- INFORMACIÓN TEMPORAL -->
+          <!-- ============================================= -->
+          <section>
+            <div class="flex items-center gap-2">
+              <i class="fa-regular fa-clock text-primary"></i>
+
+              <h3 class="text-sm font-bold">
+                Información temporal
+              </h3>
+            </div>
+
+            <div class="mt-3 divide-y divide-base-200 overflow-hidden
+                       rounded-xl border border-base-200">
+
+              <!-- FECHA INICIO -->
+              <div class="flex items-start gap-3 p-3">
+
+                <div class="flex h-8 w-8 shrink-0 items-center justify-center
+                           rounded-lg bg-success/10 text-success">
+                  <i class="fa-solid fa-play text-xs"></i>
+                </div>
+
+                <div class="min-w-0">
+                  <p class="text-xs text-base-content/60">
+                    Fecha de inicio
+                  </p>
+
+                  <p class="mt-1 text-sm font-semibold">
+                    @if (recorrido.patrullaje.fechaInicio) {
+                    {{
+                    recorrido.patrullaje.fechaInicio
+                    | date:'dd/MM/yyyy HH:mm:ss'
+                    }}
+                    } @else {
+                    No registrada
+                    }
+                  </p>
+                </div>
+
+              </div>
+
+              <!-- FECHA FINAL -->
+              <div class="flex items-start gap-3 p-3">
+
+                <div class="flex h-8 w-8 shrink-0 items-center justify-center
+                           rounded-lg bg-error/10 text-error">
+                  <i class="fa-solid fa-flag-checkered text-xs"></i>
+                </div>
+
+                <div class="min-w-0">
+                  <p class="text-xs text-base-content/60">
+                    Fecha de finalización
+                  </p>
+
+                  <p class="mt-1 text-sm font-semibold">
+                    @if (recorrido.patrullaje.fechaFin) {
+                    {{
+                    recorrido.patrullaje.fechaFin
+                    | date:'dd/MM/yyyy HH:mm:ss'
+                    }}
+                    } @else {
+                    {{
+                    recorrido.patrullaje.estado === 'EN_CURSO'
+                    ? 'Patrullaje en curso'
+                    : 'No registrada'
+                    }}
+                    }
+                  </p>
+                </div>
+
+              </div>
+
+              <!-- ÚLTIMA ACTUALIZACIÓN -->
+              <div class="flex items-start gap-3 p-3">
+
+                <div class="flex h-8 w-8 shrink-0 items-center justify-center
+                           rounded-lg bg-info/10 text-info">
+                  <i class="fa-solid fa-satellite-dish text-xs"></i>
+                </div>
+
+                <div class="min-w-0">
+                  <p class="text-xs text-base-content/60">
+                    Última actualización
+                  </p>
+
+                  <p class="mt-1 text-sm font-semibold">
+                    @if (recorrido.resumen.ultimaActualizacion) {
+                    {{
+                    recorrido.resumen.ultimaActualizacion
+                    | date:'dd/MM/yyyy HH:mm:ss'
+                    }}
+                    } @else {
+                    Sin actualizaciones
+                    }
+                  </p>
+                </div>
+
+              </div>
+
+            </div>
+          </section>
+
+          <!-- ============================================= -->
+          <!-- PRIMER Y ÚLTIMO PUNTO -->
+          <!-- ============================================= -->
+          @if (recorrido.puntos.length > 0) {
+          <div class="divider my-0"></div>
+
+          <section>
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-location-crosshairs text-primary"></i>
+
+              <h3 class="text-sm font-bold">
+                Puntos del recorrido
+              </h3>
+            </div>
+
+            <div class="mt-3 space-y-2">
+
+              <!-- PRIMER PUNTO -->
+              <div class="rounded-xl border border-base-200 p-3">
+                <div class="flex items-start gap-3">
+
+                  <span class="flex h-7 w-7 shrink-0 items-center
+                               justify-center rounded-full bg-primary
+                               text-xs font-bold text-primary-content">
+                    I
+                  </span>
+
+                  <div class="min-w-0">
+                    <p class="text-xs font-bold">
+                      Punto inicial
+                    </p>
+
+                    <p class="mt-1 break-all text-xs text-base-content/60">
+                      {{
+                      recorrido.puntos[0].lat
+                      | number:'1.5-6'
+                      }},
+                      {{
+                      recorrido.puntos[0].lng
+                      | number:'1.5-6'
+                      }}
+                    </p>
+
+                    <p class="mt-1 text-xs text-base-content/60">
+                      {{
+                      recorrido.puntos[0].fechaHora
+                      | date:'dd/MM/yyyy HH:mm:ss'
+                      }}
+                    </p>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- ÚLTIMO PUNTO -->
+              <div class="rounded-xl border border-base-200 p-3">
+                <div class="flex items-start gap-3">
+
+                  <span class="flex h-7 w-7 shrink-0 items-center
+                               justify-center rounded-full bg-secondary
+                               text-xs font-bold text-secondary-content">
+                    F
+                  </span>
+
+                  <div class="min-w-0">
+                    <p class="text-xs font-bold">
+                      Último punto
+                    </p>
+
+                    <p class="mt-1 break-all text-xs text-base-content/60">
+                      {{
+                      recorrido.puntos[
+                      recorrido.puntos.length - 1
+                      ].lat | number:'1.5-6'
+                      }},
+                      {{
+                      recorrido.puntos[
+                      recorrido.puntos.length - 1
+                      ].lng | number:'1.5-6'
+                      }}
+                    </p>
+
+                    <p class="mt-1 text-xs text-base-content/60">
+                      {{
+                      recorrido.puntos[
+                      recorrido.puntos.length - 1
+                      ].fechaHora | date:'dd/MM/yyyy HH:mm:ss'
+                      }}
+                    </p>
+                  </div>
+
+                </div>
+              </div>
+
+            </div>
+          </section>
+          }
+
+        </div>
+        } @else if (!cargando && !error) {
+        <!-- ESTADO INICIAL -->
+        <div class="flex h-full min-h-52 flex-col items-center
+                   justify-center text-center">
+          <span class="loading loading-dots loading-md text-primary"></span>
+
+          <p class="mt-3 text-sm font-semibold">
+            Preparando información
+          </p>
+
+          <p class="mt-1 text-xs text-base-content/60">
+            Los datos del recorrido aparecerán aquí.
+          </p>
+        </div>
+        }
+
+      </aside>
+
+    </main>
+
+    <!-- ===================================================== -->
+    <!-- FOOTER -->
+    <!-- ===================================================== -->
+    <footer class="flex shrink-0 flex-col-reverse gap-2
+             border-t border-base-200 bg-base-100
+             px-4 py-3 sm:flex-row sm:items-center
+             sm:justify-between sm:px-6">
+      <p class="text-center text-xs text-base-content/50 sm:text-left">
+        Los resultados dependen de la precisión de las ubicaciones GPS
+        registradas.
+      </p>
+
+      <button type="button" class="btn btn-neutral btn-sm" (click)="cerrarModal()">
+        <i class="fa-solid fa-xmark"></i>
+        Cerrar
+      </button>
+    </footer>
+
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- BACKDROP -->
+  <!-- ===================================================== -->
+  <button type="button" class="modal-backdrop cursor-default" aria-label="Cerrar modal de recorrido"
+    (click)="cerrarModal()"></button>
+</div>

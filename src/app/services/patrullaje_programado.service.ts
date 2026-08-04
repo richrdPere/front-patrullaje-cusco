@@ -5,10 +5,12 @@ import { Observable } from 'rxjs';
 //Environment
 import { environment } from '@environments/environment';
 import { ZonaPatrullaje } from './../interfaces/zonaPatrullaje';
+
+// Interface
 import { PaginadoResponse } from '../pages/shared/interfaces/paginado-response';
 import { ApiResponse } from '../pages/shared/interfaces/api-response';
 import { IPatrullajeDetalle } from '../interfaces/patrullaje_programado/IPatrullajeProgramadoInfo';
-// import { PaginadoResponse } from '../interfaces/login/loginResponse';
+import { RecorridoPatrullajeData } from '../interfaces/patrullaje_programado/recorrido_patrullaje.interface';
 
 @Injectable({ providedIn: 'root' })
 export class PatrullajeProgramadoService {
@@ -27,6 +29,7 @@ export class PatrullajeProgramadoService {
   API_GET_PATRULLAJE_BY_ID: string = this.API_BASE + '/detalle/';
   API_UPDATE_PATRULLAJE: string = this.API_BASE + '/editar/';
   API_DELETE_PATRULLAJE: string = this.API_BASE + '/eliminar/';
+  API_GET_PATRULLAJE_RECORRIDO: string = this.API_BASE + '/recorrido/';
 
   constructor(private http: HttpClient) { }
 
@@ -100,5 +103,12 @@ export class PatrullajeProgramadoService {
   // ===========================================================
   deletePatrullajeProgramado(id: string): Observable<any> {
     return this.http.delete(`${this.API_DELETE_PATRULLAJE}${id}`);
+  }
+
+  // ===========================================================
+  // 7.- Obtener Recorrido de Patrullaje Programado
+  // ===========================================================
+  getRecorridoPatrullajeProgramado(id: number | string): Observable<ApiResponse<RecorridoPatrullajeData>> {
+    return this.http.get<ApiResponse<RecorridoPatrullajeData>>(`${this.API_GET_PATRULLAJE_RECORRIDO}${id}`);
   }
 }

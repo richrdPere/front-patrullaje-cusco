@@ -8,14 +8,16 @@ import Swal from 'sweetalert2';
 import { PatrullajeProgramadoService } from 'src/app/services/patrullaje_programado.service';
 import { PatrullajeProgramFormComponent } from "./patrullaje-program-form/patrullaje-program-form.component";
 import { PatrullajeProgramInfoComponent } from "./patrullaje-program-info/patrullaje-program-info.component";
+import { PatrullajeRecorridoComponent } from "./patrullaje-recorrido/patrullaje-recorrido.component";
 
 @Component({
   selector: 'app-patrullaje-programado',
-  imports: [DatePipe, FormsModule, PatrullajeProgramFormComponent, CommonModule, PatrullajeProgramInfoComponent],
+  imports: [DatePipe, FormsModule, PatrullajeProgramFormComponent, CommonModule, PatrullajeProgramInfoComponent, PatrullajeRecorridoComponent],
   templateUrl: './patrullaje-programado.component.html',
   styles: ``
 })
 export class PatrullajeProgramadoComponent implements OnInit {
+
 
   // Unidad patrullaje
   patrullajes: any[] = [];
@@ -26,6 +28,8 @@ export class PatrullajeProgramadoComponent implements OnInit {
   mostrarModalInfo = false;
   modoEdicion = false;
   patrullajeSeleccionado: any = null;
+  mostrarModalRecorrido = false;
+  patrullajeRecorridoId: number | null = null;
 
   searchTimeout: any;
 
@@ -160,6 +164,19 @@ export class PatrullajeProgramadoComponent implements OnInit {
     this.mostrarModal = true;
   }
 
+
+  // - Ver modal de recorrido de patrullaje
+  verRecorrido(
+    patrullajeId: number
+  ): void {
+
+    this.patrullajeRecorridoId =
+      patrullajeId;
+
+    this.mostrarModalRecorrido =
+      true;
+  }
+
   // - Buscador
   onSearchChange() {
     clearTimeout(this.searchTimeout);
@@ -225,6 +242,11 @@ export class PatrullajeProgramadoComponent implements OnInit {
   cerrarModalInfo() {
     this.mostrarModalInfo = false;
     this.patrullaje_id = null;
+  }
+
+  cerrarModalRecorrido(): void {
+    this.mostrarModalRecorrido = false;
+    this.patrullajeRecorridoId = null;
   }
 
 }

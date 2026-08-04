@@ -1,40 +1,56 @@
+export type TrackingTipo =
+  | 'TRACKING'
+  | 'EMERGENCIA'
+  | 'MANUAL';
+
+export type EstadoPatrullaje =
+  | 'PROGRAMADO'
+  | 'ASIGNADO'
+  | 'ACEPTADO'
+  | 'EN_CURSO'
+  | 'FINALIZADO';
+
 export interface TrackingPayload {
 
+  // IDENTIFICADOR DEL PUNTO GPS
+  id: number;
+
   // USUARIO
-  userId: number;
+  usuarioId: number;
   username: string;
-  correo?: string;
+  correo: string | null;
   roles: string[];
 
   // SERENO
   sereno: {
     nombres: string;
     apellidos: string;
-    documento?: string;
-    telefono?: string;
-    fotoPerfil?: string | null;
+    nombreCompleto: string;
+    documento: string | null;
+    telefono: string | null;
+    fotoPerfil: string | null;
   };
 
   // PATRULLAJE
   patrullaje: {
     id: number;
-    estado: string;
+    estado: EstadoPatrullaje;
   };
 
   // GPS
   gps: {
     lat: number;
     lng: number;
-    velocidad: number;
-    precision: number;
+    velocidad: number | null;
+    precision: number | null;
   };
 
-  // REALTIME
+  // TIEMPO REAL
   realtime: {
     online: boolean;
     timestamp: string;
   };
 
-  // EVENTO
-  tipo: string;
+  // TIPO DE UBICACIÓN
+  tipo: TrackingTipo;
 }
