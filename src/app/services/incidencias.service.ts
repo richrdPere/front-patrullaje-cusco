@@ -93,9 +93,9 @@ export class IncidenciasService {
   // ===========================================================
   // 2.- Obtener Patrullaje por ID
   // ===========================================================
-  getIncidenteById(id: number): Observable<ApiResponse<IncidenciaDetalleResponse>> {
+  getIncidenteById(id: number): Observable<ApiResponse<IncidenciaDetalle>> {
     const headers = this.getAuthHeaders().headers;
-    return this.http.get<ApiResponse<IncidenciaDetalleResponse>>(`${this.API_GET_INCIDENTES_BY_ID}${id}`, { headers });
+    return this.http.get<ApiResponse<IncidenciaDetalle>>(`${this.API_GET_INCIDENTES_BY_ID}${id}`, { headers });
   }
 
   // ===========================================================

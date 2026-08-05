@@ -12,10 +12,14 @@ import {
   IncidenciasPaginadasData,
   IncidenciasPaginadasFilters,
 } from 'src/app/interfaces/incidencia/incidencias.interface';
+import { IncidenciaDetalleComponent } from "./incidencia-detalle/incidencia-detalle.component";
+import { IncidenciaDetalle } from 'src/app/interfaces/incidencia/incidencia_detalle.interface';
+import { IncidenciaMapaComponent } from "./incidencia-mapa/incidencia-mapa.component";
+import { IncidenciaArchivosComponent } from "./incidencia-archivos/incidencia-archivos.component";
 
 @Component({
   selector: 'app-incidentes-reportados',
-  imports: [DatePipe, FormsModule, CommonModule],
+  imports: [DatePipe, FormsModule, CommonModule, IncidenciaDetalleComponent, IncidenciaMapaComponent, IncidenciaArchivosComponent],
   templateUrl: './incidentes-reportados.component.html',
   styles: ``
 })
@@ -30,6 +34,18 @@ export class IncidentesReportadosComponent implements OnInit, OnDestroy {
 
   // Modal
   mostrarModalInfo = false;
+
+  // - Archivos modal
+  mostrarArchivos = false;
+  incidenciaArchivoId: number | null = null;
+
+  // - Detalle modal
+  mostrarModalDetalle = false;
+  incidenciaDetalleId: number | null = null;
+
+  // - Mapa modal
+  mostrarModalMapa = false;
+  incidenciaSeleccionada: IncidenciaPaginada | null = null;
 
   // Search
   descripcionBusqueda: string = '';
@@ -174,6 +190,68 @@ export class IncidentesReportadosComponent implements OnInit, OnDestroy {
     this.page = 1;
 
     this.getIncidentesPaginado();
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Modal de archivos
+  |--------------------------------------------------------------------------
+  */
+  abrirArchivos(incidenciaId: number,): void {
+
+    this.incidenciaArchivoId = incidenciaId;
+    this.mostrarArchivos = true;
+  }
+
+  cerrarArchivos(): void {
+    this.mostrarArchivos = false;
+  }
+  /*
+  |--------------------------------------------------------------------------
+  | Modal de detalle
+  |--------------------------------------------------------------------------
+  */
+  abrirDetalleIncidencia(
+    incidenciaId: number,
+  ): void {
+
+    this.incidenciaDetalleId = incidenciaId;
+    this.mostrarModalDetalle = true;
+  }
+
+  cerrarDetalleIncidencia(): void {
+
+    this.mostrarModalDetalle = false;
+    this.incidenciaDetalleId = null;
+  }
+
+  onIncidenciaDetalleCargada(
+    incidencia: IncidenciaDetalle,
+  ): void {
+
+    console.log(
+      'Incidencia consultada:',
+      incidencia,
+    );
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Modal de mapa
+  |--------------------------------------------------------------------------
+  */
+  abrirMapaIncidencia(
+    incidencia: IncidenciaPaginada,
+  ): void {
+
+    this.incidenciaSeleccionada = incidencia;
+    this.mostrarModalMapa = true;
+  }
+
+  cerrarMapaIncidencia(): void {
+
+    this.mostrarModalMapa = false;
+    this.incidenciaSeleccionada = null;
   }
 
   /*

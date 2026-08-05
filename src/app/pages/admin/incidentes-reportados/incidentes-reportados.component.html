@@ -87,17 +87,20 @@
   </div>
 
   <!-- ===================================================== -->
-  <!-- MODAL DETALLE -->
+  <!-- MODALES -->
   <!-- ===================================================== -->
 
-  <!--
-  <app-incidencia-info
-    *ngIf="mostrarModalInfo && incidente_id"
-    [incidenciaId]="incidente_id"
-    (cerrar)="cerrarModalInfo()"
-    (estadoActualizado)="getIncidentesPaginado()"
-  />
-  -->
+  <!-- DETALLE -->
+  <incidencia-detalle [visible]="mostrarModalDetalle" [incidenciaId]="incidenciaDetalleId"
+    (cerrar)="cerrarDetalleIncidencia()" (incidenciaCargada)="onIncidenciaDetalleCargada($event)"></incidencia-detalle>
+
+  <!-- MAPA -->
+  <incidencia-mapa [visible]="mostrarModalMapa" [incidencia]="incidenciaSeleccionada"
+    (cerrar)="cerrarMapaIncidencia()"></incidencia-mapa>
+
+  <!-- ARCHIVOS -->
+  <incidencia-archivos [visible]="mostrarArchivos" [incidenciaId]="incidenciaArchivoId"
+    (cerrar)="cerrarArchivos()"></incidencia-archivos>
 
   <!-- ===================================================== -->
   <!-- TABLA -->
@@ -330,10 +333,24 @@
             <td>
               <div class="flex justify-center">
 
-                <button type="button" class="btn btn-ghost btn-circle btn-sm" title="Ver detalle"
-                  (click)="verIncidente(incidente)">
-                  <i class="fa-solid fa-eye"></i>
+                <!-- Ver incidente detalle -->
+                <button type="button" class="btn btn-square btn-ghost btn-sm" title="Ver detalle"
+                  (click)="abrirDetalleIncidencia(incidente.id)">
+                  <i class="fa-solid fa-eye text-primary"></i>
                 </button>
+
+                <!-- Ver mapa del incidente -->
+                <button type="button" class="btn btn-square btn-ghost btn-sm" title="Ver ubicación"
+                  (click)="abrirMapaIncidencia(incidente)">
+                  <i class="fa-solid fa-map-location-dot text-primary"></i>
+                </button>
+
+                <!-- Ver archivos del incidente -->
+                <button type="button" class="btn btn-square btn-ghost  btn-sm" title="Ver archivos"
+                  [disabled]="!incidente.id" (click)="abrirArchivos(incidente.id)">
+                  <i class="fa-solid fa-paperclip text-primary"></i>
+                </button>
+
 
               </div>
             </td>

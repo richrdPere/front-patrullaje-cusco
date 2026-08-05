@@ -1,1 +1,659 @@
-<p>incidencia-detalle works!</p>
+@if (visible) {
+
+<!-- CONTENEDOR PRINCIPAL DEL MODAL -->
+<div class="fixed inset-0 z-50 flex items-center justify-center
+           bg-black/50 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="incidencia-detalle-title"
+  (click)="cerrarModal()">
+
+  <!-- MODAL -->
+  <div class="flex max-h-[92vh] w-full max-w-5xl flex-col
+             overflow-hidden rounded-3xl bg-base-100
+             text-base-content shadow-2xl" (click)="$event.stopPropagation()">
+
+    <!-- =================================================== -->
+    <!-- CABECERA -->
+    <!-- =================================================== -->
+
+    <div class="flex items-start justify-between gap-4
+               border-b border-base-300 px-5 py-4 sm:px-6">
+
+      <div class="flex min-w-0 items-center gap-3">
+
+        <div class="flex h-12 w-12 shrink-0 items-center
+                   justify-center rounded-2xl
+                   bg-primary/10 text-primary">
+          <i class="fa-solid fa-circle-info text-xl"></i>
+        </div>
+
+        <div class="min-w-0">
+
+          <h2 id="incidencia-detalle-title" class="truncate text-xl font-bold">
+            Detalle de incidencia
+          </h2>
+
+          <p class="mt-1 text-sm text-base-content/60">
+            Consulte la información completa del reporte.
+          </p>
+
+        </div>
+
+      </div>
+
+      <button type="button" class="btn btn-circle btn-ghost btn-sm shrink-0" aria-label="Cerrar detalle"
+        [disabled]="isLoading" (click)="cerrarModal()">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+    </div>
+
+    <!-- =================================================== -->
+    <!-- CONTENIDO -->
+    <!-- =================================================== -->
+
+    <div class="flex-1 overflow-y-auto p-5 sm:p-6">
+
+      <!-- ESTADO DE CARGA -->
+      @if (isLoading) {
+
+      <div class="flex min-h-80 flex-col items-center
+                   justify-center gap-4 text-center">
+
+        <span class="loading loading-spinner loading-lg text-primary"></span>
+
+        <div>
+          <p class="font-semibold">
+            Cargando incidencia
+          </p>
+
+          <p class="mt-1 text-sm text-base-content/60">
+            Estamos obteniendo la información del reporte.
+          </p>
+        </div>
+
+      </div>
+
+      }
+
+      <!-- ERROR -->
+      @else if (errorMessage) {
+
+      <div class="flex min-h-80 flex-col items-center
+                   justify-center text-center">
+
+        <div class="flex h-16 w-16 items-center justify-center
+                     rounded-full bg-error/10 text-error">
+          <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+        </div>
+
+        <h3 class="mt-4 text-lg font-bold">
+          No se pudo cargar la incidencia
+        </h3>
+
+        <p class="mt-2 max-w-md text-sm text-base-content/60">
+          {{ errorMessage }}
+        </p>
+
+        <button type="button" class="btn btn-primary mt-5" (click)="reintentar()">
+          <i class="fa-solid fa-rotate-right"></i>
+          Volver a intentar
+        </button>
+
+      </div>
+
+      }
+
+      <!-- DETALLE -->
+      @else if (incidencia) {
+
+      <div class="space-y-6">
+
+        <!-- ================================================= -->
+        <!-- RESUMEN -->
+        <!-- ================================================= -->
+
+        <section class="rounded-2xl border border-base-300
+                     bg-base-200/40 p-5">
+
+          <div class="flex flex-col gap-4
+                       sm:flex-row sm:items-center
+                       sm:justify-between">
+
+            <div class="flex min-w-0 items-center gap-4">
+
+              <div class="flex h-14 w-14 shrink-0 items-center
+                           justify-center rounded-2xl
+                           bg-primary/10 text-primary">
+                <i class="text-2xl" [class]="getTipoIcon(incidencia.tipo)"></i>
+              </div>
+
+              <div class="min-w-0">
+
+                <p class="text-sm text-base-content/60">
+                  Incidencia #{{ incidencia.id }}
+                </p>
+
+                <h3 class="truncate text-xl font-bold">
+                  {{ getTipoLabel(incidencia.tipo) }}
+                </h3>
+
+              </div>
+
+            </div>
+
+            <span class="badge badge-lg whitespace-nowrap" [ngClass]="getEstadoClass(incidencia.estado)">
+              {{ getEstadoLabel(incidencia.estado) }}
+            </span>
+
+          </div>
+
+        </section>
+
+        <!-- ================================================= -->
+        <!-- INFORMACIÓN GENERAL -->
+        <!-- ================================================= -->
+
+        <section>
+
+          <div class="mb-4 flex items-center gap-2">
+
+            <i class="fa-solid fa-file-lines text-primary"></i>
+
+            <h3 class="font-bold">
+              Información general
+            </h3>
+
+          </div>
+
+          <div class="grid grid-cols-1 gap-4
+                       rounded-2xl border border-base-300
+                       p-5 sm:grid-cols-2">
+
+            <!-- TIPO -->
+            <div>
+
+              <p class="text-xs font-semibold uppercase tracking-wide
+                            text-base-content/50">
+                Tipo de incidencia
+              </p>
+
+              <p class="mt-1 font-medium">
+                {{ getTipoLabel(incidencia.tipo) }}
+              </p>
+
+            </div>
+
+            <!-- ESTADO -->
+            <div>
+
+              <p class="text-xs font-semibold uppercase tracking-wide
+                            text-base-content/50">
+                Estado
+              </p>
+
+              <div class="mt-1">
+                <span class="badge" [ngClass]="getEstadoClass(incidencia.estado)">
+                  {{ getEstadoLabel(incidencia.estado) }}
+                </span>
+              </div>
+
+            </div>
+
+            <!-- FECHA Y HORA -->
+            <div>
+
+              <p class="text-xs font-semibold uppercase tracking-wide
+                            text-base-content/50">
+                Fecha y hora del reporte
+              </p>
+
+              <p class="mt-1 font-medium">
+                {{
+                incidencia.fecha_hora
+                | date: 'dd/MM/yyyy HH:mm:ss'
+                }}
+              </p>
+
+            </div>
+
+            <!-- FECHA DE CREACIÓN -->
+            <div>
+
+              <p class="text-xs font-semibold uppercase tracking-wide
+                            text-base-content/50">
+                Fecha de registro
+              </p>
+
+              <p class="mt-1 font-medium">
+                {{
+                incidencia.createdAt | date: 'dd/MM/yyyy HH:mm:ss'
+                }}
+              </p>
+
+            </div>
+
+            <!-- DESCRIPCIÓN -->
+            <div class="sm:col-span-2">
+
+              <p class="text-xs font-semibold uppercase tracking-wide
+                            text-base-content/50">
+                Descripción
+              </p>
+
+              <div class="mt-2 min-h-24 whitespace-pre-line
+                           rounded-xl bg-base-200/60 p-4
+                           text-sm leading-relaxed">
+                {{
+                incidencia.descripcion ||
+                'No se registró una descripción.'
+                }}
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- ================================================= -->
+        <!-- SERENO QUE REPORTÓ -->
+        <!-- ================================================= -->
+
+        <section>
+
+          <div class="mb-4 flex items-center gap-2">
+
+            <i class="fa-solid fa-user-shield text-primary"></i>
+
+            <h3 class="font-bold">
+              Sereno que reportó
+            </h3>
+
+          </div>
+
+          <div class="rounded-2xl border border-base-300 p-5">
+
+            @if (incidencia.usuario) {
+
+            <div class="flex flex-col gap-4
+                           sm:flex-row sm:items-center">
+
+              <div class="avatar shrink-0">
+
+                <div class="h-14 w-14 overflow-hidden
+                               rounded-2xl bg-base-300">
+                  <img class="h-full w-full object-cover" [src]="
+                            incidencia.usuario.persona?.foto_perfil ||
+                            'assets/img/default-avatar.png'
+                          " alt="Fotografía del sereno" />
+                </div>
+
+              </div>
+
+              <div class="min-w-0 flex-1">
+
+                <p class="font-bold">
+                  {{
+                  incidencia.usuario.persona?.nombres || ''
+                  }}
+                  {{
+                  incidencia.usuario.persona?.apellidos || ''
+                  }}
+                </p>
+
+                <div class="mt-2 grid grid-cols-1 gap-2
+                               text-sm text-base-content/60
+                               sm:grid-cols-2">
+
+                  <p>
+                    <i class="fa-solid fa-user mr-2 w-4"></i>
+                    {{ incidencia.usuario.username || 'Sin usuario' }}
+                  </p>
+
+                  <p>
+                    <i class="fa-solid fa-envelope mr-2 w-4"></i>
+                    {{ incidencia.usuario.correo || 'Sin correo' }}
+                  </p>
+
+                  <!-- <p>
+                    <i class="fa-solid fa-id-card mr-2 w-4"></i>
+                    {{
+                    incidencia.usuario.persona?.dni ||
+                    'Sin DNI'
+                    }}
+                  </p> -->
+
+                  <p>
+                    <i class="fa-solid fa-hashtag mr-2 w-4"></i>
+                    Usuario #{{ incidencia.usuario.id }}
+                  </p>
+
+                </div>
+
+              </div>
+
+            </div>
+
+            } @else {
+
+            <div class="flex items-center gap-3
+                           text-base-content/60">
+              <i class="fa-solid fa-user-slash"></i>
+              <span>
+                No se encontró información del usuario.
+              </span>
+            </div>
+
+            }
+
+          </div>
+
+        </section>
+
+        <!-- ================================================= -->
+        <!-- ZONA Y PATRULLAJE -->
+        <!-- ================================================= -->
+
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+
+          <!-- ZONA -->
+          <section>
+
+            <div class="mb-4 flex items-center gap-2">
+
+              <i class="fa-solid fa-map-location-dot text-primary"></i>
+
+              <h3 class="font-bold">
+                Zona
+              </h3>
+
+            </div>
+
+            <div class="h-full rounded-2xl
+                         border border-base-300 p-5">
+
+              @if (incidencia.zona) {
+
+              <p class="font-bold">
+                {{ incidencia.zona.nombre }}
+              </p>
+
+              <p class="mt-1 text-sm text-base-content/60">
+                Zona #{{ incidencia.zona.id }}
+              </p>
+
+              <!-- @if (incidencia.zona.descripcion) {
+
+              <p class="mt-3 text-sm leading-relaxed">
+                {{ incidencia.zona.descripcion }}
+              </p>
+
+              } -->
+
+              } @else {
+
+              <div class="flex items-center gap-3
+                             text-base-content/60">
+                <i class="fa-solid fa-location-crosshairs"></i>
+                <span>
+                  La incidencia no tiene una zona asociada.
+                </span>
+              </div>
+
+              }
+
+            </div>
+
+          </section>
+
+          <!-- PATRULLAJE -->
+          <section>
+
+            <div class="mb-4 flex items-center gap-2">
+
+              <i class="fa-solid fa-car-side text-primary"></i>
+
+              <h3 class="font-bold">
+                Patrullaje relacionado
+              </h3>
+
+            </div>
+
+            <div class="h-full rounded-2xl
+                         border border-base-300 p-5">
+
+              @if (incidencia.patrullaje) {
+
+              <p class="font-bold">
+                Patrullaje #{{ incidencia.patrullaje.id }}
+              </p>
+
+              <p class="mt-1 text-sm text-base-content/60">
+                Estado:
+                {{
+                incidencia.patrullaje.estado ||
+                'No especificado'
+                }}
+              </p>
+
+              @if (incidencia.patrullaje.hora_inicio) {
+
+              <p class="mt-3 text-sm">
+                <i class="fa-regular fa-calendar mr-2"></i>
+
+                {{
+                incidencia.patrullaje.hora_inicio
+                | date: 'dd/MM/yyyy HH:mm'
+                }}
+              </p>
+
+              }
+
+              } @else {
+
+              <div class="flex items-center gap-3
+                             text-base-content/60">
+                <i class="fa-solid fa-link-slash"></i>
+                <span>
+                  No existe un patrullaje asociado.
+                </span>
+              </div>
+
+              }
+
+            </div>
+
+          </section>
+
+        </div>
+
+        <!-- ================================================= -->
+        <!-- UBICACIÓN -->
+        <!-- ================================================= -->
+
+        <section>
+
+          <div class="mb-4 flex items-center gap-2">
+
+            <i class="fa-solid fa-location-dot text-primary"></i>
+
+            <h3 class="font-bold">
+              Ubicación geográfica
+            </h3>
+
+          </div>
+
+          <div class="rounded-2xl border border-base-300 p-5">
+
+            <div class="flex flex-col gap-4
+                         sm:flex-row sm:items-center
+                         sm:justify-between">
+
+              <div>
+
+                <p class="text-xs font-semibold uppercase tracking-wide
+                              text-base-content/50">
+                  Coordenadas
+                </p>
+
+                <p class="mt-1 font-mono font-medium">
+                  {{ coordenadas }}
+                </p>
+
+              </div>
+
+              <button type="button" class="btn btn-outline btn-primary" [disabled]="
+                      incidencia.latitud === null ||
+                      incidencia.latitud === undefined ||
+                      incidencia.longitud === null ||
+                      incidencia.longitud === undefined
+                    " (click)="abrirUbicacion()">
+                <i class="fa-solid fa-map-location-dot"></i>
+                Abrir en el mapa
+              </button>
+
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- ================================================= -->
+        <!-- ARCHIVOS -->
+        <!-- ================================================= -->
+
+        <section>
+
+          <div class="mb-4 flex items-center gap-2">
+
+            <i class="fa-solid fa-paperclip text-primary"></i>
+
+            <h3 class="font-bold">
+              Evidencias adjuntas
+            </h3>
+
+          </div>
+
+          <div class="rounded-2xl border border-base-300 p-5">
+
+            @if (
+            incidencia.archivos &&
+            incidencia.archivos.length > 0
+            ) {
+
+            <div class="grid grid-cols-1 gap-3
+                           sm:grid-cols-2 lg:grid-cols-3">
+
+              @for (
+              archivo of incidencia.archivos;
+              track archivo.id
+              ) {
+
+              <a class="group flex items-center gap-3
+                               rounded-xl border border-base-300
+                               p-3 transition
+                               hover:border-primary/40
+                               hover:bg-primary/5" [href]="archivo.url_archivo" target="_blank" rel="noopener noreferrer">
+
+                <div class="flex h-11 w-11 shrink-0
+                                 items-center justify-center
+                                 rounded-xl bg-primary/10
+                                 text-primary">
+
+                  @switch (archivo.tipo_archivo) {
+
+                  @case ('IMAGEN') {
+                  <i class="fa-solid fa-image"></i>
+                  }
+
+                  @case ('VIDEO') {
+                  <i class="fa-solid fa-video"></i>
+                  }
+
+                  @case ('PDF') {
+                  <i class="fa-solid fa-file-pdf"></i>
+                  }
+
+                  @default {
+                  <i class="fa-solid fa-file"></i>
+                  }
+
+                  }
+
+                </div>
+
+                <div class="min-w-0 flex-1">
+<!--
+                  <p class="truncate text-sm font-semibold">
+                    {{
+                    archivo.nombre_original ||
+                    'Archivo adjunto'
+                    }}
+                  </p> -->
+
+                  <p class="mt-1 text-xs text-base-content/50">
+                    {{ archivo.tipo_archivo }}
+                  </p>
+
+                </div>
+
+                <i class="fa-solid fa-arrow-up-right-from-square
+                                 text-xs text-base-content/40
+                                 transition group-hover:text-primary"></i>
+
+              </a>
+
+              }
+
+            </div>
+
+            } @else {
+
+            <div class="flex flex-col items-center
+                           justify-center py-8 text-center">
+
+              <div class="flex h-14 w-14 items-center
+                             justify-center rounded-full
+                             bg-base-200 text-base-content/40">
+                <i class="fa-solid fa-folder-open text-xl"></i>
+              </div>
+
+              <p class="mt-3 font-semibold">
+                Sin evidencias adjuntas
+              </p>
+
+              <p class="mt-1 text-sm text-base-content/50">
+                La incidencia no contiene imágenes, videos o documentos.
+              </p>
+
+            </div>
+
+            }
+
+          </div>
+
+        </section>
+
+      </div>
+
+      }
+
+    </div>
+
+    <!-- =================================================== -->
+    <!-- PIE -->
+    <!-- =================================================== -->
+
+    <div class="flex justify-end border-t
+               border-base-300 px-5 py-4 sm:px-6">
+
+      <button type="button" class="btn btn-ghost" [disabled]="isLoading" (click)="cerrarModal()">
+        Cerrar
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+}

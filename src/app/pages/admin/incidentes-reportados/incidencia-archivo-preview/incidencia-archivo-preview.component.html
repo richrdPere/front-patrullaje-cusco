@@ -1,0 +1,312 @@
+@if (visible && archivo) {
+
+<div class="fixed inset-0 z-[70] flex items-center justify-center
+           bg-black/80 p-3 backdrop-blur-sm sm:p-6" role="dialog" aria-modal="true"
+  aria-labelledby="archivo-preview-title" (click)="cerrarPreview()">
+
+  <div class="flex max-h-[96vh] w-full max-w-6xl flex-col
+             overflow-hidden rounded-3xl bg-base-100
+             text-base-content shadow-2xl" (click)="$event.stopPropagation()">
+
+    <!-- ================================================= -->
+    <!-- CABECERA -->
+    <!-- ================================================= -->
+
+    <div class="flex shrink-0 items-center justify-between gap-4
+               border-b border-base-300 px-5 py-4 sm:px-6">
+
+      <div class="flex min-w-0 items-center gap-3">
+
+        <div class="flex h-11 w-11 shrink-0 items-center
+                   justify-center rounded-xl bg-primary/10
+                   text-primary">
+
+          @if (esImagen) {
+          <i class="fa-solid fa-image text-lg"></i>
+          } @else if (esVideo) {
+          <i class="fa-solid fa-video text-lg"></i>
+          } @else if (esPdf) {
+          <i class="fa-solid fa-file-pdf text-lg"></i>
+          } @else {
+          <i class="fa-solid fa-file text-lg"></i>
+          }
+
+        </div>
+
+        <div class="min-w-0">
+
+          <h2 id="archivo-preview-title" class="truncate font-bold sm:text-lg">
+            {{ nombreArchivo }}
+          </h2>
+
+          <div class="mt-1 flex flex-wrap items-center gap-2
+                     text-xs text-base-content/50">
+
+            <span>
+              {{ tipoLabel }}
+            </span>
+
+            <span>·</span>
+
+            <span>
+              {{ estadoLabel }}
+            </span>
+
+            @if (archivos.length > 1) {
+
+            <span>·</span>
+
+            <span>
+              {{ posicionActual }} de {{ archivos.length }}
+            </span>
+
+            }
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="flex shrink-0 items-center gap-1">
+
+        <button type="button" class="btn btn-circle btn-ghost btn-sm" title="Abrir en otra pestaña"
+          aria-label="Abrir en otra pestaña" (click)="abrirEnNuevaPestana()">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i>
+        </button>
+
+        <button type="button" class="btn btn-circle btn-ghost btn-sm" title="Descargar archivo"
+          aria-label="Descargar archivo" (click)="descargarArchivo()">
+          <i class="fa-solid fa-download"></i>
+        </button>
+
+        <button type="button" class="btn btn-circle btn-ghost btn-sm" title="Cerrar" aria-label="Cerrar visor"
+          (click)="cerrarPreview()">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+
+      </div>
+
+    </div>
+
+    <!-- ================================================= -->
+    <!-- VISOR -->
+    <!-- ================================================= -->
+
+    <div class="relative flex min-h-[420px] flex-1
+               items-center justify-center overflow-auto
+               bg-neutral p-4 sm:p-6">
+
+      <!-- Loading -->
+      @if (isLoading && !mediaError) {
+
+      <div class="absolute inset-0 z-20 flex flex-col
+                   items-center justify-center bg-neutral/80
+                   text-neutral-content">
+
+        <span class="loading loading-spinner loading-lg"></span>
+
+        <p class="mt-4 text-sm">
+          Cargando evidencia...
+        </p>
+
+      </div>
+
+      }
+
+      <!-- Error -->
+      @if (mediaError) {
+
+      <div class="flex max-w-md flex-col items-center
+                   justify-center p-8 text-center
+                   text-neutral-content">
+
+        <div class="flex h-16 w-16 items-center justify-center
+                     rounded-full bg-error/20 text-error">
+          <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+        </div>
+
+        <h3 class="mt-4 text-lg font-bold">
+          No se pudo cargar el archivo
+        </h3>
+
+        <p class="mt-2 text-sm opacity-70">
+          El recurso podría no estar disponible o la URL podría
+          haber expirado.
+        </p>
+
+        <button type="button" class="btn btn-primary mt-5" (click)="abrirEnNuevaPestana()">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          Abrir externamente
+        </button>
+
+      </div>
+
+      } @else {
+
+      <!-- Imagen -->
+      @if (esImagen) {
+
+      <img class="max-h-[72vh] max-w-full rounded-xl
+                     object-contain shadow-2xl" [src]="archivo.url_archivo" [alt]="nombreArchivo"
+        (load)="onMediaLoad()" (error)="onMediaError()" />
+
+      }
+
+      <!-- Video -->
+      @else if (esVideo) {
+
+      <video class="max-h-[72vh] max-w-full rounded-xl
+                     bg-black shadow-2xl" controls playsinline preload="metadata" (loadeddata)="onMediaLoad()"
+        (error)="onMediaError()">
+
+        <source [src]="archivo.url_archivo" [type]="getMimeTypeVideo()" />
+
+        Su navegador no puede reproducir este video.
+
+      </video>
+
+      }
+
+      <!-- PDF -->
+      @else if (esPdf) {
+
+      @if (safePdfUrl) {
+
+      <iframe class="h-[72vh] w-full rounded-xl bg-white" [src]="safePdfUrl" [title]="nombreArchivo"
+        (load)="onMediaLoad()"></iframe>
+
+      } @else {
+
+      <div class="flex max-w-md flex-col items-center
+                       justify-center text-center
+                       text-neutral-content">
+
+        <div class="flex h-20 w-20 items-center justify-center
+                         rounded-3xl bg-white/10">
+          <i class="fa-solid fa-file-pdf text-3xl"></i>
+        </div>
+
+        <h3 class="mt-5 text-lg font-bold">
+          PDF no disponible
+        </h3>
+
+        <p class="mt-2 text-sm opacity-70">
+          No se pudo preparar la vista previa del documento.
+        </p>
+
+        <button type="button" class="btn btn-primary mt-5" (click)="abrirEnNuevaPestana()">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          Abrir documento
+        </button>
+
+      </div>
+
+      }
+
+      }
+
+      <!-- Otro -->
+      @else {
+
+      <div class="flex max-w-md flex-col items-center
+                     justify-center text-center
+                     text-neutral-content">
+
+        <div class="flex h-20 w-20 items-center justify-center
+                       rounded-3xl bg-white/10">
+          <i class="fa-solid fa-file text-3xl"></i>
+        </div>
+
+        <h3 class="mt-5 text-lg font-bold">
+          Vista previa no disponible
+        </h3>
+
+        <p class="mt-2 text-sm opacity-70">
+          Este tipo de archivo debe abrirse en una nueva pestaña.
+        </p>
+
+        <button type="button" class="btn btn-primary mt-5" (click)="abrirEnNuevaPestana()">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          Abrir archivo
+        </button>
+
+      </div>
+
+      }
+
+      }
+
+      <!-- ================================================= -->
+      <!-- NAVEGACIÓN -->
+      <!-- ================================================= -->
+
+      @if (archivos.length > 1) {
+
+      <button type="button" class="btn btn-circle absolute left-3 top-1/2
+                   z-30 -translate-y-1/2 bg-base-100
+                   shadow-xl sm:left-5" [disabled]="!puedeAnterior" title="Archivo anterior"
+        aria-label="Archivo anterior" (click)="anterior(); $event.stopPropagation()">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+
+      <button type="button" class="btn btn-circle absolute right-3 top-1/2
+                   z-30 -translate-y-1/2 bg-base-100
+                   shadow-xl sm:right-5" [disabled]="!puedeSiguiente" title="Archivo siguiente"
+        aria-label="Archivo siguiente" (click)="siguiente(); $event.stopPropagation()">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+
+      }
+
+    </div>
+
+    <!-- ================================================= -->
+    <!-- PIE -->
+    <!-- ================================================= -->
+
+    <div class="flex shrink-0 flex-col gap-3
+               border-t border-base-300 px-5 py-4
+               sm:flex-row sm:items-center
+               sm:justify-between sm:px-6">
+
+      <div class="flex flex-col gap-1 text-xs
+                 text-base-content/50">
+
+        <p>
+
+          {{ tamanioFormateado }}
+
+          @if (archivo.mime_type) {
+          · {{ archivo.mime_type }}
+          }
+
+        </p>
+
+        <p>
+
+          Archivo #{{ archivo.id }}
+
+          @if (archivo.sereno_id) {
+          · Sereno #{{ archivo.sereno_id }}
+          }
+
+          @if (archivo.createdAt) {
+          · {{ archivo.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+          }
+
+        </p>
+
+      </div>
+
+      <button type="button" class="btn btn-ghost sm:min-w-28" (click)="cerrarPreview()">
+        Cerrar
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+}
