@@ -1,1 +1,1898 @@
-<p>reporte-actividad-operativa works!</p>
+<div class="space-y-6">
+
+  <!-- ===================================================== -->
+  <!-- CABECERA -->
+  <!-- ===================================================== -->
+
+  <section class="flex flex-col gap-4 rounded-3xl border border-base-300
+           bg-base-100 p-5 shadow-sm
+           lg:flex-row lg:items-center lg:justify-between">
+
+    <div class="flex items-start gap-4">
+
+      <div class="flex h-12 w-12 shrink-0 items-center
+               justify-center rounded-2xl
+               bg-primary/10 text-primary">
+        <i class="fa-solid fa-chart-line text-xl"></i>
+      </div>
+
+      <div>
+
+        <h2 class="text-xl font-bold">
+          Reporte de actividad operativa
+        </h2>
+
+        <p class="mt-1 max-w-2xl text-sm text-base-content/60">
+          Analice patrullajes, personal, unidades, incidencias,
+          alertas, registros operativos y actividad GPS.
+        </p>
+
+      </div>
+
+    </div>
+
+    <button type="button" class="btn btn-outline btn-primary" [disabled]="isLoading"
+      (click)="getReporteActividadOperativa()">
+
+      @if (isLoading) {
+
+      <span class="loading loading-spinner loading-sm"></span>
+      Actualizando...
+
+      } @else {
+
+      <i class="fa-solid fa-rotate"></i>
+      Actualizar
+
+      }
+
+    </button>
+
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- FILTROS -->
+  <!-- ===================================================== -->
+
+  <section class="overflow-hidden rounded-3xl border border-base-300
+           bg-base-100 shadow-sm">
+
+    <div class="flex flex-col gap-4 border-b border-base-300
+             px-5 py-4 sm:flex-row sm:items-center
+             sm:justify-between">
+
+      <div class="flex items-center gap-3">
+
+        <div class="flex h-10 w-10 shrink-0 items-center
+                 justify-center rounded-xl
+                 bg-primary/10 text-primary">
+          <i class="fa-solid fa-filter"></i>
+        </div>
+
+        <div>
+
+          <h3 class="font-bold">
+            Filtros del reporte
+          </h3>
+
+          <p class="text-xs text-base-content/50">
+            Combine fechas, estado y criterios operativos.
+          </p>
+
+        </div>
+
+      </div>
+
+      <div class="flex flex-wrap gap-2">
+
+        <button type="button" class="btn btn-ghost btn-sm" [disabled]="isLoading" (click)="limpiarFiltros()">
+          <i class="fa-solid fa-eraser"></i>
+          Limpiar
+        </button>
+
+        <button type="button" class="btn btn-outline btn-primary btn-sm" [attr.aria-expanded]="mostrarFiltrosAvanzados"
+          (click)="toggleFiltrosAvanzados()">
+
+          <i class="fa-solid fa-sliders"></i>
+
+          @if (mostrarFiltrosAvanzados) {
+          Ocultar filtros
+          } @else {
+          Más filtros
+          }
+
+          <i class="fa-solid" [ngClass]="{
+              'fa-chevron-up': mostrarFiltrosAvanzados,
+              'fa-chevron-down': !mostrarFiltrosAvanzados
+            }"></i>
+
+        </button>
+
+      </div>
+
+    </div>
+
+    <form class="p-5" (ngSubmit)="aplicarFiltros()">
+
+      <!-- FILTROS PRINCIPALES -->
+
+      <div class="grid grid-cols-1 gap-4
+               md:grid-cols-2 xl:grid-cols-4">
+
+        <!-- Buscar -->
+        <label class="form-control xl:col-span-2">
+
+          <div class="label">
+            <span class="label-text font-semibold">
+              Buscar
+            </span>
+          </div>
+
+          <div class="relative">
+
+            <i class="fa-solid fa-magnifying-glass
+                     absolute left-4 top-1/2
+                     -translate-y-1/2
+                     text-base-content/40"></i>
+
+            <input type="text" name="search" class="input input-bordered w-full pl-11"
+              placeholder="Descripción del patrullaje" [(ngModel)]="filtrosFormulario.search" />
+
+          </div>
+
+        </label>
+
+        <!-- Fecha inicial -->
+        <label class="form-control">
+
+          <div class="label">
+            <span class="label-text font-semibold">
+              Fecha inicial
+            </span>
+          </div>
+
+          <input type="date" name="fecha_inicio" class="input input-bordered w-full"
+            [(ngModel)]="filtrosFormulario.fecha_inicio" />
+
+        </label>
+
+        <!-- Fecha final -->
+        <label class="form-control">
+
+          <div class="label">
+            <span class="label-text font-semibold">
+              Fecha final
+            </span>
+          </div>
+
+          <input type="date" name="fecha_fin" class="input input-bordered w-full"
+            [(ngModel)]="filtrosFormulario.fecha_fin" />
+
+        </label>
+
+      </div>
+
+      <!-- FILTROS AVANZADOS -->
+
+      @if (mostrarFiltrosAvanzados) {
+
+      <div class="mt-5 border-t border-base-300 pt-5">
+
+        <div class="mb-4">
+
+          <h4 class="text-sm font-bold">
+            Filtros avanzados
+          </h4>
+
+          <p class="mt-1 text-xs text-base-content/50">
+            Restrinja la consulta por relaciones y estados operativos.
+          </p>
+
+        </div>
+
+        <div class="grid grid-cols-1 gap-4
+                   md:grid-cols-2 xl:grid-cols-4">
+
+          <!-- Patrullaje -->
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Patrullaje
+              </span>
+            </div>
+
+            <input type="number" min="1" name="patrullaje_id" class="input input-bordered w-full"
+              placeholder="ID del patrullaje" [(ngModel)]="filtrosFormulario.patrullaje_id" />
+
+          </label>
+
+          <!-- Zona -->
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Zona
+              </span>
+            </div>
+
+            <input type="number" min="1" name="zona_id" class="input input-bordered w-full" placeholder="ID de la zona"
+              [(ngModel)]="filtrosFormulario.zona_id" />
+
+          </label>
+
+          <!-- Unidad -->
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Unidad
+              </span>
+            </div>
+
+            <input type="number" min="1" name="unidad_id" class="input input-bordered w-full"
+              placeholder="ID de la unidad" [(ngModel)]="filtrosFormulario.unidad_id" />
+
+          </label>
+
+          <!-- Sereno -->
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Sereno
+              </span>
+            </div>
+
+            <input type="number" min="1" name="usuario_id" class="input input-bordered w-full"
+              placeholder="ID del usuario" [(ngModel)]="filtrosFormulario.usuario_id" />
+
+          </label>
+
+          <!-- Estado patrullaje -->
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Estado del patrullaje
+              </span>
+            </div>
+
+            <select name="estado_patrullaje" class="select select-bordered w-full"
+              [(ngModel)]="filtrosFormulario.estado_patrullaje">
+
+              <option value="">
+                Todos los estados
+              </option>
+
+              @for (
+              estado of estadosPatrullaje;
+              track estado.value
+              ) {
+
+              <option [value]="estado.value">
+                {{ estado.label }}
+              </option>
+
+              }
+
+            </select>
+
+          </label>
+
+          <!-- Estado asignación -->
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Estado de asignación
+              </span>
+            </div>
+
+            <select name="estado_asignacion" class="select select-bordered w-full"
+              [(ngModel)]="filtrosFormulario.estado_asignacion">
+
+              <option value="">
+                Todos los estados
+              </option>
+
+              @for (
+              estado of estadosAsignacion;
+              track estado.value
+              ) {
+
+              <option [value]="estado.value">
+                {{ estado.label }}
+              </option>
+
+              }
+
+            </select>
+
+          </label>
+
+          <!-- Solo con incidencias -->
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Incidencias
+              </span>
+            </div>
+
+            <select name="solo_con_incidencias" class="select select-bordered w-full"
+              [(ngModel)]="filtrosFormulario.solo_con_incidencias">
+
+              <option [ngValue]="null">
+                Todos los patrullajes
+              </option>
+
+              <option [ngValue]="true">
+                Solo con incidencias
+              </option>
+
+              <option [ngValue]="false">
+                Solo sin incidencias
+              </option>
+
+            </select>
+
+          </label>
+
+          <!-- Solo finalizados -->
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Finalización
+              </span>
+            </div>
+
+            <select name="solo_finalizados" class="select select-bordered w-full"
+              [(ngModel)]="filtrosFormulario.solo_finalizados">
+
+              <option [ngValue]="null">
+                Todos los patrullajes
+              </option>
+
+              <option [ngValue]="true">
+                Solo finalizados
+              </option>
+
+              <option [ngValue]="false">
+                No restringir a finalizados
+              </option>
+
+            </select>
+
+          </label>
+
+        </div>
+
+      </div>
+
+      }
+
+      <!-- ERROR DE FILTROS -->
+
+      @if (filterErrorMessage) {
+
+      <div class="alert alert-warning mt-5">
+
+        <i class="fa-solid fa-triangle-exclamation"></i>
+
+        <span>
+          {{ filterErrorMessage }}
+        </span>
+
+      </div>
+
+      }
+
+      <!-- ACCIONES -->
+
+      <div class="mt-5 flex flex-col-reverse gap-3
+               sm:flex-row sm:justify-end">
+
+        <button type="button" class="btn btn-ghost" [disabled]="isLoading" (click)="limpiarFiltros()">
+          <i class="fa-solid fa-eraser"></i>
+          Limpiar filtros
+        </button>
+
+        <button type="submit" class="btn btn-primary sm:min-w-36" [disabled]="isLoading">
+
+          @if (isLoading) {
+
+          <span class="loading loading-spinner loading-sm"></span>
+          Consultando...
+
+          } @else {
+
+          <i class="fa-solid fa-magnifying-glass"></i>
+          Consultar
+
+          }
+
+        </button>
+
+      </div>
+
+    </form>
+
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- ERROR HTTP -->
+  <!-- ===================================================== -->
+
+  @if (requestErrorMessage && !isLoading) {
+
+  <section class="rounded-3xl border border-error/30
+             bg-error/5 p-6">
+
+    <div class="flex flex-col items-center justify-center
+               py-8 text-center">
+
+      <div class="flex h-16 w-16 items-center justify-center
+                 rounded-full bg-error/10 text-error">
+        <i class="fa-solid fa-circle-exclamation text-2xl"></i>
+      </div>
+
+      <h3 class="mt-4 text-lg font-bold">
+        No se pudo cargar el reporte
+      </h3>
+
+      <p class="mt-2 max-w-lg text-sm text-base-content/60">
+        {{ requestErrorMessage }}
+      </p>
+
+      <button type="button" class="btn btn-primary mt-5" (click)="reintentar()">
+        <i class="fa-solid fa-rotate-right"></i>
+        Reintentar
+      </button>
+
+    </div>
+
+  </section>
+
+  }
+
+  <!-- ===================================================== -->
+  <!-- CARGA INICIAL -->
+  <!-- ===================================================== -->
+
+  @if (isLoading && !reporte) {
+
+  <section class="flex min-h-72 flex-col items-center
+             justify-center rounded-3xl
+             border border-base-300 bg-base-100 p-8">
+
+    <span class="loading loading-spinner loading-lg text-primary"></span>
+
+    <h3 class="mt-4 font-bold">
+      Generando reporte
+    </h3>
+
+    <p class="mt-1 text-sm text-base-content/50">
+      Consolidando la actividad operativa.
+    </p>
+
+  </section>
+
+  }
+
+  <!-- ===================================================== -->
+  <!-- CONTENIDO -->
+  <!-- ===================================================== -->
+
+  @if (reporte) {
+
+  <!-- INDICADORES PRINCIPALES -->
+
+  <section class="grid grid-cols-1 gap-4
+             sm:grid-cols-2 xl:grid-cols-4">
+
+    <!-- Total patrullajes -->
+    <article class="rounded-3xl border border-base-300
+               bg-base-100 p-5 shadow-sm">
+
+      <div class="flex items-start justify-between gap-4">
+
+        <div>
+
+          <p class="text-sm text-base-content/55">
+            Total de patrullajes
+          </p>
+
+          <p class="mt-2 text-3xl font-bold">
+            {{ totalPatrullajes }}
+          </p>
+
+        </div>
+
+        <div class="flex h-11 w-11 items-center justify-center
+                   rounded-xl bg-primary/10 text-primary">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+
+      </div>
+
+      <p class="mt-4 text-xs text-base-content/45">
+        Patrullajes incluidos según los filtros.
+      </p>
+
+    </article>
+
+    <!-- En curso -->
+    <article class="rounded-3xl border border-base-300
+               bg-base-100 p-5 shadow-sm">
+
+      <div class="flex items-start justify-between gap-4">
+
+        <div>
+
+          <p class="text-sm text-base-content/55">
+            En curso
+          </p>
+
+          <p class="mt-2 text-3xl font-bold">
+            {{ totalEnCurso }}
+          </p>
+
+        </div>
+
+        <div class="flex h-11 w-11 items-center justify-center
+                   rounded-xl bg-info/10 text-info">
+          <i class="fa-solid fa-route"></i>
+        </div>
+
+      </div>
+
+      <div class="mt-4 flex items-center gap-2">
+
+        <progress class="progress progress-info w-full" [value]="porcentajeEnCurso" max="100"></progress>
+
+        <span class="text-xs font-semibold">
+          {{ porcentajeEnCurso }}%
+        </span>
+
+      </div>
+
+    </article>
+
+    <!-- Finalizados -->
+    <article class="rounded-3xl border border-base-300
+               bg-base-100 p-5 shadow-sm">
+
+      <div class="flex items-start justify-between gap-4">
+
+        <div>
+
+          <p class="text-sm text-base-content/55">
+            Finalizados
+          </p>
+
+          <p class="mt-2 text-3xl font-bold">
+            {{ totalFinalizados }}
+          </p>
+
+        </div>
+
+        <div class="flex h-11 w-11 items-center justify-center
+                   rounded-xl bg-success/10 text-success">
+          <i class="fa-solid fa-flag-checkered"></i>
+        </div>
+
+      </div>
+
+      <div class="mt-4 flex items-center gap-2">
+
+        <progress class="progress progress-success w-full" [value]="porcentajeFinalizados" max="100"></progress>
+
+        <span class="text-xs font-semibold">
+          {{ porcentajeFinalizados }}%
+        </span>
+
+      </div>
+
+    </article>
+
+    <!-- GPS -->
+    <article class="rounded-3xl border border-base-300
+               bg-base-100 p-5 shadow-sm">
+
+      <div class="flex items-start justify-between gap-4">
+
+        <div>
+
+          <p class="text-sm text-base-content/55">
+            Puntos GPS
+          </p>
+
+          <p class="mt-2 text-3xl font-bold">
+            {{ totalPuntosGps }}
+          </p>
+
+        </div>
+
+        <div class="flex h-11 w-11 items-center justify-center
+                   rounded-xl bg-secondary/10 text-secondary">
+          <i class="fa-solid fa-location-dot"></i>
+        </div>
+
+      </div>
+
+      <p class="mt-4 text-xs text-base-content/45">
+        Registros de ubicación consolidados.
+      </p>
+
+    </article>
+
+  </section>
+
+  <!-- INDICADORES OPERATIVOS -->
+
+  <section class="grid grid-cols-1 gap-4
+             sm:grid-cols-2 xl:grid-cols-5">
+
+    <div class="rounded-2xl border border-base-300
+               bg-base-100 p-4">
+
+      <p class="text-xs text-base-content/50">
+        Incidencias
+      </p>
+
+      <p class="mt-2 text-2xl font-bold">
+        {{ totalIncidencias }}
+      </p>
+
+    </div>
+
+    <div class="rounded-2xl border border-base-300
+               bg-base-100 p-4">
+
+      <p class="text-xs text-base-content/50">
+        Registros históricos
+      </p>
+
+      <p class="mt-2 text-2xl font-bold">
+        {{ totalHistoriales }}
+      </p>
+
+    </div>
+
+    <div class="rounded-2xl border border-base-300
+               bg-base-100 p-4">
+
+      <p class="text-xs text-base-content/50">
+        Alertas
+      </p>
+
+      <p class="mt-2 text-2xl font-bold">
+        {{ totalAlertas }}
+      </p>
+
+    </div>
+
+    <div class="rounded-2xl border border-base-300
+               bg-base-100 p-4">
+
+      <p class="text-xs text-base-content/50">
+        Horas operativas
+      </p>
+
+      <p class="mt-2 text-2xl font-bold">
+        {{ horasOperativas | number:'1.1-2' }}
+      </p>
+
+    </div>
+
+    <div class="rounded-2xl border border-base-300
+               bg-base-100 p-4">
+
+      <p class="text-xs text-base-content/50">
+        Distancia total
+      </p>
+
+      <p class="mt-2 text-2xl font-bold">
+        {{ distanciaTotalKm | number:'1.1-2' }}
+        <span class="text-sm font-normal">
+          km
+        </span>
+      </p>
+
+    </div>
+
+  </section>
+
+  <!-- =================================================== -->
+  <!-- AGRUPACIONES -->
+  <!-- =================================================== -->
+
+  <section class="grid grid-cols-1 gap-6 xl:grid-cols-2">
+
+    <!-- POR SERENO -->
+    <article class="rounded-3xl border border-base-300
+               bg-base-100 p-5 shadow-sm">
+
+      <div class="mb-5">
+
+        <h3 class="font-bold">
+          Actividad por sereno
+        </h3>
+
+        <p class="mt-1 text-xs text-base-content/50">
+          Participación individual en los patrullajes.
+        </p>
+
+      </div>
+
+      @if (reporte.por_sereno.length > 0) {
+
+      <div class="max-h-96 space-y-4 overflow-y-auto pr-1">
+
+        @for (
+        item of reporte.por_sereno;
+        track item.usuario_id
+        ) {
+
+        <div>
+
+          <div class="mb-2 flex items-center justify-between gap-3">
+
+            <div class="min-w-0">
+
+              <p class="truncate text-sm font-semibold">
+                {{ item.nombre }}
+              </p>
+
+              <p class="text-xs text-base-content/50">
+                DNI: {{ item.documento || 'Sin documento' }}
+              </p>
+
+            </div>
+
+            <div class="text-right">
+
+              <p class="font-bold">
+                {{ item.patrullajes }}
+              </p>
+
+              <p class="text-xs text-base-content/50">
+                patrullaje(s)
+              </p>
+
+            </div>
+
+          </div>
+
+          <progress class="progress progress-primary w-full" [value]="getPorcentajeSereno(item)" max="100"></progress>
+
+          <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1
+                         text-xs text-base-content/50">
+            <span>
+              {{ item.incidencias }} incidencias
+            </span>
+
+            <span>
+              {{ item.historiales }} historiales
+            </span>
+
+            <span>
+              {{ item.alertas }} alertas
+            </span>
+          </div>
+
+        </div>
+
+        }
+
+      </div>
+
+      } @else {
+
+      <p class="py-10 text-center text-sm text-base-content/50">
+        No existen datos agrupados por sereno.
+      </p>
+
+      }
+
+    </article>
+
+    <!-- POR UNIDAD -->
+    <article class="rounded-3xl border border-base-300
+               bg-base-100 p-5 shadow-sm">
+
+      <div class="mb-5">
+
+        <h3 class="font-bold">
+          Actividad por unidad
+        </h3>
+
+        <p class="mt-1 text-xs text-base-content/50">
+          Uso operativo de las unidades de patrullaje.
+        </p>
+
+      </div>
+
+      @if (reporte.por_unidad.length > 0) {
+
+      <div class="space-y-4">
+
+        @for (
+        item of reporte.por_unidad;
+        track item.unidad_id
+        ) {
+
+        <div>
+
+          <div class="mb-2 flex items-center justify-between gap-3">
+
+            <div>
+
+              <p class="text-sm font-semibold">
+                {{ item.codigo }}
+              </p>
+
+              <p class="text-xs text-base-content/50">
+                {{ item.placa || 'Sin placa' }} ·
+                {{ item.tipo || 'Sin tipo' }}
+              </p>
+
+            </div>
+
+            <div class="text-right">
+
+              <p class="font-bold">
+                {{ item.patrullajes }}
+              </p>
+
+              <p class="text-xs text-base-content/50">
+                patrullaje(s)
+              </p>
+
+            </div>
+
+          </div>
+
+          <progress class="progress progress-info w-full" [value]="getPorcentajeUnidad(item)" max="100"></progress>
+
+          <div class="mt-2 flex flex-wrap gap-3
+                         text-xs text-base-content/50">
+            <span>
+              {{ item.finalizados }} finalizados
+            </span>
+
+            <span>
+              {{ item.incidencias }} incidencias
+            </span>
+
+            <span>
+              {{ item.distancia_km | number:'1.1-2' }} km
+            </span>
+          </div>
+
+        </div>
+
+        }
+
+      </div>
+
+      } @else {
+
+      <p class="py-10 text-center text-sm text-base-content/50">
+        No existen datos agrupados por unidad.
+      </p>
+
+      }
+
+    </article>
+
+    <!-- POR ZONA -->
+    <article class="rounded-3xl border border-base-300
+               bg-base-100 p-5 shadow-sm">
+
+      <div class="mb-5">
+
+        <h3 class="font-bold">
+          Actividad por zona
+        </h3>
+
+        <p class="mt-1 text-xs text-base-content/50">
+          Eventos operativos registrados territorialmente.
+        </p>
+
+      </div>
+
+      @if (reporte.por_zona.length > 0) {
+
+      <div class="space-y-4">
+
+        @for (
+        item of reporte.por_zona;
+        track item.zona_id
+        ) {
+
+        <div>
+
+          <div class="mb-2 flex items-center justify-between gap-3">
+
+            <div>
+
+              <p class="text-sm font-semibold">
+                {{ item.zona }}
+              </p>
+
+              <p class="text-xs text-base-content/50">
+                Riesgo:
+                {{ item.riesgo || 'No definido' }}
+              </p>
+
+            </div>
+
+            <span class="badge badge-primary badge-outline">
+              {{ item.patrullajes }} patrullaje(s)
+            </span>
+
+          </div>
+
+          <progress class="progress progress-secondary w-full" [value]="getPorcentajeZona(item)" max="100"></progress>
+
+          <div class="mt-2 flex flex-wrap gap-3
+                         text-xs text-base-content/50">
+            <span>
+              {{ item.incidencias }} incidencias
+            </span>
+
+            <span>
+              {{ item.historiales }} historiales
+            </span>
+
+            <span>
+              {{ item.alertas }} alertas
+            </span>
+          </div>
+
+        </div>
+
+        }
+
+      </div>
+
+      } @else {
+
+      <p class="py-10 text-center text-sm text-base-content/50">
+        No existen datos agrupados por zona.
+      </p>
+
+      }
+
+    </article>
+
+    <!-- POR FECHA -->
+    <article class="rounded-3xl border border-base-300
+               bg-base-100 p-5 shadow-sm">
+
+      <div class="mb-5">
+
+        <h3 class="font-bold">
+          Actividad por fecha
+        </h3>
+
+        <p class="mt-1 text-xs text-base-content/50">
+          Evolución diaria de la operación.
+        </p>
+
+      </div>
+
+      @if (reporte.por_fecha.length > 0) {
+
+      <div class="max-h-96 space-y-4 overflow-y-auto pr-1">
+
+        @for (
+        item of reporte.por_fecha;
+        track item.fecha
+        ) {
+
+        <div>
+
+          <div class="mb-2 flex items-center justify-between gap-3">
+
+            <div>
+
+              <p class="text-sm font-semibold">
+                {{ item.fecha | date:'dd/MM/yyyy':'UTC' }}
+              </p>
+
+              <p class="text-xs text-base-content/50">
+                {{ item.finalizados }} finalizado(s)
+              </p>
+
+            </div>
+
+            <span class="font-bold">
+              {{ item.patrullajes }}
+            </span>
+
+          </div>
+
+          <progress class="progress progress-warning w-full" [value]="getPorcentajeFecha(item)" max="100"></progress>
+
+          <div class="mt-2 flex flex-wrap gap-3
+                         text-xs text-base-content/50">
+            <span>
+              {{ item.incidencias }} incidencias
+            </span>
+
+            <span>
+              {{ item.historiales }} historiales
+            </span>
+
+            <span>
+              {{ item.alertas }} alertas
+            </span>
+          </div>
+
+        </div>
+
+        }
+
+      </div>
+
+      } @else {
+
+      <p class="py-10 text-center text-sm text-base-content/50">
+        No existen datos agrupados por fecha.
+      </p>
+
+      }
+
+    </article>
+
+  </section>
+
+  <!-- =================================================== -->
+  <!-- TABLA -->
+  <!-- =================================================== -->
+
+  <section class="overflow-hidden rounded-3xl border border-base-300
+             bg-base-100 shadow-sm">
+
+    <div class="flex flex-col gap-4 border-b border-base-300
+               px-5 py-4 sm:flex-row sm:items-center
+               sm:justify-between">
+
+      <div>
+
+        <h3 class="font-bold">
+          Detalle de patrullajes
+        </h3>
+
+        <p class="mt-1 text-xs text-base-content/50">
+          {{ totalItems }} registro(s) encontrado(s).
+        </p>
+
+      </div>
+
+      <label class="flex items-center gap-2 text-sm">
+
+        <span class="text-base-content/60">
+          Mostrar
+        </span>
+
+        <select class="select select-bordered select-sm" [ngModel]="limit" (ngModelChange)="cambiarLimite($event)">
+
+          @for (
+          option of pageSizeOptions;
+          track option
+          ) {
+
+          <option [ngValue]="option">
+            {{ option }}
+          </option>
+
+          }
+
+        </select>
+
+      </label>
+
+    </div>
+
+    @if (patrullajes.length > 0) {
+
+    <div class="overflow-x-auto">
+
+      <table class="table table-zebra">
+
+        <thead>
+
+          <tr>
+            <th>Patrullaje</th>
+            <th>Personal</th>
+            <th>Zona y unidad</th>
+            <th>Actividad</th>
+            <th>GPS</th>
+            <th>Estado</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+          @for (
+          patrullaje of patrullajes;
+          track patrullaje.id
+          ) {
+
+          <tr>
+
+            <!-- PATRULLAJE -->
+            <td>
+
+              <div class="max-w-56">
+
+                <p class="font-semibold">
+                  Patrullaje #{{ patrullaje.id }}
+                </p>
+
+                <p class="mt-1 text-xs text-base-content/50">
+                  {{ patrullaje.fecha | date:'dd/MM/yyyy':'UTC' }}
+                </p>
+
+                <p class="text-xs text-base-content/50">
+                  {{ patrullaje.hora_inicio }} -
+                  {{ patrullaje.hora_fin }}
+                </p>
+
+                @if (patrullaje.descripcion) {
+
+                <p class="mt-2 line-clamp-2 text-xs
+                                 text-base-content/60">
+                  {{ patrullaje.descripcion }}
+                </p>
+
+                }
+
+              </div>
+
+            </td>
+
+            <!-- PERSONAL -->
+            <td>
+
+              @if (getPersonalPrincipal(patrullaje); as personal) {
+
+              <div class="flex items-center gap-3">
+
+                <div class="avatar">
+
+                  <div class="h-10 w-10 overflow-hidden
+                                   rounded-xl bg-base-200">
+
+                    <img class="h-full w-full object-cover" [src]="getFotoPersonal(personal)"
+                      [alt]="getNombrePersonal(personal)" />
+
+                  </div>
+
+                </div>
+
+                <div class="max-w-44">
+
+                  <p class="truncate text-sm font-semibold">
+                    {{ getNombrePersonal(personal) }}
+                  </p>
+
+                  <p class="text-xs text-base-content/50">
+                    {{ getSerenos(patrullaje).length }}
+                    sereno(s) ·
+                    {{ getPolicias(patrullaje).length }}
+                    policía(s)
+                  </p>
+
+                </div>
+
+              </div>
+
+              } @else {
+
+              <span class="text-sm text-base-content/45">
+                Sin personal asignado
+              </span>
+
+              }
+
+            </td>
+
+            <!-- ZONA Y UNIDAD -->
+            <td>
+
+              <div>
+
+                <p class="text-sm font-semibold">
+                  {{ getZonaLabel(patrullaje) }}
+                </p>
+
+                <p class="mt-1 text-xs text-base-content/50">
+                  {{ getUnidadLabel(patrullaje) }}
+                </p>
+
+              </div>
+
+            </td>
+
+            <!-- ACTIVIDAD -->
+            <td>
+
+              <div class="flex flex-wrap gap-2">
+
+                <span class="badge badge-warning badge-outline" title="Incidencias">
+                  <i class="fa-solid fa-triangle-exclamation mr-1"></i>
+                  {{ patrullaje.actividad.incidencias }}
+                </span>
+
+                <span class="badge badge-info badge-outline" title="Historiales">
+                  <i class="fa-solid fa-clock-rotate-left mr-1"></i>
+                  {{ patrullaje.actividad.historiales }}
+                </span>
+
+                <span class="badge badge-error badge-outline" title="Alertas">
+                  <i class="fa-solid fa-bell mr-1"></i>
+                  {{ patrullaje.actividad.alertas }}
+                </span>
+
+              </div>
+
+            </td>
+
+            <!-- GPS -->
+            <td>
+
+              <div>
+
+                <span class="badge" [ngClass]="
+                          patrullaje.actividad.puntos_gps > 0
+                            ? 'badge-success'
+                            : 'badge-ghost'
+                        ">
+                  <i class="fa-solid fa-location-dot mr-1"></i>
+                  {{ patrullaje.actividad.puntos_gps }}
+                </span>
+
+                <p class="mt-2 text-xs text-base-content/50">
+                  Máx:
+                  {{
+                  formatearVelocidad(
+                  patrullaje.actividad.velocidad_maxima
+                  )
+                  }}
+                </p>
+
+              </div>
+
+            </td>
+
+            <!-- ESTADO -->
+            <td>
+
+              <span class="badge" [ngClass]="
+                        getEstadoPatrullajeBadgeClass(
+                          patrullaje.estado
+                        )
+                      ">
+
+                <i class="mr-1" [class]="
+                          getEstadoPatrullajeIcon(
+                            patrullaje.estado
+                          )
+                        "></i>
+
+                {{
+                getEstadoPatrullajeLabel(
+                patrullaje.estado
+                )
+                }}
+
+              </span>
+
+            </td>
+
+            <!-- ACCIONES -->
+            <td>
+
+              <div class="flex justify-center">
+
+                <button type="button" class="btn btn-circle btn-ghost btn-sm" title="Ver detalle operativo"
+                  aria-label="Ver detalle operativo" (click)="abrirDetalle(patrullaje)">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+          }
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+    <!-- PAGINACIÓN -->
+
+    <div class="flex flex-col gap-4 border-t border-base-300
+                 px-5 py-4 sm:flex-row sm:items-center
+                 sm:justify-between">
+
+      <p class="text-sm text-base-content/55">
+        Página {{ currentPage }} de {{ totalPages }}
+      </p>
+
+      <div class="join">
+
+        <button type="button" class="btn join-item btn-sm" [disabled]="!hasPreviousPage || isLoading"
+          (click)="paginaAnterior()">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+
+        @for (
+        page of paginasVisibles;
+        track page
+        ) {
+
+        <button type="button" class="btn join-item btn-sm" [class.btn-active]="page === currentPage"
+          [disabled]="isLoading" (click)="cambiarPagina(page)">
+          {{ page }}
+        </button>
+
+        }
+
+        <button type="button" class="btn join-item btn-sm" [disabled]="!hasNextPage || isLoading"
+          (click)="paginaSiguiente()">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+
+      </div>
+
+    </div>
+
+    } @else {
+
+    <div class="flex min-h-64 flex-col items-center
+                 justify-center p-8 text-center">
+
+      <div class="flex h-16 w-16 items-center justify-center
+                   rounded-full bg-base-200 text-base-content/40">
+        <i class="fa-solid fa-chart-line text-2xl"></i>
+      </div>
+
+      <h3 class="mt-4 text-lg font-bold">
+        Sin actividad operativa
+      </h3>
+
+      <p class="mt-2 max-w-md text-sm text-base-content/50">
+        No existen patrullajes que coincidan con los filtros aplicados.
+      </p>
+
+      <button type="button" class="btn btn-primary mt-5" (click)="limpiarFiltros()">
+        <i class="fa-solid fa-eraser"></i>
+        Limpiar filtros
+      </button>
+
+    </div>
+
+    }
+
+  </section>
+
+  }
+
+</div>
+
+<!-- ======================================================= -->
+<!-- MODAL DE DETALLE -->
+<!-- ======================================================= -->
+
+@if (
+mostrarModalDetalle &&
+patrullajeSeleccionado
+) {
+
+<div class="fixed inset-0 z-70 flex items-center justify-center
+           bg-black/65 p-3 backdrop-blur-sm sm:p-6" role="dialog" aria-modal="true"
+  aria-labelledby="actividad-detail-title" (click)="cerrarDetalle()">
+
+  <div class="flex max-h-[94vh] w-full max-w-5xl
+             flex-col overflow-hidden rounded-3xl
+             bg-base-100 shadow-2xl" (click)="$event.stopPropagation()">
+
+    <!-- CABECERA -->
+
+    <header class="flex shrink-0 items-center justify-between gap-4
+               border-b border-base-300 px-5 py-4 sm:px-6">
+
+      <div class="flex min-w-0 items-center gap-3">
+
+        <div class="flex h-11 w-11 shrink-0 items-center
+                   justify-center rounded-xl
+                   bg-primary/10 text-primary">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+
+        <div class="min-w-0">
+
+          <h2 id="actividad-detail-title" class="truncate font-bold sm:text-lg">
+            Patrullaje #{{ patrullajeSeleccionado.id }}
+          </h2>
+
+          <p class="mt-1 truncate text-xs text-base-content/50">
+            {{ getZonaLabel(patrullajeSeleccionado) }}
+            ·
+            {{ getUnidadLabel(patrullajeSeleccionado) }}
+          </p>
+
+        </div>
+
+      </div>
+
+      <button type="button" class="btn btn-circle btn-ghost btn-sm" aria-label="Cerrar detalle"
+        (click)="cerrarDetalle()">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+    </header>
+
+    <!-- CONTENIDO -->
+
+    <div class="flex-1 overflow-y-auto p-5 sm:p-6">
+
+      <!-- INFORMACIÓN GENERAL -->
+
+      <section class="grid grid-cols-1 gap-4
+                 sm:grid-cols-2 xl:grid-cols-4">
+
+        <div class="rounded-2xl bg-base-200 p-4">
+
+          <p class="text-xs text-base-content/50">
+            Estado
+          </p>
+
+          <span class="badge mt-2" [ngClass]="
+                getEstadoPatrullajeBadgeClass(
+                  patrullajeSeleccionado.estado
+                )
+              ">
+            {{
+            getEstadoPatrullajeLabel(
+            patrullajeSeleccionado.estado
+            )
+            }}
+          </span>
+
+        </div>
+
+        <div class="rounded-2xl bg-base-200 p-4">
+
+          <p class="text-xs text-base-content/50">
+            Fecha programada
+          </p>
+
+          <p class="mt-2 font-bold">
+            {{
+            patrullajeSeleccionado.fecha
+            | date:'dd/MM/yyyy':'UTC'
+            }}
+          </p>
+
+        </div>
+
+        <div class="rounded-2xl bg-base-200 p-4">
+
+          <p class="text-xs text-base-content/50">
+            Horario
+          </p>
+
+          <p class="mt-2 font-bold">
+            {{ patrullajeSeleccionado.hora_inicio }}
+            -
+            {{ patrullajeSeleccionado.hora_fin }}
+          </p>
+
+        </div>
+
+        <div class="rounded-2xl bg-base-200 p-4">
+
+          <p class="text-xs text-base-content/50">
+            Puntos GPS
+          </p>
+
+          <p class="mt-2 font-bold">
+            {{ patrullajeSeleccionado.actividad.puntos_gps }}
+          </p>
+
+        </div>
+
+      </section>
+
+      <!-- MÉTRICAS -->
+
+      <section class="mt-6">
+
+        <h3 class="font-bold">
+          Métricas operativas
+        </h3>
+
+        <div class="mt-4 grid grid-cols-1 gap-4
+                   sm:grid-cols-2 xl:grid-cols-4">
+
+          <div class="rounded-2xl border border-base-300 p-4">
+
+            <p class="text-xs text-base-content/50">
+              Duración
+            </p>
+
+            <p class="mt-2 font-bold">
+              {{
+              formatearDuracion(
+              patrullajeSeleccionado
+              .resumen
+              .duracion_segundos
+              )
+              }}
+            </p>
+
+          </div>
+
+          <div class="rounded-2xl border border-base-300 p-4">
+
+            <p class="text-xs text-base-content/50">
+              Distancia
+            </p>
+
+            <p class="mt-2 font-bold">
+              {{
+              formatearDistancia(
+              patrullajeSeleccionado
+              .resumen
+              .distancia_total_metros
+              )
+              }}
+            </p>
+
+          </div>
+
+          <div class="rounded-2xl border border-base-300 p-4">
+
+            <p class="text-xs text-base-content/50">
+              Velocidad promedio
+            </p>
+
+            <p class="mt-2 font-bold">
+              {{
+              formatearVelocidad(
+              patrullajeSeleccionado
+              .actividad
+              .velocidad_promedio
+              )
+              }}
+            </p>
+
+          </div>
+
+          <div class="rounded-2xl border border-base-300 p-4">
+
+            <p class="text-xs text-base-content/50">
+              Velocidad máxima
+            </p>
+
+            <p class="mt-2 font-bold">
+              {{
+              formatearVelocidad(
+              patrullajeSeleccionado
+              .actividad
+              .velocidad_maxima
+              )
+              }}
+            </p>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- EVENTOS -->
+
+      <section class="mt-6">
+
+        <h3 class="font-bold">
+          Actividad registrada
+        </h3>
+
+        <div class="mt-4 grid grid-cols-1 gap-4
+                   sm:grid-cols-3">
+
+          <div class="rounded-2xl border border-warning/30
+                     bg-warning/5 p-4">
+
+            <p class="text-sm text-base-content/60">
+              Incidencias
+            </p>
+
+            <p class="mt-2 text-3xl font-bold">
+              {{ patrullajeSeleccionado.actividad.incidencias }}
+            </p>
+
+          </div>
+
+          <div class="rounded-2xl border border-info/30
+                     bg-info/5 p-4">
+
+            <p class="text-sm text-base-content/60">
+              Historiales
+            </p>
+
+            <p class="mt-2 text-3xl font-bold">
+              {{ patrullajeSeleccionado.actividad.historiales }}
+            </p>
+
+          </div>
+
+          <div class="rounded-2xl border border-error/30
+                     bg-error/5 p-4">
+
+            <p class="text-sm text-base-content/60">
+              Alertas
+            </p>
+
+            <p class="mt-2 text-3xl font-bold">
+              {{ patrullajeSeleccionado.actividad.alertas }}
+            </p>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- PERSONAL -->
+
+      <section class="mt-6">
+
+        <h3 class="font-bold">
+          Personal asignado
+        </h3>
+
+        @if (
+        patrullajeSeleccionado.personal.length > 0
+        ) {
+
+        <div class="mt-4 grid grid-cols-1 gap-4
+                     md:grid-cols-2">
+
+          @for (
+          personal of patrullajeSeleccionado.personal;
+          track personal.id
+          ) {
+
+          <article class="flex items-center gap-4 rounded-2xl
+                         border border-base-300 p-4">
+
+            <div class="avatar">
+
+              <div class="h-12 w-12 overflow-hidden
+                             rounded-xl bg-base-200">
+
+                <img class="h-full w-full object-cover" [src]="getFotoPersonal(personal)"
+                  [alt]="getNombrePersonal(personal)" />
+
+              </div>
+
+            </div>
+
+            <div class="min-w-0 flex-1">
+
+              <div class="flex flex-wrap items-center
+                             justify-between gap-2">
+
+                <p class="truncate font-semibold">
+                  {{ getNombrePersonal(personal) }}
+                </p>
+
+                <span class="badge badge-sm" [ngClass]="
+                          getEstadoAsignacionBadgeClass(
+                            personal.estado
+                          )
+                        ">
+                  {{
+                  getEstadoAsignacionLabel(
+                  personal.estado
+                  )
+                  }}
+                </span>
+
+              </div>
+
+              <p class="mt-1 text-xs text-base-content/50">
+
+                <i class="mr-1" [class]="
+                          getTipoPersonalIcon(
+                            personal.tipo_personal
+                          )
+                        "></i>
+
+                {{ personal.tipo_personal }}
+                ·
+                {{ getDocumentoPersonal(personal) }}
+
+              </p>
+
+            </div>
+
+          </article>
+
+          }
+
+        </div>
+
+        } @else {
+
+        <p class="mt-4 text-sm text-base-content/50">
+          No existe personal registrado para este patrullaje.
+        </p>
+
+        }
+
+      </section>
+
+      <!-- RESUMEN DE CIERRE -->
+
+      <section class="mt-6">
+
+        <h3 class="font-bold">
+          Resumen del patrullaje
+        </h3>
+
+        <div class="mt-4 rounded-2xl border border-base-300 p-4">
+
+          <div class="grid grid-cols-1 gap-4
+                     sm:grid-cols-2 xl:grid-cols-4">
+
+            <div>
+
+              <p class="text-xs text-base-content/50">
+                Inicio real
+              </p>
+
+              <p class="mt-1 text-sm font-semibold">
+
+                @if (
+                patrullajeSeleccionado.resumen.fecha_inicio
+                ) {
+
+                {{
+                patrullajeSeleccionado.resumen.fecha_inicio
+                | date:'dd/MM/yyyy HH:mm':'UTC'
+                }}
+
+                } @else {
+
+                No disponible
+
+                }
+
+              </p>
+
+            </div>
+
+            <div>
+
+              <p class="text-xs text-base-content/50">
+                Fin real
+              </p>
+
+              <p class="mt-1 text-sm font-semibold">
+
+                @if (
+                patrullajeSeleccionado.resumen.fecha_fin
+                ) {
+
+                {{
+                patrullajeSeleccionado.resumen.fecha_fin
+                | date:'dd/MM/yyyy HH:mm':'UTC'
+                }}
+
+                } @else {
+
+                No disponible
+
+                }
+
+              </p>
+
+            </div>
+
+            <div>
+
+              <p class="text-xs text-base-content/50">
+                Incidencias
+              </p>
+
+              <p class="mt-1 text-sm font-semibold">
+                {{
+                patrullajeSeleccionado
+                .resumen
+                .total_incidencias
+                }}
+              </p>
+
+            </div>
+
+            <div>
+
+              <p class="text-xs text-base-content/50">
+                Observaciones
+              </p>
+
+              <p class="mt-1 text-sm font-semibold">
+                {{
+                patrullajeSeleccionado
+                .resumen
+                .total_observaciones
+                }}
+              </p>
+
+            </div>
+
+          </div>
+
+          @if (
+          patrullajeSeleccionado
+          .resumen
+          .observacion_final
+          ) {
+
+          <div class="mt-4 border-t border-base-300 pt-4">
+
+            <p class="text-xs text-base-content/50">
+              Observación final
+            </p>
+
+            <p class="mt-2 text-sm leading-relaxed">
+              {{
+              patrullajeSeleccionado
+              .resumen
+              .observacion_final
+              }}
+            </p>
+
+          </div>
+
+          }
+
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- PIE -->
+
+    <footer class="flex shrink-0 justify-end
+               border-t border-base-300 px-5 py-4">
+
+      <button type="button" class="btn btn-ghost sm:min-w-28" (click)="cerrarDetalle()">
+        Cerrar
+      </button>
+
+    </footer>
+
+  </div>
+
+</div>
+
+}

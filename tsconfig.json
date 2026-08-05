@@ -9,6 +9,9 @@
         "src/environments/*"
       ]
     },
+    "types": [
+      "google.maps"
+    ],
     "outDir": "./dist/out-tsc",
     "strict": true,
     "noImplicitOverride": true,

@@ -1,1 +1,162 @@
-<p>reportes works!</p>
+<div class="min-h-full overflow-auto bg-base-300
+         p-4 text-base-content transition-colors
+         duration-300 sm:p-6">
+
+  <!-- ===================================================== -->
+  <!-- CABECERA -->
+  <!-- ===================================================== -->
+
+  <header class="mb-6 flex flex-col gap-4
+           xl:flex-row xl:items-center
+           xl:justify-between">
+
+    <div class="flex items-center gap-4">
+
+      <div class="flex h-12 w-12 shrink-0 items-center
+               justify-center rounded-2xl
+               bg-primary/10 text-primary">
+        <i class="fa-solid fa-chart-column text-xl"></i>
+      </div>
+
+      <div>
+
+        <h1 class="text-2xl font-bold">
+          Reportes operativos
+        </h1>
+
+        <p class="mt-1 text-sm text-base-content/60">
+          Consulte indicadores, recorridos, incidencias y
+          zonas críticas del servicio de serenazgo.
+        </p>
+
+      </div>
+
+    </div>
+
+    <div class="flex items-center gap-3 rounded-2xl
+             border border-base-300 bg-base-100
+             px-4 py-3 shadow-sm">
+
+      <div class="flex h-10 w-10 shrink-0 items-center
+               justify-center rounded-xl" [ngClass]="tabSeleccionada.colorClass">
+        <i [class]="tabSeleccionada.icono"></i>
+      </div>
+
+      <div>
+
+        <p class="text-xs text-base-content/50">
+          Reporte seleccionado
+        </p>
+
+        <p class="font-semibold">
+          {{ tabSeleccionada.label }}
+        </p>
+
+      </div>
+
+    </div>
+
+  </header>
+
+  <!-- ===================================================== -->
+  <!-- SELECTOR DE REPORTES -->
+  <!-- ===================================================== -->
+
+  <nav class="mb-6 rounded-3xl border border-base-300
+           bg-base-100 p-2 shadow-sm" aria-label="Tipos de reporte">
+
+    <div class="grid grid-cols-1 gap-2
+             sm:grid-cols-2 xl:grid-cols-4">
+
+      @for (
+      tab of tabs;
+      track tab.value
+      ) {
+
+      <button type="button" class="group flex min-h-24 items-start gap-3
+         rounded-2xl border p-4 text-left
+         transition-all duration-200" [class.border-primary]="esTabActiva(tab.value)"
+        [class.shadow-sm]="esTabActiva(tab.value)" [class.border-transparent]="!esTabActiva(tab.value)" [ngClass]="{
+          'bg-primary/5': esTabActiva(tab.value),
+          'hover:bg-base-200': !esTabActiva(tab.value)
+        }" [attr.aria-current]="
+          esTabActiva(tab.value) ? 'page' : null
+        " (click)="seleccionarTab(tab.value)">
+
+        <div class="flex h-11 w-11 shrink-0 items-center
+                   justify-center rounded-xl transition" [ngClass]="tab.colorClass">
+          <i [class]="tab.icono"></i>
+        </div>
+
+        <div class="min-w-0">
+
+          <div class="flex items-center gap-2">
+
+            <h2 class="font-bold">
+              {{ tab.label }}
+            </h2>
+
+            @if (
+            esTabActiva(tab.value)
+            ) {
+
+            <span class="badge badge-primary badge-sm">
+              Activo
+            </span>
+
+            }
+
+          </div>
+
+          <p class="mt-1 line-clamp-2 text-xs
+                     leading-relaxed text-base-content/55">
+            {{ tab.descripcion }}
+          </p>
+
+        </div>
+
+      </button>
+
+      }
+
+    </div>
+
+  </nav>
+
+  <!-- ===================================================== -->
+  <!-- CONTENIDO -->
+  <!-- ===================================================== -->
+
+  <main>
+
+    @switch (tabActiva) {
+
+    @case ('INCIDENCIAS') {
+
+    <reporte-incidencias />
+
+    }
+
+    @case ('RECORRIDOS') {
+
+    <reporte-recorridos />
+
+    }
+
+    @case ('ACTIVIDAD_OPERATIVA') {
+
+    <reporte-actividad-operativa />
+
+    }
+
+    @case ('ZONAS_CRITICAS') {
+
+    <reporte-zonas-criticas />
+
+    }
+
+    }
+
+  </main>
+
+</div>

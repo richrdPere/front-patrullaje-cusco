@@ -1,1 +1,1859 @@
-<p>reporte-zonas-criticas works!</p>
+<div class="space-y-6">
+
+  <!-- ===================================================== -->
+  <!-- CABECERA -->
+  <!-- ===================================================== -->
+
+  <section class="flex flex-col gap-4 rounded-3xl border border-base-300
+           bg-base-100 p-5 shadow-sm
+           lg:flex-row lg:items-center lg:justify-between">
+
+    <div class="flex items-start gap-4">
+
+      <div class="flex h-12 w-12 shrink-0 items-center
+               justify-center rounded-2xl
+               bg-warning/10 text-warning">
+        <i class="fa-solid fa-map-location-dot text-xl"></i>
+      </div>
+
+      <div>
+
+        <h2 class="text-xl font-bold">
+          Reporte de zonas críticas
+        </h2>
+
+        <p class="mt-1 max-w-2xl text-sm text-base-content/60">
+          Analice la concentración y severidad de incidencias,
+          alertas y registros operativos en cada zona.
+        </p>
+
+      </div>
+
+    </div>
+
+    <div class="flex flex-wrap gap-2">
+
+      <button type="button" class="btn btn-ghost" [attr.aria-expanded]="mostrarCriterio" (click)="toggleCriterio()">
+        <i class="fa-solid fa-circle-info"></i>
+
+        @if (mostrarCriterio) {
+        Ocultar criterio
+        } @else {
+        Ver criterio
+        }
+      </button>
+
+      <button type="button" class="btn btn-outline btn-primary" [disabled]="isLoading"
+        (click)="getReporteZonasCriticas()">
+
+        @if (isLoading) {
+
+        <span class="loading loading-spinner loading-sm"></span>
+        Actualizando...
+
+        } @else {
+
+        <i class="fa-solid fa-rotate"></i>
+        Actualizar
+
+        }
+
+      </button>
+
+    </div>
+
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- CRITERIO -->
+  <!-- ===================================================== -->
+
+  @if (mostrarCriterio && reporte) {
+
+  <section class="rounded-3xl border border-info/30
+             bg-info/5 p-5">
+
+    <div class="flex items-start gap-4">
+
+      <div class="flex h-11 w-11 shrink-0 items-center
+                 justify-center rounded-xl
+                 bg-info/10 text-info">
+        <i class="fa-solid fa-scale-balanced"></i>
+      </div>
+
+      <div class="flex-1">
+
+        <h3 class="font-bold">
+          Criterio de criticidad
+        </h3>
+
+        <p class="mt-2 text-sm text-base-content/65">
+          {{ reporte.criterio.descripcion }}
+        </p>
+
+        <div class="mt-5 grid grid-cols-1 gap-3
+                   sm:grid-cols-2 xl:grid-cols-4">
+
+          <div class="rounded-2xl border border-success/30
+                     bg-base-100 p-4">
+            <span class="badge badge-success">
+              Bajo
+            </span>
+
+            <p class="mt-2 text-sm">
+              {{ reporte.criterio.niveles.BAJO.min }}
+              a
+              {{ reporte.criterio.niveles.BAJO.max }}
+              puntos
+            </p>
+          </div>
+
+          <div class="rounded-2xl border border-warning/30
+                     bg-base-100 p-4">
+            <span class="badge badge-warning">
+              Medio
+            </span>
+
+            <p class="mt-2 text-sm">
+              {{ reporte.criterio.niveles.MEDIO.min }}
+              a
+              {{ reporte.criterio.niveles.MEDIO.max }}
+              puntos
+            </p>
+          </div>
+
+          <div class="rounded-2xl border border-error/30
+                     bg-base-100 p-4">
+            <span class="badge badge-error badge-outline">
+              Alto
+            </span>
+
+            <p class="mt-2 text-sm">
+              {{ reporte.criterio.niveles.ALTO.min }}
+              a
+              {{ reporte.criterio.niveles.ALTO.max }}
+              puntos
+            </p>
+          </div>
+
+          <div class="rounded-2xl border border-error/40
+                     bg-base-100 p-4">
+            <span class="badge badge-error">
+              Crítico
+            </span>
+
+            <p class="mt-2 text-sm">
+              Desde
+              {{ reporte.criterio.niveles.CRITICO.min }}
+              puntos
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  }
+
+  <!-- ===================================================== -->
+  <!-- FILTROS -->
+  <!-- ===================================================== -->
+
+  <section class="overflow-hidden rounded-3xl border border-base-300
+           bg-base-100 shadow-sm">
+
+    <div class="flex flex-col gap-4 border-b border-base-300
+             px-5 py-4 sm:flex-row sm:items-center
+             sm:justify-between">
+
+      <div class="flex items-center gap-3">
+
+        <div class="flex h-10 w-10 items-center justify-center
+                 rounded-xl bg-primary/10 text-primary">
+          <i class="fa-solid fa-filter"></i>
+        </div>
+
+        <div>
+
+          <h3 class="font-bold">
+            Filtros del reporte
+          </h3>
+
+          <p class="text-xs text-base-content/50">
+            Combine fechas, criticidad y criterios operativos.
+          </p>
+
+        </div>
+
+      </div>
+
+      <div class="flex flex-wrap gap-2">
+
+        <button type="button" class="btn btn-ghost btn-sm" [disabled]="isLoading" (click)="limpiarFiltros()">
+          <i class="fa-solid fa-eraser"></i>
+          Limpiar
+        </button>
+
+        <button type="button" class="btn btn-outline btn-primary btn-sm" [attr.aria-expanded]="mostrarFiltrosAvanzados"
+          (click)="toggleFiltrosAvanzados()">
+
+          <i class="fa-solid fa-sliders"></i>
+
+          @if (mostrarFiltrosAvanzados) {
+          Ocultar filtros
+          } @else {
+          Más filtros
+          }
+
+          <i class="fa-solid" [ngClass]="{
+              'fa-chevron-up': mostrarFiltrosAvanzados,
+              'fa-chevron-down': !mostrarFiltrosAvanzados
+            }"></i>
+
+        </button>
+
+      </div>
+
+    </div>
+
+    <form class="p-5" (ngSubmit)="aplicarFiltros()">
+
+      <!-- FILTROS PRINCIPALES -->
+
+      <div class="grid grid-cols-1 gap-4
+               md:grid-cols-2 xl:grid-cols-4">
+
+        <label class="form-control">
+
+          <div class="label">
+            <span class="label-text font-semibold">
+              Fecha inicial
+            </span>
+          </div>
+
+          <input type="date" name="fecha_inicio" class="input input-bordered w-full"
+            [(ngModel)]="filtrosFormulario.fecha_inicio" />
+
+        </label>
+
+        <label class="form-control">
+
+          <div class="label">
+            <span class="label-text font-semibold">
+              Fecha final
+            </span>
+          </div>
+
+          <input type="date" name="fecha_fin" class="input input-bordered w-full"
+            [(ngModel)]="filtrosFormulario.fecha_fin" />
+
+        </label>
+
+        <label class="form-control">
+
+          <div class="label">
+            <span class="label-text font-semibold">
+              Nivel de criticidad
+            </span>
+          </div>
+
+          <select name="nivel_criticidad" class="select select-bordered w-full"
+            [(ngModel)]="filtrosFormulario.nivel_criticidad">
+
+            <option value="">
+              Todos los niveles
+            </option>
+
+            @for (
+            nivel of nivelesCriticidad;
+            track nivel.value
+            ) {
+
+            <option [value]="nivel.value">
+              {{ nivel.label }}
+            </option>
+
+            }
+
+          </select>
+
+        </label>
+
+        <label class="form-control">
+
+          <div class="label">
+            <span class="label-text font-semibold">
+              Límite del ranking
+            </span>
+          </div>
+
+          <select name="limite" class="select select-bordered w-full" [(ngModel)]="filtrosFormulario.limite">
+
+            @for (
+            limite of limitesDisponibles;
+            track limite
+            ) {
+
+            <option [ngValue]="limite">
+              Primeras {{ limite }} zonas
+            </option>
+
+            }
+
+          </select>
+
+        </label>
+
+      </div>
+
+      <!-- FILTROS AVANZADOS -->
+
+      @if (mostrarFiltrosAvanzados) {
+
+      <div class="mt-5 border-t border-base-300 pt-5">
+
+        <div class="mb-4">
+
+          <h4 class="text-sm font-bold">
+            Filtros avanzados
+          </h4>
+
+          <p class="mt-1 text-xs text-base-content/50">
+            Restrinja los eventos utilizados en el cálculo.
+          </p>
+
+        </div>
+
+        <div class="grid grid-cols-1 gap-4
+                   md:grid-cols-2 xl:grid-cols-4">
+
+          <!-- Zona -->
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Zona
+              </span>
+            </div>
+
+            <input type="number" min="1" name="zona_id" class="input input-bordered w-full" placeholder="ID de la zona"
+              [(ngModel)]="filtrosFormulario.zona_id" />
+
+          </label>
+
+          <!-- Unidad -->
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Unidad
+              </span>
+            </div>
+
+            <input type="number" min="1" name="unidad_id" class="input input-bordered w-full"
+              placeholder="ID de la unidad" [(ngModel)]="filtrosFormulario.unidad_id" />
+
+          </label>
+
+          <!-- Patrullaje -->
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Patrullaje
+              </span>
+            </div>
+
+            <input type="number" min="1" name="patrullaje_id" class="input input-bordered w-full"
+              placeholder="ID del patrullaje" [(ngModel)]="filtrosFormulario.patrullaje_id" />
+
+          </label>
+
+          <!-- Usuario -->
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Sereno o emisor
+              </span>
+            </div>
+
+            <input type="number" min="1" name="usuario_id" class="input input-bordered w-full"
+              placeholder="ID del usuario" [(ngModel)]="filtrosFormulario.usuario_id" />
+
+          </label>
+
+          <!-- Tipo incidencia -->
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Tipo de incidencia
+              </span>
+            </div>
+
+            <select name="tipo_incidencia" class="select select-bordered w-full"
+              [(ngModel)]="filtrosFormulario.tipo_incidencia">
+
+              <option value="">
+                Todos los tipos
+              </option>
+
+              @for (
+              tipo of tiposIncidencia;
+              track tipo.value
+              ) {
+
+              <option [value]="tipo.value">
+                {{ tipo.label }}
+              </option>
+
+              }
+
+            </select>
+
+          </label>
+
+          <!-- Estado incidencia -->
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Estado de incidencia
+              </span>
+            </div>
+
+            <select name="estado_incidencia" class="select select-bordered w-full"
+              [(ngModel)]="filtrosFormulario.estado_incidencia">
+
+              <option value="">
+                Todos los estados
+              </option>
+
+              @for (
+              estado of estadosIncidencia;
+              track estado.value
+              ) {
+
+              <option [value]="estado.value">
+                {{ estado.label }}
+              </option>
+
+              }
+
+            </select>
+
+          </label>
+
+          <!-- Prioridad -->
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Prioridad
+              </span>
+            </div>
+
+            <select name="prioridad" class="select select-bordered w-full" [(ngModel)]="filtrosFormulario.prioridad">
+
+              <option value="">
+                Todas las prioridades
+              </option>
+
+              @for (
+              prioridad of prioridades;
+              track prioridad.value
+              ) {
+
+              <option [value]="prioridad.value">
+                {{ prioridad.label }}
+              </option>
+
+              }
+
+            </select>
+
+          </label>
+
+          <!-- Tipo alerta -->
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Tipo de alerta
+              </span>
+            </div>
+
+            <select name="tipo_alerta" class="select select-bordered w-full"
+              [(ngModel)]="filtrosFormulario.tipo_alerta">
+
+              <option value="">
+                Todos los tipos
+              </option>
+
+              @for (
+              tipo of tiposAlerta;
+              track tipo.value
+              ) {
+
+              <option [value]="tipo.value">
+                {{ tipo.label }}
+              </option>
+
+              }
+
+            </select>
+
+          </label>
+
+          <!-- Estado alerta -->
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Estado de alerta
+              </span>
+            </div>
+
+            <select name="estado_alerta" class="select select-bordered w-full"
+              [(ngModel)]="filtrosFormulario.estado_alerta">
+
+              <option value="">
+                Todos los estados
+              </option>
+
+              @for (
+              estado of estadosAlerta;
+              track estado.value
+              ) {
+
+              <option [value]="estado.value">
+                {{ estado.label }}
+              </option>
+
+              }
+
+            </select>
+
+          </label>
+
+          <!-- Sin eventos -->
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Zonas sin eventos
+              </span>
+            </div>
+
+            <select name="incluir_sin_eventos" class="select select-bordered w-full"
+              [(ngModel)]="filtrosFormulario.incluir_sin_eventos">
+
+              <option [ngValue]="false">
+                Excluir zonas sin eventos
+              </option>
+
+              <option [ngValue]="true">
+                Incluir zonas sin eventos
+              </option>
+
+            </select>
+
+          </label>
+
+          <!-- Puntos -->
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Puntos geográficos
+              </span>
+            </div>
+
+            <select name="incluir_puntos" class="select select-bordered w-full"
+              [(ngModel)]="filtrosFormulario.incluir_puntos">
+
+              <option [ngValue]="true">
+                Incluir puntos
+              </option>
+
+              <option [ngValue]="false">
+                No incluir puntos
+              </option>
+
+            </select>
+
+          </label>
+
+        </div>
+
+      </div>
+
+      }
+
+      @if (filterErrorMessage) {
+
+      <div class="alert alert-warning mt-5">
+
+        <i class="fa-solid fa-triangle-exclamation"></i>
+
+        <span>
+          {{ filterErrorMessage }}
+        </span>
+
+      </div>
+
+      }
+
+      <div class="mt-5 flex flex-col-reverse gap-3
+               sm:flex-row sm:justify-end">
+
+        <button type="button" class="btn btn-ghost" [disabled]="isLoading" (click)="limpiarFiltros()">
+          <i class="fa-solid fa-eraser"></i>
+          Limpiar filtros
+        </button>
+
+        <button type="submit" class="btn btn-primary sm:min-w-36" [disabled]="isLoading">
+
+          @if (isLoading) {
+
+          <span class="loading loading-spinner loading-sm"></span>
+          Consultando...
+
+          } @else {
+
+          <i class="fa-solid fa-magnifying-glass"></i>
+          Consultar
+
+          }
+
+        </button>
+
+      </div>
+
+    </form>
+
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- ERROR -->
+  <!-- ===================================================== -->
+
+  @if (requestErrorMessage && !isLoading) {
+
+  <section class="rounded-3xl border border-error/30
+             bg-error/5 p-6">
+
+    <div class="flex flex-col items-center
+               justify-center py-8 text-center">
+
+      <div class="flex h-16 w-16 items-center
+                 justify-center rounded-full
+                 bg-error/10 text-error">
+        <i class="fa-solid fa-circle-exclamation text-2xl"></i>
+      </div>
+
+      <h3 class="mt-4 text-lg font-bold">
+        No se pudo cargar el reporte
+      </h3>
+
+      <p class="mt-2 max-w-lg text-sm text-base-content/60">
+        {{ requestErrorMessage }}
+      </p>
+
+      <button type="button" class="btn btn-primary mt-5" (click)="reintentar()">
+        <i class="fa-solid fa-rotate-right"></i>
+        Reintentar
+      </button>
+
+    </div>
+
+  </section>
+
+  }
+
+  <!-- ===================================================== -->
+  <!-- CARGA -->
+  <!-- ===================================================== -->
+
+  @if (isLoading && !reporte) {
+
+  <section class="flex min-h-72 flex-col items-center
+             justify-center rounded-3xl
+             border border-base-300 bg-base-100 p-8">
+
+    <span class="loading loading-spinner loading-lg text-primary"></span>
+
+    <h3 class="mt-4 font-bold">
+      Analizando zonas
+    </h3>
+
+    <p class="mt-1 text-sm text-base-content/50">
+      Calculando la frecuencia y severidad de los eventos.
+    </p>
+
+  </section>
+
+  }
+
+  <!-- ===================================================== -->
+  <!-- CONTENIDO -->
+  <!-- ===================================================== -->
+
+  @if (reporte) {
+
+  <!-- INDICADORES -->
+
+  <section class="grid grid-cols-1 gap-4
+             sm:grid-cols-2 xl:grid-cols-4">
+
+    <article class="rounded-3xl border border-base-300
+               bg-base-100 p-5 shadow-sm">
+
+      <div class="flex items-start justify-between gap-4">
+
+        <div>
+          <p class="text-sm text-base-content/55">
+            Zonas analizadas
+          </p>
+
+          <p class="mt-2 text-3xl font-bold">
+            {{ zonasAnalizadas }}
+          </p>
+        </div>
+
+        <div class="flex h-11 w-11 items-center justify-center
+                   rounded-xl bg-primary/10 text-primary">
+          <i class="fa-solid fa-map"></i>
+        </div>
+
+      </div>
+
+    </article>
+
+    <article class="rounded-3xl border border-base-300
+               bg-base-100 p-5 shadow-sm">
+
+      <div class="flex items-start justify-between gap-4">
+
+        <div>
+          <p class="text-sm text-base-content/55">
+            Total de eventos
+          </p>
+
+          <p class="mt-2 text-3xl font-bold">
+            {{ totalEventos }}
+          </p>
+        </div>
+
+        <div class="flex h-11 w-11 items-center justify-center
+                   rounded-xl bg-info/10 text-info">
+          <i class="fa-solid fa-layer-group"></i>
+        </div>
+
+      </div>
+
+    </article>
+
+    <article class="rounded-3xl border border-base-300
+               bg-base-100 p-5 shadow-sm">
+
+      <div class="flex items-start justify-between gap-4">
+
+        <div>
+          <p class="text-sm text-base-content/55">
+            Zonas críticas
+          </p>
+
+          <p class="mt-2 text-3xl font-bold">
+            {{ zonasCriticas }}
+          </p>
+        </div>
+
+        <div class="flex h-11 w-11 items-center justify-center
+                   rounded-xl bg-error/10 text-error">
+          <i class="fa-solid fa-skull-crossbones"></i>
+        </div>
+
+      </div>
+
+    </article>
+
+    <article class="rounded-3xl border border-base-300
+               bg-base-100 p-5 shadow-sm">
+
+      <div class="flex items-start justify-between gap-4">
+
+        <div>
+          <p class="text-sm text-base-content/55">
+            Puntaje acumulado
+          </p>
+
+          <p class="mt-2 text-3xl font-bold">
+            {{ puntajeTotal }}
+          </p>
+        </div>
+
+        <div class="flex h-11 w-11 items-center justify-center
+                   rounded-xl bg-warning/10 text-warning">
+          <i class="fa-solid fa-gauge-high"></i>
+        </div>
+
+      </div>
+
+    </article>
+
+  </section>
+
+  <!-- DISTRIBUCIÓN DE NIVELES -->
+
+  <section class="grid grid-cols-2 gap-4
+             xl:grid-cols-4">
+
+    <div class="rounded-2xl border border-success/30
+               bg-base-100 p-4">
+      <p class="text-xs text-base-content/50">
+        Nivel bajo
+      </p>
+
+      <p class="mt-2 text-2xl font-bold text-success">
+        {{ zonasBajas }}
+      </p>
+    </div>
+
+    <div class="rounded-2xl border border-warning/30
+               bg-base-100 p-4">
+      <p class="text-xs text-base-content/50">
+        Nivel medio
+      </p>
+
+      <p class="mt-2 text-2xl font-bold text-warning">
+        {{ zonasMedias }}
+      </p>
+    </div>
+
+    <div class="rounded-2xl border border-error/30
+               bg-base-100 p-4">
+      <p class="text-xs text-base-content/50">
+        Nivel alto
+      </p>
+
+      <p class="mt-2 text-2xl font-bold text-error">
+        {{ zonasAltas }}
+      </p>
+    </div>
+
+    <div class="rounded-2xl border border-error/40
+               bg-error/5 p-4">
+      <p class="text-xs text-base-content/50">
+        Nivel crítico
+      </p>
+
+      <p class="mt-2 text-2xl font-bold text-error">
+        {{ zonasCriticas }}
+      </p>
+    </div>
+
+  </section>
+
+  <!-- ZONA MÁS CRÍTICA -->
+
+  @if (reporte.resumen.zona_mas_critica; as zonaCritica) {
+
+  <section class="rounded-3xl border border-warning/40
+               bg-warning/5 p-5">
+
+    <div class="flex flex-col gap-4 sm:flex-row
+                 sm:items-center sm:justify-between">
+
+      <div class="flex items-center gap-4">
+
+        <div class="flex h-12 w-12 items-center justify-center
+                     rounded-2xl bg-warning/15 text-warning">
+          <i class="fa-solid fa-ranking-star text-xl"></i>
+        </div>
+
+        <div>
+
+          <p class="text-xs font-semibold uppercase text-warning">
+            Zona con mayor criticidad
+          </p>
+
+          <h3 class="mt-1 text-xl font-bold">
+            {{ zonaCritica.zona }}
+          </h3>
+
+          <p class="mt-1 text-sm text-base-content/60">
+            {{ zonaCritica.total_eventos }} eventos registrados
+          </p>
+
+        </div>
+
+      </div>
+
+      <div class="flex items-center gap-3">
+
+        <span class="badge badge-lg" [ngClass]="
+                getNivelBadgeClass(
+                  zonaCritica.nivel_criticidad
+                )
+              ">
+          {{
+          getNivelLabel(
+          zonaCritica.nivel_criticidad
+          )
+          }}
+        </span>
+
+        <span class="text-2xl font-bold">
+          {{ zonaCritica.puntaje }}
+          <span class="text-sm font-normal">
+            pts.
+          </span>
+        </span>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  }
+
+  <!-- EVENTOS GENERALES -->
+
+  <section class="grid grid-cols-1 gap-4
+             sm:grid-cols-3">
+
+    <div class="rounded-2xl border border-warning/30
+               bg-base-100 p-4">
+      <p class="text-xs text-base-content/50">
+        Incidencias
+      </p>
+
+      <p class="mt-2 text-2xl font-bold">
+        {{ totalIncidencias }}
+      </p>
+    </div>
+
+    <div class="rounded-2xl border border-info/30
+               bg-base-100 p-4">
+      <p class="text-xs text-base-content/50">
+        Registros operativos
+      </p>
+
+      <p class="mt-2 text-2xl font-bold">
+        {{ totalHistoriales }}
+      </p>
+    </div>
+
+    <div class="rounded-2xl border border-error/30
+               bg-base-100 p-4">
+      <p class="text-xs text-base-content/50">
+        Alertas
+      </p>
+
+      <p class="mt-2 text-2xl font-bold">
+        {{ totalAlertas }}
+      </p>
+    </div>
+
+  </section>
+
+  <!-- =================================================== -->
+  <!-- RANKING Y FECHAS -->
+  <!-- =================================================== -->
+
+  <section class="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_360px]">
+
+    <!-- RANKING -->
+
+    <article class="overflow-hidden rounded-3xl
+               border border-base-300
+               bg-base-100 shadow-sm">
+
+      <div class="border-b border-base-300 px-5 py-4">
+
+        <h3 class="font-bold">
+          Ranking de zonas
+        </h3>
+
+        <p class="mt-1 text-xs text-base-content/50">
+          Ordenado según el puntaje de criticidad calculado.
+        </p>
+
+      </div>
+
+      @if (zonas.length > 0) {
+
+      <div class="divide-y divide-base-300">
+
+        @for (
+        zona of zonas;
+        track zona.zona_id
+        ) {
+
+        <div class="p-5 transition hover:bg-base-200/40">
+
+          <div class="flex flex-col gap-4
+                         sm:flex-row sm:items-start
+                         sm:justify-between">
+
+            <div class="flex min-w-0 gap-4">
+
+              <div class="flex h-11 w-11 shrink-0
+                             items-center justify-center
+                             rounded-xl font-bold" [ngClass]="[
+                        getNivelBackgroundClass(
+                          zona.nivel_criticidad
+                        ),
+                        getNivelTextClass(
+                          zona.nivel_criticidad
+                        )
+                      ]">
+                {{ zona.posicion }}
+              </div>
+
+              <div class="min-w-0">
+
+                <div class="flex flex-wrap items-center gap-2">
+
+                  <h4 class="font-bold">
+                    {{ zona.zona }}
+                  </h4>
+
+                  <span class="badge badge-sm" [ngClass]="
+                            getNivelBadgeClass(
+                              zona.nivel_criticidad
+                            )
+                          ">
+                    {{
+                    getNivelLabel(
+                    zona.nivel_criticidad
+                    )
+                    }}
+                  </span>
+
+                </div>
+
+                <p class="mt-1 line-clamp-2 text-sm
+                               text-base-content/55">
+                  {{ zona.descripcion || 'Sin descripción' }}
+                </p>
+
+                <div class="mt-3 flex flex-wrap gap-x-4
+                               gap-y-2 text-xs
+                               text-base-content/55">
+                  <span>
+                    <i class="fa-solid fa-layer-group mr-1"></i>
+                    {{ zona.total_eventos }} eventos
+                  </span>
+
+                  <span>
+                    <i class="fa-solid fa-triangle-exclamation mr-1"></i>
+                    {{ zona.total_incidencias }} incidencias
+                  </span>
+
+                  <span>
+                    <i class="fa-solid fa-clock-rotate-left mr-1"></i>
+                    {{ zona.total_historiales }} historiales
+                  </span>
+
+                  <span>
+                    <i class="fa-solid fa-bell mr-1"></i>
+                    {{ zona.total_alertas }} alertas
+                  </span>
+                </div>
+
+              </div>
+
+            </div>
+
+            <div class="flex shrink-0 items-center
+                           justify-between gap-4 sm:flex-col
+                           sm:items-end">
+
+              <div class="text-right">
+
+                <p class="text-2xl font-bold">
+                  {{ zona.puntaje.total }}
+                </p>
+
+                <p class="text-xs text-base-content/50">
+                  puntos
+                </p>
+
+              </div>
+
+              <div class="flex gap-1">
+
+                <button type="button" class="btn btn-circle btn-ghost btn-sm" title="Ver detalle"
+                  aria-label="Ver detalle de zona" (click)="abrirDetalle(zona)">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+
+                <button type="button" class="btn btn-circle btn-ghost btn-sm" title="Abrir ubicación"
+                  aria-label="Abrir ubicación" [disabled]="!tieneCoordenadas(zona)"
+                  (click)="abrirZonaEnGoogleMaps(zona)">
+                  <i class="fa-solid fa-map-location-dot"></i>
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <progress class="progress progress-warning mt-4 w-full" [value]="getPorcentajePuntaje(zona)"
+            max="100"></progress>
+
+          <div class="mt-3 grid grid-cols-3 gap-2
+                         text-center text-xs">
+
+            <div class="rounded-xl bg-warning/10 p-2">
+              <p class="text-base-content/50">
+                Incidencias
+              </p>
+
+              <p class="mt-1 font-bold">
+                {{ zona.puntaje.incidencias }}
+              </p>
+            </div>
+
+            <div class="rounded-xl bg-info/10 p-2">
+              <p class="text-base-content/50">
+                Historiales
+              </p>
+
+              <p class="mt-1 font-bold">
+                {{ zona.puntaje.historiales }}
+              </p>
+            </div>
+
+            <div class="rounded-xl bg-error/10 p-2">
+              <p class="text-base-content/50">
+                Alertas
+              </p>
+
+              <p class="mt-1 font-bold">
+                {{ zona.puntaje.alertas }}
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+
+        }
+
+      </div>
+
+      } @else {
+
+      <div class="flex min-h-64 flex-col items-center
+                   justify-center p-8 text-center">
+
+        <div class="flex h-16 w-16 items-center
+                     justify-center rounded-full
+                     bg-base-200 text-base-content/40">
+          <i class="fa-solid fa-map-location-dot text-2xl"></i>
+        </div>
+
+        <h3 class="mt-4 text-lg font-bold">
+          Sin zonas para mostrar
+        </h3>
+
+        <p class="mt-2 max-w-md text-sm text-base-content/50">
+          No existen zonas que coincidan con los filtros aplicados.
+        </p>
+
+        <button type="button" class="btn btn-primary mt-5" (click)="limpiarFiltros()">
+          <i class="fa-solid fa-eraser"></i>
+          Limpiar filtros
+        </button>
+
+      </div>
+
+      }
+
+    </article>
+
+    <!-- POR FECHA -->
+
+    <article class="rounded-3xl border border-base-300
+               bg-base-100 p-5 shadow-sm">
+
+      <div class="mb-5">
+
+        <h3 class="font-bold">
+          Eventos por fecha
+        </h3>
+
+        <p class="mt-1 text-xs text-base-content/50">
+          Evolución temporal de los eventos analizados.
+        </p>
+
+      </div>
+
+      @if (reporte.por_fecha.length > 0) {
+
+      <div class="max-h-155 space-y-4 overflow-y-auto pr-1">
+
+        @for (
+        item of reporte.por_fecha;
+        track item.fecha
+        ) {
+
+        <div>
+
+          <div class="mb-2 flex items-center justify-between">
+
+            <div>
+
+              <p class="text-sm font-semibold">
+                {{ item.fecha | date:'dd/MM/yyyy':'UTC' }}
+              </p>
+
+              <p class="text-xs text-base-content/50">
+                {{ item.total_eventos }} evento(s)
+              </p>
+
+            </div>
+
+            <span class="badge badge-primary">
+              {{ item.total_eventos }}
+            </span>
+
+          </div>
+
+          <progress class="progress progress-primary w-full" [value]="getPorcentajeFecha(item.total_eventos)"
+            max="100"></progress>
+
+          <div class="mt-2 flex flex-wrap gap-2
+                         text-xs text-base-content/50">
+            <span>
+              {{ item.incidencias }} incidencias
+            </span>
+
+            <span>
+              {{ item.historiales }} historiales
+            </span>
+
+            <span>
+              {{ item.alertas }} alertas
+            </span>
+          </div>
+
+        </div>
+
+        }
+
+      </div>
+
+      } @else {
+
+      <p class="py-10 text-center text-sm text-base-content/50">
+        No existen eventos agrupados por fecha.
+      </p>
+
+      }
+
+    </article>
+
+  </section>
+
+  }
+
+</div>
+
+<!-- ======================================================= -->
+<!-- MODAL DE DETALLE -->
+<!-- ======================================================= -->
+
+@if (
+mostrarModalDetalle &&
+zonaSeleccionada
+) {
+
+<div class="fixed inset-0 z-70 flex items-center justify-center
+           bg-black/65 p-3 backdrop-blur-sm sm:p-6" role="dialog" aria-modal="true"
+  aria-labelledby="zona-critica-detail-title" (click)="cerrarDetalle()">
+
+  <div class="flex max-h-[95vh] w-full max-w-6xl
+             flex-col overflow-hidden rounded-3xl
+             bg-base-100 shadow-2xl" (click)="$event.stopPropagation()">
+
+    <!-- CABECERA -->
+
+    <header class="flex shrink-0 items-center
+               justify-between gap-4
+               border-b border-base-300
+               px-5 py-4 sm:px-6">
+
+      <div class="flex min-w-0 items-center gap-3">
+
+        <div class="flex h-11 w-11 shrink-0
+                   items-center justify-center
+                   rounded-xl" [ngClass]="[
+              getNivelBackgroundClass(
+                zonaSeleccionada.nivel_criticidad
+              ),
+              getNivelTextClass(
+                zonaSeleccionada.nivel_criticidad
+              )
+            ]">
+          <i [class]="
+                getNivelIcon(
+                  zonaSeleccionada.nivel_criticidad
+                )
+              "></i>
+        </div>
+
+        <div class="min-w-0">
+
+          <h2 id="zona-critica-detail-title" class="truncate font-bold sm:text-lg">
+            {{ zonaSeleccionada.zona }}
+          </h2>
+
+          <p class="mt-1 truncate text-xs text-base-content/50">
+            Posición {{ zonaSeleccionada.posicion }}
+            ·
+            Riesgo configurado:
+            {{
+            getRiesgoLabel(
+            zonaSeleccionada.riesgo_configurado
+            )
+            }}
+          </p>
+
+        </div>
+
+      </div>
+
+      <div class="flex items-center gap-1">
+
+        <button type="button" class="btn btn-circle btn-ghost btn-sm" title="Abrir ubicación"
+          aria-label="Abrir ubicación" [disabled]="!tieneCoordenadas(zonaSeleccionada)"
+          (click)="abrirZonaEnGoogleMaps(zonaSeleccionada)">
+          <i class="fa-solid fa-map-location-dot"></i>
+        </button>
+
+        <button type="button" class="btn btn-circle btn-ghost btn-sm" aria-label="Cerrar detalle"
+          (click)="cerrarDetalle()">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+
+      </div>
+
+    </header>
+
+    <!-- CONTENIDO -->
+
+    <div class="flex-1 overflow-y-auto p-5 sm:p-6">
+
+      <!-- RESUMEN -->
+
+      <section class="grid grid-cols-1 gap-4
+                 sm:grid-cols-2 xl:grid-cols-5">
+
+        <div class="rounded-2xl bg-base-200 p-4">
+
+          <p class="text-xs text-base-content/50">
+            Nivel
+          </p>
+
+          <span class="badge mt-2" [ngClass]="
+                getNivelBadgeClass(
+                  zonaSeleccionada.nivel_criticidad
+                )
+              ">
+            {{
+            getNivelLabel(
+            zonaSeleccionada.nivel_criticidad
+            )
+            }}
+          </span>
+
+        </div>
+
+        <div class="rounded-2xl bg-base-200 p-4">
+
+          <p class="text-xs text-base-content/50">
+            Puntaje
+          </p>
+
+          <p class="mt-2 text-xl font-bold">
+            {{ zonaSeleccionada.puntaje.total }}
+          </p>
+
+        </div>
+
+        <div class="rounded-2xl bg-base-200 p-4">
+
+          <p class="text-xs text-base-content/50">
+            Eventos
+          </p>
+
+          <p class="mt-2 text-xl font-bold">
+            {{ zonaSeleccionada.total_eventos }}
+          </p>
+
+        </div>
+
+        <div class="rounded-2xl bg-base-200 p-4">
+
+          <p class="text-xs text-base-content/50">
+            Puntos críticos
+          </p>
+
+          <p class="mt-2 text-xl font-bold">
+            {{ zonaSeleccionada.puntos_criticos }}
+          </p>
+
+        </div>
+
+        <div class="rounded-2xl bg-base-200 p-4">
+
+          <p class="text-xs text-base-content/50">
+            Última actividad
+          </p>
+
+          <p class="mt-2 text-sm font-bold">
+
+            @if (zonaSeleccionada.ultima_actividad) {
+
+            {{
+            zonaSeleccionada.ultima_actividad
+            | date:'dd/MM/yyyy HH:mm':'UTC'
+            }}
+
+            } @else {
+
+            No disponible
+
+            }
+
+          </p>
+
+        </div>
+
+      </section>
+
+      <!-- DISTRIBUCIONES -->
+
+      <section class="mt-6 grid grid-cols-1 gap-5
+                 lg:grid-cols-2">
+
+        <!-- INCIDENCIAS POR TIPO -->
+
+        <article class="rounded-2xl border
+                   border-base-300 p-4">
+
+          <h3 class="font-bold">
+            Incidencias por tipo
+          </h3>
+
+          @if (
+          getIncidenciasPorTipo(
+          zonaSeleccionada
+          ).length > 0
+          ) {
+
+          <div class="mt-4 space-y-3">
+
+            @for (
+            item of getIncidenciasPorTipo(
+            zonaSeleccionada
+            );
+            track item.key
+            ) {
+
+            <div class="flex items-center
+                           justify-between gap-3">
+              <span class="text-sm">
+                {{ getTipoIncidenciaLabel(item.key) }}
+              </span>
+
+              <span class="badge badge-warning">
+                {{ item.total }}
+              </span>
+            </div>
+
+            }
+
+          </div>
+
+          } @else {
+
+          <p class="mt-4 text-sm text-base-content/50">
+            No existen incidencias registradas.
+          </p>
+
+          }
+
+        </article>
+
+        <!-- INCIDENCIAS POR ESTADO -->
+
+        <article class="rounded-2xl border
+                   border-base-300 p-4">
+
+          <h3 class="font-bold">
+            Incidencias por estado
+          </h3>
+
+          @if (
+          getIncidenciasPorEstado(
+          zonaSeleccionada
+          ).length > 0
+          ) {
+
+          <div class="mt-4 space-y-3">
+
+            @for (
+            item of getIncidenciasPorEstado(
+            zonaSeleccionada
+            );
+            track item.key
+            ) {
+
+            <div class="flex items-center
+                           justify-between gap-3">
+              <span class="text-sm">
+                {{ getEstadoIncidenciaLabel(item.key) }}
+              </span>
+
+              <span class="badge badge-info">
+                {{ item.total }}
+              </span>
+            </div>
+
+            }
+
+          </div>
+
+          } @else {
+
+          <p class="mt-4 text-sm text-base-content/50">
+            No existen estados de incidencia.
+          </p>
+
+          }
+
+        </article>
+
+        <!-- HISTORIALES -->
+
+        <article class="rounded-2xl border
+                   border-base-300 p-4">
+
+          <h3 class="font-bold">
+            Historiales por tipo
+          </h3>
+
+          @if (
+          getHistorialesPorTipo(
+          zonaSeleccionada
+          ).length > 0
+          ) {
+
+          <div class="mt-4 space-y-3">
+
+            @for (
+            item of getHistorialesPorTipo(
+            zonaSeleccionada
+            );
+            track item.key
+            ) {
+
+            <div class="flex items-center
+                           justify-between gap-3">
+              <span class="text-sm">
+                {{ getTipoHistorialLabel(item.key) }}
+              </span>
+
+              <span class="badge badge-secondary">
+                {{ item.total }}
+              </span>
+            </div>
+
+            }
+
+          </div>
+
+          } @else {
+
+          <p class="mt-4 text-sm text-base-content/50">
+            No existen historiales registrados.
+          </p>
+
+          }
+
+        </article>
+
+        <!-- ALERTAS -->
+
+        <article class="rounded-2xl border
+                   border-base-300 p-4">
+
+          <h3 class="font-bold">
+            Alertas por tipo
+          </h3>
+
+          @if (
+          getAlertasPorTipo(
+          zonaSeleccionada
+          ).length > 0
+          ) {
+
+          <div class="mt-4 space-y-3">
+
+            @for (
+            item of getAlertasPorTipo(
+            zonaSeleccionada
+            );
+            track item.key
+            ) {
+
+            <div class="flex items-center
+                           justify-between gap-3">
+              <span class="text-sm">
+                {{ getTipoAlertaLabel(item.key) }}
+              </span>
+
+              <span class="badge badge-error">
+                {{ item.total }}
+              </span>
+            </div>
+
+            }
+
+          </div>
+
+          } @else {
+
+          <p class="mt-4 text-sm text-base-content/50">
+            No existen alertas registradas.
+          </p>
+
+          }
+
+        </article>
+
+      </section>
+
+      <!-- PUNTOS GEOGRÁFICOS -->
+
+      <section class="mt-6">
+
+        <div class="flex flex-col gap-3 sm:flex-row
+                   sm:items-center sm:justify-between">
+
+          <div>
+
+            <h3 class="font-bold">
+              Puntos geográficos
+            </h3>
+
+            <p class="mt-1 text-xs text-base-content/50">
+              Ubicaciones incluidas en el análisis de criticidad.
+            </p>
+
+          </div>
+
+          <span class="badge badge-primary badge-outline">
+            {{ zonaSeleccionada.puntos_geograficos.length }}
+            punto(s)
+          </span>
+
+        </div>
+
+        @if (
+        zonaSeleccionada.puntos_geograficos.length > 0
+        ) {
+
+        <div class="mt-4 overflow-hidden rounded-2xl
+                     border border-base-300">
+
+          <div class="overflow-x-auto">
+
+            <table class="table table-zebra">
+
+              <thead>
+                <tr>
+                  <th>Fuente</th>
+                  <th>Evento</th>
+                  <th>Fecha</th>
+                  <th>Puntaje</th>
+                  <th class="text-center">Ubicación</th>
+                </tr>
+              </thead>
+
+              <tbody>
+
+                @for (
+                punto of zonaSeleccionada.puntos_geograficos;
+                track punto.fuente + '-' + punto.id
+                ) {
+
+                <tr>
+
+                  <td>
+                    <span class="badge badge-sm" [ngClass]="
+                              getFuenteBadgeClass(
+                                punto.fuente
+                              )
+                            ">
+                      {{ getFuenteLabel(punto.fuente) }}
+                    </span>
+                  </td>
+
+                  <td>
+
+                    <div class="max-w-sm">
+
+                      <p class="font-semibold">
+                        {{ punto.titulo }}
+                      </p>
+
+                      <p class="mt-1 line-clamp-2
+                                     text-xs
+                                     text-base-content/55">
+                        {{ punto.descripcion }}
+                      </p>
+
+                    </div>
+
+                  </td>
+
+                  <td>
+
+                    <p class="text-sm">
+                      {{
+                      punto.fecha_hora
+                      | date:'dd/MM/yyyy':'UTC'
+                      }}
+                    </p>
+
+                    <p class="text-xs text-base-content/50">
+                      {{
+                      punto.fecha_hora
+                      | date:'HH:mm':'UTC'
+                      }}
+                    </p>
+
+                  </td>
+
+                  <td>
+                    <span class="badge badge-neutral">
+                      {{ punto.puntaje }}
+                    </span>
+                  </td>
+
+                  <td class="text-center">
+
+                    <button type="button" class="btn btn-circle
+                                   btn-ghost btn-sm" title="Abrir ubicación" aria-label="Abrir ubicación" (click)="
+                              abrirPuntoEnGoogleMaps(
+                                punto
+                              )
+                            ">
+                      <i class="fa-solid
+                                     fa-map-location-dot"></i>
+                    </button>
+
+                  </td>
+
+                </tr>
+
+                }
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+        } @else {
+
+        <div class="mt-4 rounded-2xl bg-base-200
+                     p-6 text-center">
+          <p class="text-sm text-base-content/50">
+            La consulta no devolvió puntos geográficos.
+          </p>
+        </div>
+
+        }
+
+      </section>
+
+      <!-- POLÍGONO -->
+
+      <section class="mt-6">
+
+        <h3 class="font-bold">
+          Polígono de la zona
+        </h3>
+
+        @if (zonaSeleccionada.coordenadas.length > 0) {
+
+        <div class="mt-4 grid grid-cols-1 gap-3
+                     sm:grid-cols-2 xl:grid-cols-3">
+
+          @for (
+          coordenada of zonaSeleccionada.coordenadas;
+          track $index
+          ) {
+
+          <div class="rounded-2xl border
+                         border-base-300 p-3">
+
+            <p class="text-xs text-base-content/50">
+              Vértice {{ $index + 1 }}
+            </p>
+
+            <p class="mt-1 text-sm font-semibold">
+              {{ coordenada.lat }},
+              {{ coordenada.lng }}
+            </p>
+
+          </div>
+
+          }
+
+        </div>
+
+        } @else {
+
+        <p class="mt-4 text-sm text-base-content/50">
+          La zona no tiene coordenadas de polígono.
+        </p>
+
+        }
+
+      </section>
+
+    </div>
+
+    <!-- PIE -->
+
+    <footer class="flex shrink-0 justify-end
+               border-t border-base-300 px-5 py-4">
+
+      <button type="button" class="btn btn-ghost sm:min-w-28" (click)="cerrarDetalle()">
+        Cerrar
+      </button>
+
+    </footer>
+
+  </div>
+
+</div>
+
+}

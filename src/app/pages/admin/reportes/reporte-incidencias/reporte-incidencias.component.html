@@ -1,1 +1,1145 @@
-<p>reporte-incidencias works!</p>
+<div class="space-y-6">
+
+  <!-- ===================================================== -->
+  <!-- CABECERA DEL REPORTE -->
+  <!-- ===================================================== -->
+
+  <section class="flex flex-col gap-4 rounded-3xl border border-base-300
+           bg-base-100 p-5 shadow-sm
+           lg:flex-row lg:items-center lg:justify-between">
+
+    <div class="flex items-start gap-4">
+
+      <div class="flex h-12 w-12 shrink-0 items-center
+               justify-center rounded-2xl
+               bg-error/10 text-error">
+        <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+      </div>
+
+      <div>
+        <h2 class="text-xl font-bold">
+          Reporte de incidencias
+        </h2>
+
+        <p class="mt-1 max-w-2xl text-sm text-base-content/60">
+          Consulte la distribución de incidencias por tipo, estado,
+          zona, fecha, sereno, patrullaje y unidad.
+        </p>
+      </div>
+
+    </div>
+
+    <button type="button" class="btn btn-outline btn-primary" [disabled]="isLoading" (click)="getReporteIncidencias()">
+      @if (isLoading) {
+      <span class="loading loading-spinner loading-sm"></span>
+      Actualizando...
+      } @else {
+      <i class="fa-solid fa-rotate"></i>
+      Actualizar
+      }
+    </button>
+
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- FILTROS -->
+  <!-- ===================================================== -->
+
+  <section class="overflow-hidden rounded-3xl border border-base-300
+           bg-base-100 shadow-sm">
+
+    <div class="flex flex-col gap-4 border-b border-base-300
+             px-5 py-4 sm:flex-row sm:items-center
+             sm:justify-between">
+
+      <div class="flex items-center gap-3">
+
+        <div class="flex h-10 w-10 shrink-0 items-center
+                 justify-center rounded-xl
+                 bg-primary/10 text-primary">
+          <i class="fa-solid fa-filter"></i>
+        </div>
+
+        <div>
+          <h3 class="font-bold">
+            Filtros del reporte
+          </h3>
+
+          <p class="text-xs text-base-content/50">
+            Puede combinar varios criterios de consulta.
+          </p>
+        </div>
+
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+
+        <button type="button" class="btn btn-ghost btn-sm" [disabled]="isLoading" (click)="limpiarFiltros()">
+          <i class="fa-solid fa-eraser"></i>
+          Limpiar
+        </button>
+
+        <button type="button" class="btn btn-outline btn-primary btn-sm" [attr.aria-expanded]="mostrarFiltrosAvanzados"
+          (click)="toggleFiltrosAvanzados()">
+          <i class="fa-solid fa-sliders"></i>
+
+          @if (mostrarFiltrosAvanzados) {
+          Ocultar filtros
+          } @else {
+          Más filtros
+          }
+
+          <i class="fa-solid" [ngClass]="{
+              'fa-chevron-up': mostrarFiltrosAvanzados,
+              'fa-chevron-down': !mostrarFiltrosAvanzados
+            }"></i>
+        </button>
+
+      </div>
+
+    </div>
+
+    <form class="p-5" (ngSubmit)="aplicarFiltros()">
+
+      <!-- FILTROS PRINCIPALES -->
+
+      <div class="grid grid-cols-1 gap-4
+               md:grid-cols-2 xl:grid-cols-4">
+
+        <!-- Buscar -->
+        <label class="form-control xl:col-span-2">
+
+          <div class="label">
+            <span class="label-text font-semibold">
+              Buscar
+            </span>
+          </div>
+
+          <div class="relative">
+
+            <i class="fa-solid fa-magnifying-glass
+                     absolute left-4 top-1/2
+                     -translate-y-1/2
+                     text-base-content/40"></i>
+
+            <input type="text" name="search" class="input input-bordered w-full pl-11"
+              placeholder="Descripción de la incidencia" [(ngModel)]="filtrosFormulario.search" />
+
+          </div>
+
+        </label>
+
+        <!-- Fecha inicial -->
+        <label class="form-control">
+
+          <div class="label">
+            <span class="label-text font-semibold">
+              Fecha inicial
+            </span>
+          </div>
+
+          <input type="date" name="fecha_inicio" class="input input-bordered w-full"
+            [(ngModel)]="filtrosFormulario.fecha_inicio" />
+
+        </label>
+
+        <!-- Fecha final -->
+        <label class="form-control">
+
+          <div class="label">
+            <span class="label-text font-semibold">
+              Fecha final
+            </span>
+          </div>
+
+          <input type="date" name="fecha_fin" class="input input-bordered w-full"
+            [(ngModel)]="filtrosFormulario.fecha_fin" />
+
+        </label>
+
+      </div>
+
+      <!-- FILTROS AVANZADOS -->
+
+      @if (mostrarFiltrosAvanzados) {
+
+      <div class="mt-5 border-t border-base-300 pt-5">
+
+        <div class="mb-4">
+
+          <h4 class="text-sm font-bold">
+            Filtros avanzados
+          </h4>
+
+          <p class="mt-1 text-xs text-base-content/50">
+            Restrinja el reporte por relaciones operativas y
+            características de la incidencia.
+          </p>
+
+        </div>
+
+        <div class="grid grid-cols-1 gap-4
+                   md:grid-cols-2 xl:grid-cols-4">
+
+          <!-- Usuario -->
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Sereno
+              </span>
+            </div>
+
+            <input type="number" min="1" name="usuario_id" class="input input-bordered w-full"
+              placeholder="ID de usuario" [(ngModel)]="filtrosFormulario.usuario_id" />
+
+          </label>
+
+          <!-- Patrullaje -->
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Patrullaje
+              </span>
+            </div>
+
+            <input type="number" min="1" name="patrullaje_id" class="input input-bordered w-full"
+              placeholder="ID de patrullaje" [(ngModel)]="filtrosFormulario.patrullaje_id" />
+
+          </label>
+
+          <!-- Zona -->
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Zona
+              </span>
+            </div>
+
+            <input type="number" min="1" name="zona_id" class="input input-bordered w-full" placeholder="ID de zona"
+              [(ngModel)]="filtrosFormulario.zona_id" />
+
+          </label>
+
+          <!-- Unidad -->
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Unidad
+              </span>
+            </div>
+
+            <input type="number" min="1" name="unidad_id" class="input input-bordered w-full" placeholder="ID de unidad"
+              [(ngModel)]="filtrosFormulario.unidad_id" />
+
+          </label>
+
+          <!-- Tipo -->
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Tipo de incidencia
+              </span>
+            </div>
+
+            <select name="tipo" class="select select-bordered w-full" [(ngModel)]="filtrosFormulario.tipo">
+              <option value="">
+                Todos los tipos
+              </option>
+
+              @for (tipo of tipos; track tipo.value) {
+              <option [value]="tipo.value">
+                {{ tipo.label }}
+              </option>
+              }
+            </select>
+
+          </label>
+
+          <!-- Estado -->
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Estado
+              </span>
+            </div>
+
+            <select name="estado" class="select select-bordered w-full" [(ngModel)]="filtrosFormulario.estado">
+              <option value="">
+                Todos los estados
+              </option>
+
+              @for (estado of estados; track estado.value) {
+              <option [value]="estado.value">
+                {{ estado.label }}
+              </option>
+              }
+            </select>
+
+          </label>
+
+          <!-- Origen -->
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Origen
+              </span>
+            </div>
+
+            <select name="origen" class="select select-bordered w-full" [(ngModel)]="filtrosFormulario.origen">
+              <option value="">
+                Todos los orígenes
+              </option>
+
+              @for (origen of origenes; track origen.value) {
+              <option [value]="origen.value">
+                {{ origen.label }}
+              </option>
+              }
+            </select>
+
+          </label>
+
+          <!-- Evidencias -->
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Evidencias
+              </span>
+            </div>
+
+            <select name="con_evidencias" class="select select-bordered w-full"
+              [(ngModel)]="filtrosFormulario.con_evidencias">
+              <option [ngValue]="null">
+                Todas las incidencias
+              </option>
+
+              <option [ngValue]="true">
+                Con evidencias
+              </option>
+
+              <option [ngValue]="false">
+                Sin evidencias
+              </option>
+            </select>
+
+          </label>
+
+        </div>
+
+      </div>
+
+      }
+
+      <!-- ERROR DE VALIDACIÓN -->
+
+      @if (filterErrorMessage) {
+
+      <div class="alert alert-warning mt-5">
+
+        <i class="fa-solid fa-triangle-exclamation"></i>
+
+        <span>
+          {{ filterErrorMessage }}
+        </span>
+
+      </div>
+
+      }
+
+      <!-- ACCIONES -->
+
+      <div class="mt-5 flex flex-col-reverse gap-3
+               sm:flex-row sm:justify-end">
+
+        <button type="button" class="btn btn-ghost" [disabled]="isLoading" (click)="limpiarFiltros()">
+          <i class="fa-solid fa-eraser"></i>
+          Limpiar filtros
+        </button>
+
+        <button type="submit" class="btn btn-primary sm:min-w-36" [disabled]="isLoading">
+          @if (isLoading) {
+          <span class="loading loading-spinner loading-sm"></span>
+          Consultando...
+          } @else {
+          <i class="fa-solid fa-magnifying-glass"></i>
+          Consultar
+          }
+        </button>
+
+      </div>
+
+    </form>
+
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- ERROR DE CONSULTA -->
+  <!-- ===================================================== -->
+
+  @if (requestErrorMessage && !isLoading) {
+
+  <section class="rounded-3xl border border-error/30 bg-error/5 p-6">
+
+    <div class="flex flex-col items-center justify-center
+               py-8 text-center">
+
+      <div class="flex h-16 w-16 items-center justify-center
+                 rounded-full bg-error/10 text-error">
+        <i class="fa-solid fa-circle-exclamation text-2xl"></i>
+      </div>
+
+      <h3 class="mt-4 text-lg font-bold">
+        No se pudo cargar el reporte
+      </h3>
+
+      <p class="mt-2 max-w-lg text-sm text-base-content/60">
+        {{ requestErrorMessage }}
+      </p>
+
+      <button type="button" class="btn btn-primary mt-5" (click)="reintentar()">
+        <i class="fa-solid fa-rotate-right"></i>
+        Reintentar
+      </button>
+
+    </div>
+
+  </section>
+
+  }
+
+  <!-- ===================================================== -->
+  <!-- LOADING INICIAL -->
+  <!-- ===================================================== -->
+
+  @if (isLoading && !reporte) {
+
+  <section class="flex min-h-72 flex-col items-center justify-center
+             rounded-3xl border border-base-300
+             bg-base-100 p-8 shadow-sm">
+
+    <span class="loading loading-spinner loading-lg text-primary"></span>
+
+    <h3 class="mt-4 font-bold">
+      Generando reporte
+    </h3>
+
+    <p class="mt-1 text-sm text-base-content/50">
+      Consolidando incidencias e indicadores.
+    </p>
+
+  </section>
+
+  }
+
+  <!-- ===================================================== -->
+  <!-- CONTENIDO DEL REPORTE -->
+  <!-- ===================================================== -->
+
+  @if (reporte) {
+
+  <!-- INDICADORES -->
+
+  <section class="grid grid-cols-1 gap-4
+             sm:grid-cols-2 xl:grid-cols-4">
+
+    <!-- Total -->
+    <article class="rounded-3xl border border-base-300
+               bg-base-100 p-5 shadow-sm">
+
+      <div class="flex items-start justify-between gap-4">
+
+        <div>
+          <p class="text-sm text-base-content/55">
+            Total de incidencias
+          </p>
+
+          <p class="mt-2 text-3xl font-bold">
+            {{ totalIncidencias }}
+          </p>
+        </div>
+
+        <div class="flex h-11 w-11 items-center justify-center
+                   rounded-xl bg-primary/10 text-primary">
+          <i class="fa-solid fa-list-check"></i>
+        </div>
+
+      </div>
+
+      <p class="mt-4 text-xs text-base-content/45">
+        Registros que cumplen los filtros.
+      </p>
+
+    </article>
+
+    <!-- En proceso -->
+    <article class="rounded-3xl border border-base-300
+               bg-base-100 p-5 shadow-sm">
+
+      <div class="flex items-start justify-between gap-4">
+
+        <div>
+          <p class="text-sm text-base-content/55">
+            En proceso
+          </p>
+
+          <p class="mt-2 text-3xl font-bold">
+            {{ totalEnProceso }}
+          </p>
+        </div>
+
+        <div class="flex h-11 w-11 items-center justify-center
+                   rounded-xl bg-info/10 text-info">
+          <i class="fa-solid fa-spinner"></i>
+        </div>
+
+      </div>
+
+      <p class="mt-4 text-xs text-base-content/45">
+        Incidencias en atención operativa.
+      </p>
+
+    </article>
+
+    <!-- Atendidas -->
+    <article class="rounded-3xl border border-base-300
+               bg-base-100 p-5 shadow-sm">
+
+      <div class="flex items-start justify-between gap-4">
+
+        <div>
+          <p class="text-sm text-base-content/55">
+            Atendidas
+          </p>
+
+          <p class="mt-2 text-3xl font-bold">
+            {{ totalAtendidas }}
+          </p>
+        </div>
+
+        <div class="flex h-11 w-11 items-center justify-center
+                   rounded-xl bg-success/10 text-success">
+          <i class="fa-solid fa-circle-check"></i>
+        </div>
+
+      </div>
+
+      <div class="mt-4 flex items-center gap-2">
+
+        <progress class="progress progress-success w-full" [value]="porcentajeAtendidas" max="100"></progress>
+
+        <span class="text-xs font-semibold">
+          {{ porcentajeAtendidas }}%
+        </span>
+
+      </div>
+
+    </article>
+
+    <!-- Evidencias -->
+    <article class="rounded-3xl border border-base-300
+               bg-base-100 p-5 shadow-sm">
+
+      <div class="flex items-start justify-between gap-4">
+
+        <div>
+          <p class="text-sm text-base-content/55">
+            Con evidencias
+          </p>
+
+          <p class="mt-2 text-3xl font-bold">
+            {{ totalConEvidencias }}
+          </p>
+        </div>
+
+        <div class="flex h-11 w-11 items-center justify-center
+                   rounded-xl bg-secondary/10 text-secondary">
+          <i class="fa-solid fa-paperclip"></i>
+        </div>
+
+      </div>
+
+      <div class="mt-4 flex items-center gap-2">
+
+        <progress class="progress progress-secondary w-full" [value]="porcentajeConEvidencias" max="100"></progress>
+
+        <span class="text-xs font-semibold">
+          {{ porcentajeConEvidencias }}%
+        </span>
+
+      </div>
+
+    </article>
+
+  </section>
+
+  <!-- =================================================== -->
+  <!-- DISTRIBUCIONES -->
+  <!-- =================================================== -->
+
+  <section class="grid grid-cols-1 gap-6 xl:grid-cols-2">
+
+    <!-- POR TIPO -->
+    <article class="rounded-3xl border border-base-300
+               bg-base-100 p-5 shadow-sm">
+
+      <div class="mb-5 flex items-center justify-between">
+
+        <div>
+          <h3 class="font-bold">
+            Incidencias por tipo
+          </h3>
+
+          <p class="mt-1 text-xs text-base-content/50">
+            Distribución según la categoría reportada.
+          </p>
+        </div>
+
+        <i class="fa-solid fa-chart-simple text-primary"></i>
+
+      </div>
+
+      @if (reporte.por_tipo.length > 0) {
+
+      <div class="space-y-4">
+
+        @for (item of reporte.por_tipo; track item.tipo) {
+
+        <div>
+
+          <div class="mb-2 flex items-center justify-between gap-3">
+
+            <div class="flex min-w-0 items-center gap-2">
+
+              <i [class]="getTipoIcon(item.tipo)" class="text-primary"></i>
+
+              <span class="truncate text-sm font-semibold">
+                {{ getTipoLabel(item.tipo) }}
+              </span>
+
+            </div>
+
+            <span class="badge badge-ghost">
+              {{ item.total }}
+            </span>
+
+          </div>
+
+          <progress class="progress progress-primary w-full" [value]="getPorcentajeTipo(item.total)"
+            max="100"></progress>
+
+        </div>
+
+        }
+
+      </div>
+
+      } @else {
+
+      <p class="py-10 text-center text-sm text-base-content/50">
+        No existen datos por tipo.
+      </p>
+
+      }
+
+    </article>
+
+    <!-- POR ESTADO -->
+    <article class="rounded-3xl border border-base-300
+               bg-base-100 p-5 shadow-sm">
+
+      <div class="mb-5 flex items-center justify-between">
+
+        <div>
+          <h3 class="font-bold">
+            Incidencias por estado
+          </h3>
+
+          <p class="mt-1 text-xs text-base-content/50">
+            Situación actual de los registros encontrados.
+          </p>
+        </div>
+
+        <i class="fa-solid fa-chart-pie text-primary"></i>
+
+      </div>
+
+      @if (reporte.por_estado.length > 0) {
+
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+
+        @for (item of reporte.por_estado; track item.estado) {
+
+        <div class="flex items-center justify-between gap-3
+                       rounded-2xl border border-base-300 p-4">
+
+          <div>
+            <span class="badge" [ngClass]="getEstadoBadgeClass(item.estado)">
+              {{ getEstadoLabel(item.estado) }}
+            </span>
+
+            <p class="mt-2 text-xs text-base-content/50">
+              Registros encontrados
+            </p>
+          </div>
+
+          <span class="text-2xl font-bold">
+            {{ item.total }}
+          </span>
+
+        </div>
+
+        }
+
+      </div>
+
+      } @else {
+
+      <p class="py-10 text-center text-sm text-base-content/50">
+        No existen datos por estado.
+      </p>
+
+      }
+
+    </article>
+
+    <!-- POR ZONA -->
+    <article class="rounded-3xl border border-base-300
+               bg-base-100 p-5 shadow-sm">
+
+      <div class="mb-5 flex items-center justify-between">
+
+        <div>
+          <h3 class="font-bold">
+            Incidencias por zona
+          </h3>
+
+          <p class="mt-1 text-xs text-base-content/50">
+            Concentración territorial de incidencias.
+          </p>
+        </div>
+
+        <i class="fa-solid fa-map-location-dot text-primary"></i>
+
+      </div>
+
+      @if (reporte.por_zona.length > 0) {
+
+      <div class="space-y-4">
+
+        @for (item of reporte.por_zona; track item.zona_id) {
+
+        <div>
+
+          <div class="mb-2 flex items-center justify-between gap-3">
+
+            <span class="truncate text-sm font-semibold">
+              {{ item.zona }}
+            </span>
+
+            <span class="badge badge-primary badge-outline">
+              {{ item.total }}
+            </span>
+
+          </div>
+
+          <progress class="progress progress-info w-full" [value]="getPorcentajeZona(item.total)" max="100"></progress>
+
+        </div>
+
+        }
+
+      </div>
+
+      } @else {
+
+      <p class="py-10 text-center text-sm text-base-content/50">
+        No existen datos por zona.
+      </p>
+
+      }
+
+    </article>
+
+    <!-- POR FECHA -->
+    <article class="rounded-3xl border border-base-300
+               bg-base-100 p-5 shadow-sm">
+
+      <div class="mb-5 flex items-center justify-between">
+
+        <div>
+          <h3 class="font-bold">
+            Evolución por fecha
+          </h3>
+
+          <p class="mt-1 text-xs text-base-content/50">
+            Cantidad de incidencias registradas diariamente.
+          </p>
+        </div>
+
+        <i class="fa-solid fa-calendar-days text-primary"></i>
+
+      </div>
+
+      @if (reporte.por_fecha.length > 0) {
+
+      <div class="max-h-72 space-y-3 overflow-y-auto pr-1">
+
+        @for (item of reporte.por_fecha; track item.fecha) {
+
+        <div class="flex items-center justify-between gap-4
+                       rounded-2xl border border-base-300
+                       px-4 py-3">
+
+          <div class="flex items-center gap-3">
+
+            <div class="flex h-9 w-9 items-center justify-center
+                           rounded-xl bg-primary/10 text-primary">
+              <i class="fa-solid fa-calendar-day"></i>
+            </div>
+
+            <span class="text-sm font-semibold">
+              {{ item.fecha | date:'dd/MM/yyyy':'UTC' }}
+            </span>
+
+          </div>
+
+          <span class="badge badge-primary">
+            {{ item.total }}
+          </span>
+
+        </div>
+
+        }
+
+      </div>
+
+      } @else {
+
+      <p class="py-10 text-center text-sm text-base-content/50">
+        No existen datos por fecha.
+      </p>
+
+      }
+
+    </article>
+
+  </section>
+
+  <!-- =================================================== -->
+  <!-- TABLA -->
+  <!-- =================================================== -->
+
+  <section class="overflow-hidden rounded-3xl border border-base-300
+             bg-base-100 shadow-sm">
+
+    <div class="flex flex-col gap-4 border-b border-base-300
+               px-5 py-4 sm:flex-row sm:items-center
+               sm:justify-between">
+
+      <div>
+
+        <h3 class="font-bold">
+          Detalle de incidencias
+        </h3>
+
+        <p class="mt-1 text-xs text-base-content/50">
+          {{ totalItems }} registro(s) encontrado(s).
+        </p>
+
+      </div>
+
+      <label class="flex items-center gap-2 text-sm">
+
+        <span class="text-base-content/60">
+          Mostrar
+        </span>
+
+        <select class="select select-bordered select-sm" [ngModel]="limit" (ngModelChange)="cambiarLimite($event)">
+          @for (option of pageSizeOptions; track option) {
+          <option [ngValue]="option">
+            {{ option }}
+          </option>
+          }
+        </select>
+
+      </label>
+
+    </div>
+
+    @if (incidencias.length > 0) {
+
+    <div class="overflow-x-auto">
+
+      <table class="table table-zebra">
+
+        <thead>
+          <tr>
+            <th>Incidencia</th>
+            <th>Sereno</th>
+            <th>Ubicación operativa</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+            <th>Evidencias</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          @for (
+          incidencia of incidencias;
+          track incidencia.id
+          ) {
+
+          <tr>
+
+            <!-- Incidencia -->
+            <td>
+
+              <div class="max-w-xs">
+
+                <div class="flex items-center gap-2">
+
+                  <span class="badge badge-sm" [ngClass]="getTipoBadgeClass(incidencia.tipo)">
+                    <i [class]="getTipoIcon(incidencia.tipo)" class="mr-1"></i>
+
+                    {{ getTipoLabel(incidencia.tipo) }}
+                  </span>
+
+                  <span class="text-xs text-base-content/40">
+                    #{{ incidencia.id }}
+                  </span>
+
+                </div>
+
+                <p class="mt-2 line-clamp-2 text-sm
+                               text-base-content/70">
+                  {{ incidencia.descripcion }}
+                </p>
+
+                <div class="mt-2 flex items-center gap-2
+                               text-xs text-base-content/45">
+                  <i [class]="getOrigenIcon(incidencia.origen)"></i>
+                  {{ getOrigenLabel(incidencia.origen) }}
+                </div>
+
+              </div>
+
+            </td>
+
+            <!-- Sereno -->
+            <td>
+
+              <div class="flex items-center gap-3">
+
+                <div class="avatar">
+
+                  <div class="h-10 w-10 overflow-hidden
+                                 rounded-xl bg-base-200">
+                    <img class="h-full w-full object-cover" [src]="getFotoSereno(incidencia)"
+                      [alt]="getNombreSereno(incidencia)" />
+                  </div>
+
+                </div>
+
+                <div>
+
+                  <p class="text-sm font-semibold">
+                    {{ getNombreSereno(incidencia) }}
+                  </p>
+
+                  <p class="text-xs text-base-content/45">
+                    {{ getDocumentoSereno(incidencia) }}
+                  </p>
+
+                </div>
+
+              </div>
+
+            </td>
+
+            <!-- Ubicación operativa -->
+            <td>
+
+              <div class="space-y-1">
+
+                <p class="text-sm font-semibold">
+                  {{ getZonaLabel(incidencia) }}
+                </p>
+
+                <p class="text-xs text-base-content/50">
+                  {{ getPatrullajeLabel(incidencia) }}
+                </p>
+
+                <p class="text-xs text-base-content/50">
+                  {{ getUnidadLabel(incidencia) }}
+                </p>
+
+              </div>
+
+            </td>
+
+            <!-- Fecha -->
+            <td>
+
+              <p class="text-sm font-semibold">
+                {{ incidencia.fecha_hora | date:'dd/MM/yyyy':'UTC' }}
+              </p>
+
+              <p class="text-xs text-base-content/50">
+                {{ incidencia.fecha_hora | date:'HH:mm':'UTC' }}
+              </p>
+
+            </td>
+
+            <!-- Estado -->
+            <td>
+
+              <span class="badge" [ngClass]="getEstadoBadgeClass(incidencia.estado)">
+                {{ getEstadoLabel(incidencia.estado) }}
+              </span>
+
+            </td>
+
+            <!-- Evidencias -->
+            <td>
+
+              <button type="button" class="btn btn-ghost btn-sm" [disabled]="incidencia.total_evidencias <= 0"
+                (click)="abrirArchivos(incidencia)">
+                <i class="fa-solid fa-paperclip"></i>
+                {{ incidencia.total_evidencias }}
+              </button>
+
+            </td>
+
+            <!-- Acciones -->
+            <td>
+
+              <div class="flex justify-center gap-1">
+
+                <button type="button" class="btn btn-circle btn-ghost btn-sm" title="Ver detalle"
+                  aria-label="Ver detalle" (click)="abrirDetalle(incidencia)">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+
+                <button type="button" class="btn btn-circle btn-ghost btn-sm" title="Ver ubicación"
+                  aria-label="Ver ubicación" [disabled]="!tieneCoordenadasValidas(incidencia)"
+                  (click)="abrirMapa(incidencia)">
+                  <i class="fa-solid fa-map-location-dot"></i>
+                </button>
+
+                <button type="button" class="btn btn-circle btn-ghost btn-sm" title="Ver evidencias"
+                  aria-label="Ver evidencias" [disabled]="incidencia.total_evidencias <= 0"
+                  (click)="abrirArchivos(incidencia)">
+                  <i class="fa-solid fa-photo-film"></i>
+                </button>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+          }
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+    <!-- PAGINACIÓN -->
+
+    <div class="flex flex-col gap-4 border-t border-base-300
+                 px-5 py-4 sm:flex-row sm:items-center
+                 sm:justify-between">
+
+      <p class="text-sm text-base-content/55">
+        Página {{ currentPage }} de {{ totalPages }}
+      </p>
+
+      <div class="join">
+
+        <button type="button" class="btn join-item btn-sm" [disabled]="!hasPreviousPage || isLoading"
+          (click)="paginaAnterior()">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+
+        @for (page of paginasVisibles; track page) {
+
+        <button type="button" class="btn join-item btn-sm" [class.btn-active]="page === currentPage"
+          [disabled]="isLoading" (click)="cambiarPagina(page)">
+          {{ page }}
+        </button>
+
+        }
+
+        <button type="button" class="btn join-item btn-sm" [disabled]="!hasNextPage || isLoading"
+          (click)="paginaSiguiente()">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+
+      </div>
+
+    </div>
+
+    } @else {
+
+    <div class="flex min-h-64 flex-col items-center
+                 justify-center p-8 text-center">
+
+      <div class="flex h-16 w-16 items-center justify-center
+                   rounded-full bg-base-200 text-base-content/40">
+        <i class="fa-solid fa-inbox text-2xl"></i>
+      </div>
+
+      <h3 class="mt-4 text-lg font-bold">
+        Sin incidencias
+      </h3>
+
+      <p class="mt-2 max-w-md text-sm text-base-content/50">
+        No existen registros que coincidan con los filtros aplicados.
+      </p>
+
+      <button type="button" class="btn btn-primary mt-5" (click)="limpiarFiltros()">
+        <i class="fa-solid fa-eraser"></i>
+        Limpiar filtros
+      </button>
+
+    </div>
+
+    }
+
+  </section>
+
+  }
+
+</div>
+
+<!-- ======================================================= -->
+<!-- MODAL DETALLE -->
+<!-- ======================================================= -->
+
+<incidencia-detalle [visible]="mostrarModalDetalle" [incidenciaId]="incidenciaIdSeleccionada"
+  (cerrar)="cerrarDetalle()" />
+
+<!-- ======================================================= -->
+<!-- MODAL MAPA -->
+<!-- ======================================================= -->
+
+<incidencia-mapa [visible]="mostrarModalMapa" [incidencia]="$any(incidenciaSeleccionada)" (cerrar)="cerrarMapa()" />
+
+<!-- ======================================================= -->
+<!-- MODAL ARCHIVOS -->
+<!-- ======================================================= -->
+
+<incidencia-archivos [visible]="mostrarModalArchivos" [incidenciaId]="incidenciaIdSeleccionada"
+  (cerrar)="cerrarArchivos()" />

@@ -45,24 +45,11 @@ export class IncidenciaMapaComponent implements AfterViewInit, OnChanges, OnDest
     }
   }
 
-  // =========================================================
   // INPUTS
-  // =========================================================
-
-  /**
-   * Incidencia que contiene las coordenadas a mostrar.
-   */
   @Input() incidencia: IncidenciaPaginada | null = null;
-
-  /**
-   * Controla la visibilidad del modal.
-   */
   @Input() visible = false;
 
-  // =========================================================
   // OUTPUTS
-  // =========================================================
-
   @Output() cerrar = new EventEmitter<void>();
 
   // =========================================================

@@ -14,7 +14,7 @@ import { ReporteZonasCriticasData, ReporteZonasCriticasFilters } from '../interf
 
 
 @Injectable({ providedIn: 'root' })
-export class ReportesServices {
+export class ReportesService {
 
   // 1.- Enviroment
   envs = environment;

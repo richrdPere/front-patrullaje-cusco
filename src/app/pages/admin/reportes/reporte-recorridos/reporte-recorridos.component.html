@@ -1,1 +1,1324 @@
-<p>reporte-recorridos works!</p>
+<div class="space-y-6">
+
+  <!-- ===================================================== -->
+  <!-- CABECERA -->
+  <!-- ===================================================== -->
+
+  <section class="flex flex-col gap-4 rounded-3xl border border-base-300
+           bg-base-100 p-5 shadow-sm
+           lg:flex-row lg:items-center lg:justify-between">
+
+    <div class="flex items-start gap-4">
+
+      <div class="flex h-12 w-12 shrink-0 items-center
+               justify-center rounded-2xl
+               bg-info/10 text-info">
+        <i class="fa-solid fa-route text-xl"></i>
+      </div>
+
+      <div>
+        <h2 class="text-xl font-bold">
+          Reporte de recorridos
+        </h2>
+
+        <p class="mt-1 max-w-2xl text-sm text-base-content/60">
+          Consulte las distancias, tiempos, puntos GPS, velocidades
+          y rutas registradas durante los patrullajes.
+        </p>
+      </div>
+
+    </div>
+
+    <button type="button" class="btn btn-outline btn-primary" [disabled]="isLoading" (click)="getReporteRecorridos()">
+      @if (isLoading) {
+      <span class="loading loading-spinner loading-sm"></span>
+      Actualizando...
+      } @else {
+      <i class="fa-solid fa-rotate"></i>
+      Actualizar
+      }
+    </button>
+
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- FILTROS -->
+  <!-- ===================================================== -->
+
+  <section class="overflow-hidden rounded-3xl border border-base-300
+           bg-base-100 shadow-sm">
+
+    <div class="flex flex-col gap-4 border-b border-base-300
+             px-5 py-4 sm:flex-row sm:items-center
+             sm:justify-between">
+
+      <div class="flex items-center gap-3">
+
+        <div class="flex h-10 w-10 items-center justify-center
+                 rounded-xl bg-primary/10 text-primary">
+          <i class="fa-solid fa-filter"></i>
+        </div>
+
+        <div>
+          <h3 class="font-bold">
+            Filtros del reporte
+          </h3>
+
+          <p class="text-xs text-base-content/50">
+            Puede combinar varios criterios de búsqueda.
+          </p>
+        </div>
+
+      </div>
+
+      <div class="flex flex-wrap gap-2">
+
+        <button type="button" class="btn btn-ghost btn-sm" [disabled]="isLoading" (click)="limpiarFiltros()">
+          <i class="fa-solid fa-eraser"></i>
+          Limpiar
+        </button>
+
+        <button type="button" class="btn btn-outline btn-primary btn-sm" [attr.aria-expanded]="mostrarFiltrosAvanzados"
+          (click)="toggleFiltrosAvanzados()">
+          <i class="fa-solid fa-sliders"></i>
+
+          @if (mostrarFiltrosAvanzados) {
+          Ocultar filtros
+          } @else {
+          Más filtros
+          }
+
+          <i class="fa-solid" [ngClass]="{
+              'fa-chevron-up': mostrarFiltrosAvanzados,
+              'fa-chevron-down': !mostrarFiltrosAvanzados
+            }"></i>
+        </button>
+
+      </div>
+
+    </div>
+
+    <form class="p-5" (ngSubmit)="aplicarFiltros()">
+
+      <!-- FILTROS PRINCIPALES -->
+
+      <div class="grid grid-cols-1 gap-4
+               md:grid-cols-2 xl:grid-cols-4">
+
+        <label class="form-control">
+
+          <div class="label">
+            <span class="label-text font-semibold">
+              Fecha inicial
+            </span>
+          </div>
+
+          <input type="date" name="fecha_inicio" class="input input-bordered w-full"
+            [(ngModel)]="filtrosFormulario.fecha_inicio" />
+
+        </label>
+
+        <label class="form-control">
+
+          <div class="label">
+            <span class="label-text font-semibold">
+              Fecha final
+            </span>
+          </div>
+
+          <input type="date" name="fecha_fin" class="input input-bordered w-full"
+            [(ngModel)]="filtrosFormulario.fecha_fin" />
+
+        </label>
+
+        <label class="form-control">
+
+          <div class="label">
+            <span class="label-text font-semibold">
+              Estado del patrullaje
+            </span>
+          </div>
+
+          <select name="estado_patrullaje" class="select select-bordered w-full"
+            [(ngModel)]="filtrosFormulario.estado_patrullaje">
+            <option value="">
+              Todos los estados
+            </option>
+
+            @for (
+            estado of estadosPatrullaje;
+            track estado.value
+            ) {
+            <option [value]="estado.value">
+              {{ estado.label }}
+            </option>
+            }
+          </select>
+
+        </label>
+
+        <label class="form-control">
+
+          <div class="label">
+            <span class="label-text font-semibold">
+              Disponibilidad de recorrido
+            </span>
+          </div>
+
+          <select name="con_recorrido" class="select select-bordered w-full"
+            [(ngModel)]="filtrosFormulario.con_recorrido">
+            <option [ngValue]="null">
+              Todos los patrullajes
+            </option>
+
+            <option [ngValue]="true">
+              Con puntos GPS
+            </option>
+
+            <option [ngValue]="false">
+              Sin puntos GPS
+            </option>
+          </select>
+
+        </label>
+
+      </div>
+
+      <!-- FILTROS AVANZADOS -->
+
+      @if (mostrarFiltrosAvanzados) {
+
+      <div class="mt-5 border-t border-base-300 pt-5">
+
+        <div class="mb-4">
+          <h4 class="text-sm font-bold">
+            Filtros avanzados
+          </h4>
+
+          <p class="mt-1 text-xs text-base-content/50">
+            Restrinja el reporte por patrullaje, unidad, zona,
+            sereno o características de los puntos GPS.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4
+                   md:grid-cols-2 xl:grid-cols-4">
+
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Patrullaje
+              </span>
+            </div>
+
+            <input type="number" min="1" name="patrullaje_id" class="input input-bordered w-full"
+              placeholder="ID del patrullaje" [(ngModel)]="filtrosFormulario.patrullaje_id" />
+
+          </label>
+
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Zona
+              </span>
+            </div>
+
+            <input type="number" min="1" name="zona_id" class="input input-bordered w-full" placeholder="ID de la zona"
+              [(ngModel)]="filtrosFormulario.zona_id" />
+
+          </label>
+
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Unidad
+              </span>
+            </div>
+
+            <input type="number" min="1" name="unidad_id" class="input input-bordered w-full"
+              placeholder="ID de la unidad" [(ngModel)]="filtrosFormulario.unidad_id" />
+
+          </label>
+
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Sereno
+              </span>
+            </div>
+
+            <input type="number" min="1" name="usuario_id" class="input input-bordered w-full"
+              placeholder="ID del usuario" [(ngModel)]="filtrosFormulario.usuario_id" />
+
+          </label>
+
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Tipo de punto GPS
+              </span>
+            </div>
+
+            <select name="tipo_gps" class="select select-bordered w-full" [(ngModel)]="filtrosFormulario.tipo_gps">
+              <option value="">
+                Todos los tipos
+              </option>
+
+              @for (
+              tipo of tiposGps;
+              track tipo.value
+              ) {
+              <option [value]="tipo.value">
+                {{ tipo.label }}
+              </option>
+              }
+            </select>
+
+          </label>
+
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Precisión máxima
+              </span>
+            </div>
+
+            <div class="join w-full">
+
+              <input type="number" min="0" step="0.1" name="precision_maxima"
+                class="input input-bordered join-item w-full" placeholder="Ej. 30"
+                [(ngModel)]="filtrosFormulario.precision_maxima" />
+
+              <span class="join-item flex items-center bg-base-200 px-4">
+                m
+              </span>
+
+            </div>
+
+          </label>
+
+        </div>
+
+      </div>
+
+      }
+
+      @if (filterErrorMessage) {
+
+      <div class="alert alert-warning mt-5">
+
+        <i class="fa-solid fa-triangle-exclamation"></i>
+
+        <span>
+          {{ filterErrorMessage }}
+        </span>
+
+      </div>
+
+      }
+
+      <div class="mt-5 flex flex-col-reverse gap-3
+               sm:flex-row sm:justify-end">
+
+        <button type="button" class="btn btn-ghost" [disabled]="isLoading" (click)="limpiarFiltros()">
+          <i class="fa-solid fa-eraser"></i>
+          Limpiar filtros
+        </button>
+
+        <button type="submit" class="btn btn-primary sm:min-w-36" [disabled]="isLoading">
+          @if (isLoading) {
+          <span class="loading loading-spinner loading-sm"></span>
+          Consultando...
+          } @else {
+          <i class="fa-solid fa-magnifying-glass"></i>
+          Consultar
+          }
+        </button>
+
+      </div>
+
+    </form>
+
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- ERROR -->
+  <!-- ===================================================== -->
+
+  @if (requestErrorMessage && !isLoading) {
+
+  <section class="rounded-3xl border border-error/30
+             bg-error/5 p-6">
+
+    <div class="flex flex-col items-center
+               justify-center py-8 text-center">
+
+      <div class="flex h-16 w-16 items-center justify-center
+                 rounded-full bg-error/10 text-error">
+        <i class="fa-solid fa-circle-exclamation text-2xl"></i>
+      </div>
+
+      <h3 class="mt-4 text-lg font-bold">
+        No se pudo cargar el reporte
+      </h3>
+
+      <p class="mt-2 max-w-lg text-sm text-base-content/60">
+        {{ requestErrorMessage }}
+      </p>
+
+      <button type="button" class="btn btn-primary mt-5" (click)="reintentar()">
+        <i class="fa-solid fa-rotate-right"></i>
+        Reintentar
+      </button>
+
+    </div>
+
+  </section>
+
+  }
+
+  <!-- ===================================================== -->
+  <!-- CARGANDO -->
+  <!-- ===================================================== -->
+
+  @if (isLoading && !reporte) {
+
+  <section class="flex min-h-72 flex-col items-center
+             justify-center rounded-3xl
+             border border-base-300 bg-base-100 p-8">
+
+    <span class="loading loading-spinner loading-lg text-primary"></span>
+
+    <h3 class="mt-4 font-bold">
+      Generando reporte
+    </h3>
+
+    <p class="mt-1 text-sm text-base-content/50">
+      Procesando puntos GPS y métricas de los recorridos.
+    </p>
+
+  </section>
+
+  }
+
+  <!-- ===================================================== -->
+  <!-- REPORTE -->
+  <!-- ===================================================== -->
+
+  @if (reporte) {
+
+  <!-- INDICADORES -->
+
+  <section class="grid grid-cols-1 gap-4
+             sm:grid-cols-2 xl:grid-cols-4">
+
+    <article class="rounded-3xl border border-base-300
+               bg-base-100 p-5 shadow-sm">
+
+      <div class="flex items-start justify-between gap-4">
+
+        <div>
+          <p class="text-sm text-base-content/55">
+            Total de recorridos
+          </p>
+
+          <p class="mt-2 text-3xl font-bold">
+            {{ totalRecorridos }}
+          </p>
+        </div>
+
+        <div class="flex h-11 w-11 items-center justify-center
+                   rounded-xl bg-primary/10 text-primary">
+          <i class="fa-solid fa-route"></i>
+        </div>
+
+      </div>
+
+      <p class="mt-4 text-xs text-base-content/45">
+        Patrullajes incluidos en el reporte.
+      </p>
+
+    </article>
+
+    <article class="rounded-3xl border border-base-300
+               bg-base-100 p-5 shadow-sm">
+
+      <div class="flex items-start justify-between gap-4">
+
+        <div>
+          <p class="text-sm text-base-content/55">
+            Distancia total
+          </p>
+
+          <p class="mt-2 text-3xl font-bold">
+            {{ distanciaTotalKm | number:'1.2-2' }}
+          </p>
+
+          <p class="mt-1 text-xs text-base-content/50">
+            kilómetros
+          </p>
+        </div>
+
+        <div class="flex h-11 w-11 items-center justify-center
+                   rounded-xl bg-info/10 text-info">
+          <i class="fa-solid fa-road"></i>
+        </div>
+
+      </div>
+
+    </article>
+
+    <article class="rounded-3xl border border-base-300
+               bg-base-100 p-5 shadow-sm">
+
+      <div class="flex items-start justify-between gap-4">
+
+        <div>
+          <p class="text-sm text-base-content/55">
+            Horas de recorrido
+          </p>
+
+          <p class="mt-2 text-3xl font-bold">
+            {{ horasTotales | number:'1.1-2' }}
+          </p>
+
+          <p class="mt-1 text-xs text-base-content/50">
+            horas acumuladas
+          </p>
+        </div>
+
+        <div class="flex h-11 w-11 items-center justify-center
+                   rounded-xl bg-warning/10 text-warning">
+          <i class="fa-solid fa-clock"></i>
+        </div>
+
+      </div>
+
+    </article>
+
+    <article class="rounded-3xl border border-base-300
+               bg-base-100 p-5 shadow-sm">
+
+      <div class="flex items-start justify-between gap-4">
+
+        <div>
+          <p class="text-sm text-base-content/55">
+            Puntos GPS
+          </p>
+
+          <p class="mt-2 text-3xl font-bold">
+            {{ totalPuntosGps }}
+          </p>
+        </div>
+
+        <div class="flex h-11 w-11 items-center justify-center
+                   rounded-xl bg-success/10 text-success">
+          <i class="fa-solid fa-location-dot"></i>
+        </div>
+
+      </div>
+
+      <div class="mt-4 flex items-center gap-2">
+
+        <progress class="progress progress-success w-full" [value]="porcentajeConGps" max="100"></progress>
+
+        <span class="text-xs font-semibold">
+          {{ porcentajeConGps }}%
+        </span>
+
+      </div>
+
+    </article>
+
+  </section>
+
+  <!-- INDICADORES SECUNDARIOS -->
+
+  <section class="grid grid-cols-1 gap-4
+             sm:grid-cols-2 xl:grid-cols-4">
+
+    <div class="rounded-2xl border border-base-300
+               bg-base-100 p-4">
+      <p class="text-xs text-base-content/50">
+        Finalizados
+      </p>
+
+      <div class="mt-2 flex items-end justify-between">
+        <span class="text-2xl font-bold">
+          {{ recorridosFinalizados }}
+        </span>
+
+        <span class="badge badge-success">
+          {{ porcentajeFinalizados }}%
+        </span>
+      </div>
+    </div>
+
+    <div class="rounded-2xl border border-base-300
+               bg-base-100 p-4">
+      <p class="text-xs text-base-content/50">
+        En curso
+      </p>
+
+      <p class="mt-2 text-2xl font-bold">
+        {{ recorridosEnCurso }}
+      </p>
+    </div>
+
+    <div class="rounded-2xl border border-base-300
+               bg-base-100 p-4">
+      <p class="text-xs text-base-content/50">
+        Sin puntos GPS
+      </p>
+
+      <p class="mt-2 text-2xl font-bold">
+        {{ recorridosSinGps }}
+      </p>
+    </div>
+
+    <div class="rounded-2xl border border-base-300
+               bg-base-100 p-4">
+      <p class="text-xs text-base-content/50">
+        Velocidad máxima
+      </p>
+
+      <p class="mt-2 text-2xl font-bold">
+        @if (velocidadMaxima !== null) {
+        {{ convertirVelocidadAKmh(velocidadMaxima) | number:'1.1-2' }}
+        <span class="text-sm font-normal">km/h</span>
+        } @else {
+        N/D
+        }
+      </p>
+    </div>
+
+  </section>
+
+  <!-- =================================================== -->
+  <!-- AGRUPACIONES -->
+  <!-- =================================================== -->
+
+  <section class="grid grid-cols-1 gap-6 xl:grid-cols-2">
+
+    <!-- POR UNIDAD -->
+
+    <article class="rounded-3xl border border-base-300
+               bg-base-100 p-5 shadow-sm">
+
+      <div class="mb-5">
+
+        <h3 class="font-bold">
+          Recorrido por unidad
+        </h3>
+
+        <p class="mt-1 text-xs text-base-content/50">
+          Distancia acumulada por vehículo.
+        </p>
+
+      </div>
+
+      @if (reporte.por_unidad.length > 0) {
+
+      <div class="space-y-4">
+
+        @for (
+        item of reporte.por_unidad;
+        track item.unidad_id
+        ) {
+
+        <div>
+
+          <div class="mb-2 flex items-center justify-between gap-3">
+
+            <div>
+              <p class="text-sm font-semibold">
+                {{ item.codigo }}
+              </p>
+
+              <p class="text-xs text-base-content/50">
+                {{ item.placa || 'Sin placa' }} ·
+                {{ item.tipo || 'Sin tipo' }}
+              </p>
+            </div>
+
+            <div class="text-right">
+              <p class="text-sm font-bold">
+                {{ item.distancia_km | number:'1.2-2' }} km
+              </p>
+
+              <p class="text-xs text-base-content/50">
+                {{ item.recorridos }} recorrido(s)
+              </p>
+            </div>
+
+          </div>
+
+          <progress class="progress progress-primary w-full" [value]="getPorcentajeUnidad(item)" max="100"></progress>
+
+        </div>
+
+        }
+
+      </div>
+
+      } @else {
+
+      <p class="py-10 text-center text-sm text-base-content/50">
+        No existen datos agrupados por unidad.
+      </p>
+
+      }
+
+    </article>
+
+    <!-- POR ZONA -->
+
+    <article class="rounded-3xl border border-base-300
+               bg-base-100 p-5 shadow-sm">
+
+      <div class="mb-5">
+
+        <h3 class="font-bold">
+          Recorrido por zona
+        </h3>
+
+        <p class="mt-1 text-xs text-base-content/50">
+          Cobertura acumulada en cada zona.
+        </p>
+
+      </div>
+
+      @if (reporte.por_zona.length > 0) {
+
+      <div class="space-y-4">
+
+        @for (
+        item of reporte.por_zona;
+        track item.zona_id
+        ) {
+
+        <div>
+
+          <div class="mb-2 flex items-center justify-between gap-3">
+
+            <div>
+              <p class="text-sm font-semibold">
+                {{ item.zona }}
+              </p>
+
+              <p class="text-xs text-base-content/50">
+                Riesgo: {{ item.riesgo || 'No definido' }}
+              </p>
+            </div>
+
+            <div class="text-right">
+              <p class="text-sm font-bold">
+                {{ item.distancia_km | number:'1.2-2' }} km
+              </p>
+
+              <p class="text-xs text-base-content/50">
+                {{ item.puntos_gps }} puntos
+              </p>
+            </div>
+
+          </div>
+
+          <progress class="progress progress-info w-full" [value]="getPorcentajeZona(item)" max="100"></progress>
+
+        </div>
+
+        }
+
+      </div>
+
+      } @else {
+
+      <p class="py-10 text-center text-sm text-base-content/50">
+        No existen datos agrupados por zona.
+      </p>
+
+      }
+
+    </article>
+
+    <!-- POR SERENO -->
+
+    <article class="rounded-3xl border border-base-300
+               bg-base-100 p-5 shadow-sm">
+
+      <div class="mb-5">
+
+        <h3 class="font-bold">
+          Recorrido por sereno
+        </h3>
+
+        <p class="mt-1 text-xs text-base-content/50">
+          Participación del personal en los recorridos.
+        </p>
+
+      </div>
+
+      @if (reporte.por_sereno.length > 0) {
+
+      <div class="max-h-80 space-y-4 overflow-y-auto pr-1">
+
+        @for (
+        item of reporte.por_sereno;
+        track item.usuario_id
+        ) {
+
+        <div>
+
+          <div class="mb-2 flex items-center justify-between gap-3">
+
+            <div>
+              <p class="text-sm font-semibold">
+                {{ item.nombre }}
+              </p>
+
+              <p class="text-xs text-base-content/50">
+                DNI: {{ item.documento || 'Sin documento' }}
+              </p>
+            </div>
+
+            <div class="text-right">
+              <p class="text-sm font-bold">
+                {{ item.distancia_km | number:'1.2-2' }} km
+              </p>
+
+              <p class="text-xs text-base-content/50">
+                {{ item.recorridos }} recorrido(s)
+              </p>
+            </div>
+
+          </div>
+
+          <progress class="progress progress-secondary w-full" [value]="getPorcentajeSereno(item)" max="100"></progress>
+
+        </div>
+
+        }
+
+      </div>
+
+      } @else {
+
+      <p class="py-10 text-center text-sm text-base-content/50">
+        No existen datos agrupados por sereno.
+      </p>
+
+      }
+
+    </article>
+
+    <!-- POR FECHA -->
+
+    <article class="rounded-3xl border border-base-300
+               bg-base-100 p-5 shadow-sm">
+
+      <div class="mb-5">
+
+        <h3 class="font-bold">
+          Evolución por fecha
+        </h3>
+
+        <p class="mt-1 text-xs text-base-content/50">
+          Distancia y puntos GPS registrados diariamente.
+        </p>
+
+      </div>
+
+      @if (reporte.por_fecha.length > 0) {
+
+      <div class="max-h-80 space-y-4 overflow-y-auto pr-1">
+
+        @for (
+        item of reporte.por_fecha;
+        track item.fecha
+        ) {
+
+        <div>
+
+          <div class="mb-2 flex items-center justify-between gap-3">
+
+            <div>
+              <p class="text-sm font-semibold">
+                {{ item.fecha | date:'dd/MM/yyyy':'UTC' }}
+              </p>
+
+              <p class="text-xs text-base-content/50">
+                {{ item.puntos_gps }} puntos GPS
+              </p>
+            </div>
+
+            <div class="text-right">
+              <p class="text-sm font-bold">
+                {{ item.distancia_km | number:'1.2-2' }} km
+              </p>
+
+              <p class="text-xs text-base-content/50">
+                {{ item.horas_recorrido | number:'1.1-2' }} h
+              </p>
+            </div>
+
+          </div>
+
+          <progress class="progress progress-warning w-full" [value]="getPorcentajeFecha(item)" max="100"></progress>
+
+        </div>
+
+        }
+
+      </div>
+
+      } @else {
+
+      <p class="py-10 text-center text-sm text-base-content/50">
+        No existen datos agrupados por fecha.
+      </p>
+
+      }
+
+    </article>
+
+  </section>
+
+  <!-- =================================================== -->
+  <!-- TABLA -->
+  <!-- =================================================== -->
+
+  <section class="overflow-hidden rounded-3xl border border-base-300
+             bg-base-100 shadow-sm">
+
+    <div class="flex flex-col gap-4 border-b border-base-300
+               px-5 py-4 sm:flex-row sm:items-center
+               sm:justify-between">
+
+      <div>
+        <h3 class="font-bold">
+          Detalle de recorridos
+        </h3>
+
+        <p class="mt-1 text-xs text-base-content/50">
+          {{ totalItems }} registro(s) encontrado(s).
+        </p>
+      </div>
+
+      <label class="flex items-center gap-2 text-sm">
+
+        <span class="text-base-content/60">
+          Mostrar
+        </span>
+
+        <select class="select select-bordered select-sm" [ngModel]="limit" (ngModelChange)="cambiarLimite($event)">
+          @for (
+          option of pageSizeOptions;
+          track option
+          ) {
+          <option [ngValue]="option">
+            {{ option }}
+          </option>
+          }
+        </select>
+
+      </label>
+
+    </div>
+
+    @if (recorridos.length > 0) {
+
+    <div class="overflow-x-auto">
+
+      <table class="table table-zebra">
+
+        <thead>
+          <tr>
+            <th>Patrullaje</th>
+            <th>Sereno</th>
+            <th>Zona y unidad</th>
+            <th>Recorrido</th>
+            <th>GPS</th>
+            <th>Estado</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          @for (
+          recorrido of recorridos;
+          track recorrido.patrullaje_id
+          ) {
+
+          <tr>
+
+            <!-- Patrullaje -->
+            <td>
+
+              <div>
+                <p class="font-semibold">
+                  {{ getPatrullajeLabel(recorrido) }}
+                </p>
+
+                <p class="mt-1 text-xs text-base-content/50">
+                  {{ recorrido.fecha | date:'dd/MM/yyyy':'UTC' }}
+                </p>
+
+                <p class="text-xs text-base-content/50">
+                  {{ recorrido.hora_inicio }} -
+                  {{ recorrido.hora_fin }}
+                </p>
+              </div>
+
+            </td>
+
+            <!-- Sereno -->
+            <td>
+
+              <div class="flex items-center gap-3">
+
+                <div class="avatar">
+
+                  <div class="h-10 w-10 overflow-hidden
+                                 rounded-xl bg-base-200">
+                    <img class="h-full w-full object-cover" [src]="getFotoSerenoPrincipal(recorrido)"
+                      [alt]="getSerenoPrincipal(recorrido)" />
+                  </div>
+
+                </div>
+
+                <div class="max-w-44">
+
+                  <p class="truncate text-sm font-semibold">
+                    {{ getSerenoPrincipal(recorrido) }}
+                  </p>
+
+                  @if (recorrido.serenos.length > 1) {
+                  <p class="text-xs text-base-content/50">
+                    +{{ recorrido.serenos.length - 1 }}
+                    participante(s)
+                  </p>
+                  }
+
+                </div>
+
+              </div>
+
+            </td>
+
+            <!-- Zona y unidad -->
+            <td>
+
+              <div>
+                <p class="text-sm font-semibold">
+                  {{ getZonaLabel(recorrido) }}
+                </p>
+
+                <p class="mt-1 text-xs text-base-content/50">
+                  {{ getUnidadLabel(recorrido) }}
+                </p>
+              </div>
+
+            </td>
+
+            <!-- Métricas -->
+            <td>
+
+              <div class="space-y-1">
+
+                <p class="text-sm font-semibold">
+                  {{ formatearDistancia(
+                  recorrido.metricas.distancia_metros
+                  ) }}
+                </p>
+
+                <p class="text-xs text-base-content/50">
+                  {{ formatearDuracion(
+                  recorrido.metricas.duracion_segundos
+                  ) }}
+                </p>
+
+              </div>
+
+            </td>
+
+            <!-- GPS -->
+            <td>
+
+              <div class="space-y-1">
+
+                <span class="badge" [ngClass]="
+                          recorrido.metricas.puntos_gps > 0
+                            ? 'badge-success'
+                            : 'badge-ghost'
+                        ">
+                  <i class="fa-solid fa-location-dot mr-1"></i>
+                  {{ recorrido.metricas.puntos_gps }}
+                </span>
+
+                <p class="text-xs text-base-content/50">
+                  Precisión:
+                  {{ formatearPrecision(
+                  recorrido.metricas.precision_promedio
+                  ) }}
+                </p>
+
+              </div>
+
+            </td>
+
+            <!-- Estado -->
+            <td>
+
+              <span class="badge" [ngClass]="
+                        getEstadoPatrullajeBadgeClass(recorrido.estado)
+                      ">
+                <i class="mr-1" [class]="getEstadoPatrullajeIcon(recorrido.estado)"></i>
+
+                {{ getEstadoPatrullajeLabel(recorrido.estado) }}
+              </span>
+
+            </td>
+
+            <!-- Acciones -->
+            <td>
+
+              <div class="flex justify-center gap-1">
+
+                <button type="button" class="btn btn-circle btn-ghost btn-sm" title="Ver detalle"
+                  aria-label="Ver detalle" (click)="abrirDetalle(recorrido)">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+
+                <button type="button" class="btn btn-circle btn-ghost btn-sm" title="Visualizar recorrido"
+                  aria-label="Visualizar recorrido" [disabled]="!tieneRecorridoValido(recorrido)"
+                  (click)="abrirMapa(recorrido)">
+                  <i class="fa-solid fa-map-location-dot"></i>
+                </button>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+          }
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+    <!-- PAGINACIÓN -->
+
+    <div class="flex flex-col gap-4 border-t border-base-300
+                 px-5 py-4 sm:flex-row sm:items-center
+                 sm:justify-between">
+
+      <p class="text-sm text-base-content/55">
+        Página {{ currentPage }} de {{ totalPages }}
+      </p>
+
+      <div class="join">
+
+        <button type="button" class="btn join-item btn-sm" [disabled]="!hasPreviousPage || isLoading"
+          (click)="paginaAnterior()">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+
+        @for (
+        page of paginasVisibles;
+        track page
+        ) {
+
+        <button type="button" class="btn join-item btn-sm" [class.btn-active]="page === currentPage"
+          [disabled]="isLoading" (click)="cambiarPagina(page)">
+          {{ page }}
+        </button>
+
+        }
+
+        <button type="button" class="btn join-item btn-sm" [disabled]="!hasNextPage || isLoading"
+          (click)="paginaSiguiente()">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+
+      </div>
+
+    </div>
+
+    } @else {
+
+    <div class="flex min-h-64 flex-col items-center
+                 justify-center p-8 text-center">
+
+      <div class="flex h-16 w-16 items-center justify-center
+                   rounded-full bg-base-200 text-base-content/40">
+        <i class="fa-solid fa-route text-2xl"></i>
+      </div>
+
+      <h3 class="mt-4 text-lg font-bold">
+        Sin recorridos
+      </h3>
+
+      <p class="mt-2 max-w-md text-sm text-base-content/50">
+        No existen recorridos que coincidan con los filtros aplicados.
+      </p>
+
+      <button type="button" class="btn btn-primary mt-5" (click)="limpiarFiltros()">
+        <i class="fa-solid fa-eraser"></i>
+        Limpiar filtros
+      </button>
+
+    </div>
+
+    }
+
+  </section>
+
+  }
+
+</div>
+
+<!-- ======================================================= -->
+<!-- MODAL MAPA -->
+<!-- ======================================================= -->
+
+<reporte-recorrido-mapa [visible]="mostrarModalMapa" [recorrido]="recorridoSeleccionado"
+  (cerrar)="cerrarMapa()"></reporte-recorrido-mapa>
+
+
+<!-- ======================================================= -->
+<!-- MODAL DETALLE SIMPLE -->
+<!-- ======================================================= -->
+
+@if (mostrarModalDetalle && recorridoSeleccionado) {
+
+<div class="fixed inset-0 z-60 flex items-center justify-center
+           bg-black/60 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="recorrido-detail-title"
+  (click)="cerrarDetalle()">
+
+  <div class="max-h-[92vh] w-full max-w-3xl overflow-y-auto
+             rounded-3xl bg-base-100 shadow-2xl" (click)="$event.stopPropagation()">
+
+    <div class="sticky top-0 z-10 flex items-center
+               justify-between gap-4 border-b border-base-300
+               bg-base-100 px-5 py-4">
+
+      <div>
+        <h3 id="recorrido-detail-title" class="text-lg font-bold">
+          Patrullaje #{{ recorridoSeleccionado.patrullaje_id }}
+        </h3>
+
+        <p class="text-xs text-base-content/50">
+          Detalle operativo del recorrido
+        </p>
+      </div>
+
+      <button type="button" class="btn btn-circle btn-ghost btn-sm" aria-label="Cerrar detalle"
+        (click)="cerrarDetalle()">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+    </div>
+
+    <div class="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2">
+
+      <div class="rounded-2xl bg-base-200 p-4">
+        <p class="text-xs text-base-content/50">
+          Distancia
+        </p>
+
+        <p class="mt-1 font-bold">
+          {{ formatearDistancia(
+          recorridoSeleccionado.metricas.distancia_metros
+          ) }}
+        </p>
+      </div>
+
+      <div class="rounded-2xl bg-base-200 p-4">
+        <p class="text-xs text-base-content/50">
+          Duración
+        </p>
+
+        <p class="mt-1 font-bold">
+          {{ formatearDuracion(
+          recorridoSeleccionado.metricas.duracion_segundos
+          ) }}
+        </p>
+      </div>
+
+      <div class="rounded-2xl bg-base-200 p-4">
+        <p class="text-xs text-base-content/50">
+          Velocidad promedio
+        </p>
+
+        <p class="mt-1 font-bold">
+          {{ formatearVelocidad(
+          recorridoSeleccionado.metricas.velocidad_promedio
+          ) }}
+        </p>
+      </div>
+
+      <div class="rounded-2xl bg-base-200 p-4">
+        <p class="text-xs text-base-content/50">
+          Velocidad máxima
+        </p>
+
+        <p class="mt-1 font-bold">
+          {{ formatearVelocidad(
+          recorridoSeleccionado.metricas.velocidad_maxima
+          ) }}
+        </p>
+      </div>
+
+      <div class="rounded-2xl bg-base-200 p-4">
+        <p class="text-xs text-base-content/50">
+          Puntos GPS
+        </p>
+
+        <p class="mt-1 font-bold">
+          {{ recorridoSeleccionado.metricas.puntos_gps }}
+        </p>
+      </div>
+
+      <div class="rounded-2xl bg-base-200 p-4">
+        <p class="text-xs text-base-content/50">
+          Precisión promedio
+        </p>
+
+        <p class="mt-1 font-bold">
+          {{ formatearPrecision(
+          recorridoSeleccionado.metricas.precision_promedio
+          ) }}
+        </p>
+      </div>
+
+    </div>
+
+    <div class="flex justify-end gap-3 border-t border-base-300 p-5">
+
+      <button type="button" class="btn btn-ghost" (click)="cerrarDetalle()">
+        Cerrar
+      </button>
+
+      <button type="button" class="btn btn-primary" [disabled]="!tieneRecorridoValido(recorridoSeleccionado)"
+        (click)="abrirMapa(recorridoSeleccionado)">
+        <i class="fa-solid fa-map-location-dot"></i>
+        Ver en mapa
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+}
