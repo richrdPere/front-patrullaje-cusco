@@ -16,10 +16,11 @@ import { IncidenciaDetalleComponent } from "./incidencia-detalle/incidencia-deta
 import { IncidenciaDetalle } from 'src/app/interfaces/incidencia/incidencia_detalle.interface';
 import { IncidenciaMapaComponent } from "./incidencia-mapa/incidencia-mapa.component";
 import { IncidenciaArchivosComponent } from "./incidencia-archivos/incidencia-archivos.component";
+import { IncidenciaEstadoFormComponent } from "./incidencia-estado-form/incidencia-estado-form.component";
 
 @Component({
   selector: 'app-incidentes-reportados',
-  imports: [DatePipe, FormsModule, CommonModule, IncidenciaDetalleComponent, IncidenciaMapaComponent, IncidenciaArchivosComponent],
+  imports: [DatePipe, FormsModule, CommonModule, IncidenciaDetalleComponent, IncidenciaMapaComponent, IncidenciaArchivosComponent, IncidenciaEstadoFormComponent],
   templateUrl: './incidentes-reportados.component.html',
   styles: ``
 })
@@ -46,6 +47,10 @@ export class IncidentesReportadosComponent implements OnInit, OnDestroy {
   // - Mapa modal
   mostrarModalMapa = false;
   incidenciaSeleccionada: IncidenciaPaginada | null = null;
+
+  // - Actualizar estado modal
+  mostrarEstadoForm = false;
+  incidenciaEstadoSeleccionada: IncidenciaPaginada | IncidenciaDetalle | null = null;
 
   // Search
   descripcionBusqueda: string = '';
@@ -252,6 +257,37 @@ export class IncidentesReportadosComponent implements OnInit, OnDestroy {
 
     this.mostrarModalMapa = false;
     this.incidenciaSeleccionada = null;
+  }
+
+  /*
+   |--------------------------------------------------------------------------
+   | Modal de actualizar estado
+   |--------------------------------------------------------------------------
+   */
+  abrirEstadoForm(incidencia: IncidenciaPaginada | IncidenciaDetalle,): void {
+    this.incidenciaEstadoSeleccionada = incidencia;
+    this.mostrarEstadoForm = true;
+  }
+
+  cerrarEstadoForm(): void {
+    this.mostrarEstadoForm = false;
+    this.incidenciaEstadoSeleccionada = null;
+  }
+
+  onEstadoActualizado(incidenciaActualizada: IncidenciaDetalle,): void {
+    const index = this.incidentes.findIndex(
+      item =>
+        item.id === incidenciaActualizada.id,
+    );
+
+    if (index !== -1) {
+      this.incidentes[index] = {
+        ...this.incidentes[index],
+        estado: incidenciaActualizada.estado,
+      };
+    }
+
+    this.cerrarEstadoForm();
   }
 
   /*

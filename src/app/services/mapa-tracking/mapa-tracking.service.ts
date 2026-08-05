@@ -1098,21 +1098,35 @@ export class MapaTrackingService {
   }
 
   // =====================================================
-  // MARCAR SERENO OFFLINE
+  // MARCAR SERENO ONLINE
   // =====================================================
-
-  marcarSerenoOffline(
-    usuarioId: number
+  marcarSerenoOnline(
+    usuarioId: number,
+    timestamp: string,
   ): void {
 
     const tracking =
-      this.serenos[
-      usuarioId
-      ];
+      this.serenos[usuarioId];
 
     if (!tracking) {
+      console.warn(
+        `No existe tracking previo para el usuario ${usuarioId}.`,
+      );
+
+      /*
+       * Todavía no podemos crear el marcador porque el evento
+       * online no contiene coordenadas.
+       *
+       * El marcador se creará cuando llegue tracking_actualizado.
+       */
       return;
     }
+
+    const timestampNormalizado =
+      this.normalizarTimestamp(
+        timestamp,
+        tracking.realtime.timestamp,
+      );
 
     const trackingActualizado:
       TrackingPayload = {
@@ -1120,39 +1134,168 @@ export class MapaTrackingService {
 
       realtime: {
         ...tracking.realtime,
-        online: false
-      }
+        online: true,
+        timestamp: timestampNormalizado,
+      },
     };
 
-    this.serenos[
-      usuarioId
-    ] = trackingActualizado;
+    this.serenos[usuarioId] =
+      trackingActualizado;
 
     const marker =
-      this.serenoMarkers[
-      usuarioId
-      ];
+      this.serenoMarkers[usuarioId];
 
     if (marker) {
+
       marker.setIcon(
         this.obtenerIconoMarcador(
-          trackingActualizado
-        )
+          trackingActualizado,
+        ),
+      );
+
+      marker.setTitle(
+        `${trackingActualizado.sereno.nombreCompleto} - En línea`,
       );
     }
 
     const infoWindow =
-      this.infoWindows[
-      usuarioId
-      ];
+      this.infoWindows[usuarioId];
 
     if (infoWindow) {
       infoWindow.setContent(
         this.buildInfoWindowContent(
-          trackingActualizado
-        )
+          trackingActualizado,
+        ),
       );
     }
+  }
+
+  private normalizarTimestamp(
+    timestamp: string,
+    fallbackTimestamp: string,
+  ): string {
+
+    if (!timestamp) {
+      return fallbackTimestamp;
+    }
+
+    const fecha =
+      new Date(timestamp);
+
+    if (
+      Number.isNaN(
+        fecha.getTime(),
+      )
+    ) {
+      return fallbackTimestamp;
+    }
+
+    return fecha.toISOString();
+  }
+
+  // =====================================================
+  // MARCAR SERENO OFFLINE
+  // =====================================================
+  marcarSerenoOffline(
+    usuarioId: number,
+    timestamp: string,
+  ): void {
+
+    const tracking =
+      this.serenos[usuarioId];
+
+    if (!tracking) {
+      console.warn(
+        `No se encontró tracking para marcar offline al usuario ${usuarioId}`,
+      );
+
+      return;
+    }
+
+    const timestampValido =
+      this.normalizarTimestampOffline(
+        timestamp,
+        tracking.realtime.timestamp,
+      );
+
+    const trackingActualizado:
+      TrackingPayload = {
+      ...tracking,
+
+      realtime: {
+        ...tracking.realtime,
+        online: false,
+        timestamp: timestampValido,
+      },
+    };
+
+    /*
+     * Se conserva el último GPS conocido.
+     * Solo se actualiza el estado de conexión.
+     */
+    this.serenos[usuarioId] =
+      trackingActualizado;
+
+    // Actualizar marcador
+    const marker =
+      this.serenoMarkers[usuarioId];
+
+    if (marker) {
+
+      marker.setIcon(
+        this.obtenerIconoMarcador(
+          trackingActualizado,
+        ),
+      );
+
+      marker.setTitle(
+        `${trackingActualizado.sereno.nombreCompleto} - Desconectado`,
+      );
+
+      /*
+       * Se conserva el marcador en la última
+       * ubicación conocida.
+       */
+      marker.setPosition({
+        lat: trackingActualizado.gps.lat,
+        lng: trackingActualizado.gps.lng,
+      });
+    }
+
+    // Actualizar InfoWindow
+    const infoWindow =
+      this.infoWindows[usuarioId];
+
+    if (infoWindow) {
+      infoWindow.setContent(
+        this.buildInfoWindowContent(
+          trackingActualizado,
+        ),
+      );
+    }
+  }
+
+  private normalizarTimestampOffline(
+    timestamp: string,
+    fallbackTimestamp: string,
+  ): string {
+
+    if (!timestamp) {
+      return fallbackTimestamp;
+    }
+
+    const fecha =
+      new Date(timestamp);
+
+    if (
+      Number.isNaN(
+        fecha.getTime(),
+      )
+    ) {
+      return fallbackTimestamp;
+    }
+
+    return fecha.toISOString();
   }
 
   // =====================================================

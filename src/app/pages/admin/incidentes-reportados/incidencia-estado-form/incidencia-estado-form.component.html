@@ -1,1 +1,298 @@
-<p>incidencia-estado-form works!</p>
+@if (visible) {
+
+<div class="fixed inset-0 z-65 flex items-center justify-center
+           bg-black/60 p-3 backdrop-blur-sm sm:p-6" role="dialog" aria-modal="true"
+  aria-labelledby="incidencia-estado-title" (click)="cerrarModal()">
+
+  <div class="flex max-h-[94vh] w-full max-w-2xl flex-col
+             overflow-hidden rounded-3xl bg-base-100
+             text-base-content shadow-2xl" (click)="$event.stopPropagation()">
+
+    <!-- CABECERA -->
+    <div class="flex shrink-0 items-start justify-between gap-4
+               border-b border-base-300 px-5 py-4 sm:px-6">
+
+      <div class="flex min-w-0 items-center gap-3">
+
+        <div class="flex h-12 w-12 shrink-0 items-center
+                   justify-center rounded-2xl
+                   bg-primary/10 text-primary">
+          <i class="fa-solid fa-arrows-rotate text-xl"></i>
+        </div>
+
+        <div class="min-w-0">
+
+          <h2 id="incidencia-estado-title" class="truncate text-xl font-bold">
+            Actualizar estado
+          </h2>
+
+          <p class="mt-1 text-sm text-base-content/60">
+
+            @if (incidencia) {
+            Incidencia #{{ incidencia.id }}
+            } @else {
+            Seleccione el nuevo estado de la incidencia.
+            }
+
+          </p>
+
+        </div>
+
+      </div>
+
+      <button type="button" class="btn btn-circle btn-ghost btn-sm shrink-0" aria-label="Cerrar formulario"
+        title="Cerrar" [disabled]="isSaving" (click)="cerrarModal()">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+    </div>
+
+    <!-- CONTENIDO -->
+    <div class="flex-1 overflow-y-auto p-5 sm:p-6">
+
+      @if (incidencia) {
+
+      <!-- Estado actual -->
+      <section class="rounded-2xl border border-base-300
+                   bg-base-200/40 p-4">
+
+        <p class="text-xs font-semibold uppercase tracking-wide
+                     text-base-content/50">
+          Estado actual
+        </p>
+
+        <div class="mt-3 flex items-center gap-3">
+
+          <div class="flex h-11 w-11 items-center justify-center
+                       rounded-xl bg-base-100 shadow-sm">
+            <i [class]="getEstadoIcon(estadoActual)"></i>
+          </div>
+
+          <div>
+
+            <span class="badge badge-lg" [ngClass]="getEstadoBadgeClass(estadoActual)">
+              {{ getEstadoLabel(estadoActual) }}
+            </span>
+
+            <p class="mt-1 text-xs text-base-content/50">
+              Estado registrado actualmente en el sistema.
+            </p>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- Opciones -->
+      <section class="mt-6">
+
+        <div class="mb-4">
+
+          <h3 class="font-bold">
+            Seleccione el nuevo estado
+          </h3>
+
+          <p class="mt-1 text-sm text-base-content/60">
+            El cambio será aplicado a la incidencia seleccionada.
+          </p>
+
+        </div>
+
+        <div class="space-y-3">
+
+          @for (
+          estado of estados;
+          track estado.value
+          ) {
+
+          <button type="button" class="flex w-full items-start gap-4 rounded-2xl
+                border p-4 text-left transition
+                hover:border-primary/40 hover:bg-base-200/50" [ngClass]="{
+            'border-primary bg-primary/5':
+              estadoSeleccionado === estado.value,
+
+            'border-base-300':
+              estadoSeleccionado !== estado.value,
+
+            'opacity-50 cursor-not-allowed':
+              !esTransicionValida(estado.value)
+          }" [disabled]="
+            isSaving ||
+            !esTransicionValida(estado.value)
+          " (click)="seleccionarEstado(estado.value)">
+
+            <div class="flex h-11 w-11 shrink-0 items-center
+                           justify-center rounded-xl bg-base-200">
+              <i [class]="estado.icon"></i>
+            </div>
+
+            <div class="min-w-0 flex-1">
+
+              <div class="flex flex-wrap items-center
+                             justify-between gap-2">
+
+                <p class="font-semibold">
+                  {{ estado.label }}
+                </p>
+
+                <span class="badge badge-sm" [ngClass]="estado.badgeClass">
+                  {{ estado.value }}
+                </span>
+
+              </div>
+
+              <p class="mt-2 text-sm leading-relaxed
+                             text-base-content/60">
+                {{ estado.descripcion }}
+              </p>
+
+              @if (
+              estadoActual === estado.value
+              ) {
+
+              <p class="mt-2 text-xs font-semibold
+                               text-primary">
+                <i class="fa-solid fa-circle-check mr-1"></i>
+                Estado actual
+              </p>
+
+              }
+
+            </div>
+
+            <input type="radio" class="radio radio-primary mt-1 shrink-0" name="estadoIncidencia" [value]="estado.value"
+              [(ngModel)]="estadoSeleccionado" [disabled]="
+                      isSaving ||
+                      !esTransicionValida(estado.value)
+                    " (click)="$event.stopPropagation()" />
+
+          </button>
+
+          }
+
+        </div>
+
+      </section>
+
+      <!-- Error -->
+      @if (errorMessage) {
+
+      <div class="alert alert-error mt-5" role="alert">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+
+        <span>
+          {{ errorMessage }}
+        </span>
+      </div>
+
+      }
+
+      <!-- Resumen del cambio -->
+      @if (estadoCambio && estadoSeleccionado) {
+
+      <section class="mt-5 rounded-2xl border border-primary/20
+                     bg-primary/5 p-4">
+
+        <div class="flex items-start gap-3">
+
+          <i class="fa-solid fa-arrow-right-arrow-left
+                         mt-1 text-primary"></i>
+
+          <div>
+
+            <p class="font-semibold">
+              Cambio seleccionado
+            </p>
+
+            <div class="mt-2 flex flex-wrap items-center gap-2">
+
+              <span class="badge" [ngClass]="
+                        getEstadoBadgeClass(estadoActual)
+                      ">
+                {{ getEstadoLabel(estadoActual) }}
+              </span>
+
+              <i class="fa-solid fa-arrow-right
+                             text-base-content/40"></i>
+
+              <span class="badge" [ngClass]="
+                        getEstadoBadgeClass(
+                          estadoSeleccionado
+                        )
+                      ">
+                {{
+                getEstadoLabel(
+                estadoSeleccionado
+                )
+                }}
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      }
+
+      } @else {
+
+      <div class="flex min-h-80 flex-col
+                   items-center justify-center text-center">
+
+        <div class="flex h-16 w-16 items-center justify-center
+                     rounded-full bg-base-200
+                     text-base-content/40">
+          <i class="fa-solid fa-circle-exclamation text-2xl"></i>
+        </div>
+
+        <h3 class="mt-4 text-lg font-bold">
+          Incidencia no seleccionada
+        </h3>
+
+        <p class="mt-2 max-w-md text-sm text-base-content/60">
+          Seleccione una incidencia para actualizar su estado.
+        </p>
+
+      </div>
+
+      }
+
+    </div>
+
+    <!-- PIE -->
+    <div class="flex shrink-0 flex-col-reverse gap-3
+               border-t border-base-300 px-5 py-4
+               sm:flex-row sm:justify-end sm:px-6">
+
+      <button type="button" class="btn btn-ghost" [disabled]="isSaving" (click)="cerrarModal()">
+        Cancelar
+      </button>
+
+      <button type="button" class="btn btn-primary sm:min-w-40" [disabled]="!formularioValido"
+        (click)="guardarEstado()">
+
+        @if (isSaving) {
+
+        <span class="loading loading-spinner loading-sm"></span>
+        Actualizando...
+
+        } @else {
+
+        <i class="fa-solid fa-floppy-disk"></i>
+        Actualizar estado
+
+        }
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+}

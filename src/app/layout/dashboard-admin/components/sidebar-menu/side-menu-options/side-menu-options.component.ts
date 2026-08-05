@@ -72,6 +72,7 @@ export class SideMenuOptionsComponent {
 
 
   ];
+
   // Others nav items
   othersItems: NavItem[] = [
     {
@@ -90,7 +91,27 @@ export class SideMenuOptionsComponent {
       roles: ['ADMIN', 'GERENTE_SERENAZGO', 'SERENO'],
       path: "/admin/calendario",
     },
+  ];
 
+  // Others nav items
+  configureItems: NavItem[] = [
+    {
+      icon: "assets/icons/sidebar/configure.svg",
+      name: "Catalogos",
+      roles: ['ADMIN', 'GERENTE_SERENAZGO', 'SERENO'],
+      subItems: [
+        { name: "Incidencias", path: "/admin/conf_incidencia" },
+        { name: "Zonas", path: "/admin/conf_zonas" },
+        { name: "Unidades", path: "/admin/conf_unidades" },
+      ],
+    },
+
+    {
+      icon: "assets/icons/sidebar/role.svg",
+      name: "Roles",
+      roles: ['ADMIN', 'GERENTE_SERENAZGO', 'SERENO'],
+      path: "/admin/roles",
+    },
 
   ];
 

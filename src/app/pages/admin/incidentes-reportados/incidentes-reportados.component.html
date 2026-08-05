@@ -102,6 +102,10 @@
   <incidencia-archivos [visible]="mostrarArchivos" [incidenciaId]="incidenciaArchivoId"
     (cerrar)="cerrarArchivos()"></incidencia-archivos>
 
+  <!-- ACTUALIZAR ESTADO -->
+  <incidencia-estado-form [visible]="mostrarEstadoForm" [incidencia]="incidenciaEstadoSeleccionada"
+    (cerrar)="cerrarEstadoForm()" (estadoActualizado)="onEstadoActualizado($event)"></incidencia-estado-form>
+
   <!-- ===================================================== -->
   <!-- TABLA -->
   <!-- ===================================================== -->
@@ -349,6 +353,12 @@
                 <button type="button" class="btn btn-square btn-ghost  btn-sm" title="Ver archivos"
                   [disabled]="!incidente.id" (click)="abrirArchivos(incidente.id)">
                   <i class="fa-solid fa-paperclip text-primary"></i>
+                </button>
+
+                <!-- Actualizar estado del incidente -->
+                <button type="button" class="btn btn-square btn-ghost btn-sm" title="Actualizar estado"
+                  (click)="abrirEstadoForm(incidente)">
+                  <i class="fa-solid fa-arrows-rotate text-primary"></i>
                 </button>
 
 

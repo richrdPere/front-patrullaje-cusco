@@ -54,3 +54,22 @@ export interface TrackingPayload {
   // TIPO DE UBICACIÓN
   tipo: TrackingTipo;
 }
+
+
+export interface SerenoOfflinePayload {
+  usuarioId: number;
+
+  realtime: {
+    online: false;
+    timestamp: string;
+  };
+}
+
+export interface SerenoOnlinePayload {
+  usuarioId: number;
+
+  realtime: {
+    online: true;
+    timestamp: string;
+  };
+}

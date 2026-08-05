@@ -1,6 +1,6 @@
 @if (visible) {
 
-<div class="fixed inset-0 z-[60] flex items-center justify-center
+<div class="fixed inset-0 z-60 flex items-center justify-center
            bg-black/60 p-3 backdrop-blur-sm sm:p-6" role="dialog" aria-modal="true"
   aria-labelledby="incidencia-archivos-title" (click)="cerrarModal()">
 
@@ -60,7 +60,7 @@
       <!-- LOADING -->
       @if (isLoading) {
 
-      <div class="flex min-h-[430px] flex-col
+      <div class="flex min-h-107.5 flex-col
                    items-center justify-center text-center">
 
         <span class="loading loading-spinner
@@ -81,7 +81,7 @@
       <!-- ERROR -->
       @else if (errorMessage) {
 
-      <div class="flex min-h-[430px] flex-col
+      <div class="flex min-h-107.5 flex-col
                    items-center justify-center text-center">
 
         <div class="flex h-16 w-16 items-center justify-center
@@ -384,7 +384,7 @@
 
       } @else {
 
-      <div class="flex min-h-[340px] flex-col
+      <div class="flex min-h-85 flex-col
                      items-center justify-center text-center">
 
         <div class="flex h-16 w-16 items-center justify-center

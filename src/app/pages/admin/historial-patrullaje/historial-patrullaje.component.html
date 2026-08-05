@@ -1,1 +1,963 @@
-<p>historial-patrullaje works!</p>
+<div class="min-h-full overflow-auto bg-base-300
+         p-4 text-base-content transition-colors
+         duration-300 sm:p-6">
+
+  <!-- ===================================================== -->
+  <!-- CABECERA -->
+  <!-- ===================================================== -->
+  <div class="mb-6 flex flex-col gap-4
+           lg:flex-row lg:items-center
+           lg:justify-between">
+
+    <div class="flex items-center gap-4">
+
+      <div class="flex h-12 w-12 shrink-0 items-center
+               justify-center rounded-2xl
+               bg-primary/10 text-primary">
+        <i class="fa-solid fa-clock-rotate-left text-xl"></i>
+      </div>
+
+      <div>
+
+        <h1 class="text-2xl font-bold">
+          Historial operativo
+        </h1>
+
+        <p class="mt-1 text-sm text-base-content/60">
+          Consulte las observaciones, novedades y eventos
+          registrados durante los patrullajes.
+        </p>
+
+      </div>
+
+    </div>
+
+    <button type="button" class="btn btn-outline btn-primary" [disabled]="isLoading" (click)="getHistorial()">
+      @if (isLoading) {
+      <span class="loading loading-spinner loading-sm"></span>
+      } @else {
+      <i class="fa-solid fa-rotate-right"></i>
+      }
+
+      Actualizar
+    </button>
+
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- FILTROS -->
+  <!-- ===================================================== -->
+
+  <section class="mb-6 rounded-3xl border border-base-300
+         bg-base-100 shadow-sm">
+
+    <!-- CABECERA -->
+    <div class="flex flex-col gap-4 border-b border-base-300
+           px-5 py-4 sm:flex-row sm:items-center
+           sm:justify-between">
+
+      <div class="flex items-center gap-3">
+
+        <div class="flex h-10 w-10 shrink-0 items-center
+               justify-center rounded-xl
+               bg-primary/10 text-primary">
+          <i class="fa-solid fa-filter"></i>
+        </div>
+
+        <div>
+
+          <h2 class="font-bold">
+            Filtros de búsqueda
+          </h2>
+
+          <p class="text-xs text-base-content/50">
+            Puede combinar uno o varios criterios.
+          </p>
+
+        </div>
+
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+
+        <button type="button" class="btn btn-ghost btn-sm" [disabled]="isLoading" (click)="limpiarFiltros()">
+          <i class="fa-solid fa-eraser"></i>
+          Limpiar
+        </button>
+
+        <button type="button" class="btn btn-outline btn-primary btn-sm" [attr.aria-expanded]="mostrarFiltrosAvanzados"
+          aria-controls="filtros-avanzados" (click)="toggleFiltrosAvanzados()">
+          <i class="fa-solid fa-sliders"></i>
+
+          @if (mostrarFiltrosAvanzados) {
+          Ocultar filtros
+          } @else {
+          Más filtros
+          }
+
+          <i class="fa-solid transition-transform duration-200" [ngClass]="{
+            'fa-chevron-up': mostrarFiltrosAvanzados,
+            'fa-chevron-down': !mostrarFiltrosAvanzados
+          }"></i>
+        </button>
+
+      </div>
+
+    </div>
+
+    <form class="p-5" (ngSubmit)="aplicarFiltros()">
+
+      <!-- ================================================= -->
+      <!-- FILTROS PRINCIPALES: SIEMPRE VISIBLES -->
+      <!-- ================================================= -->
+
+      <div class="grid grid-cols-1 gap-4
+             md:grid-cols-2 xl:grid-cols-4">
+
+        <!-- Búsqueda -->
+        <label class="form-control xl:col-span-2">
+
+          <div class="label">
+            <span class="label-text font-semibold">
+              Buscar
+            </span>
+          </div>
+
+          <div class="relative">
+
+            <i class="fa-solid fa-magnifying-glass
+                   absolute left-4 top-1/2
+                   -translate-y-1/2
+                   text-base-content/40"></i>
+
+            <input type="text" class="input input-bordered w-full pl-11" name="search"
+              placeholder="Título o descripción" [(ngModel)]="filtrosFormulario.search" />
+
+          </div>
+
+        </label>
+
+        <!-- Fecha inicial -->
+        <label class="form-control">
+
+          <div class="label">
+            <span class="label-text font-semibold">
+              Fecha inicial
+            </span>
+          </div>
+
+          <input type="date" class="input input-bordered w-full" name="fecha_inicio"
+            [(ngModel)]="filtrosFormulario.fecha_inicio" />
+
+        </label>
+
+        <!-- Fecha final -->
+        <label class="form-control">
+
+          <div class="label">
+            <span class="label-text font-semibold">
+              Fecha final
+            </span>
+          </div>
+
+          <input type="date" class="input input-bordered w-full" name="fecha_fin"
+            [(ngModel)]="filtrosFormulario.fecha_fin" />
+
+        </label>
+
+      </div>
+
+      <!-- ================================================= -->
+      <!-- FILTROS AVANZADOS -->
+      <!-- ================================================= -->
+
+      @if (mostrarFiltrosAvanzados) {
+
+      <div id="filtros-avanzados" class="mt-5 border-t border-base-300 pt-5">
+
+        <div class="mb-4 flex items-center gap-2">
+
+          <i class="fa-solid fa-sliders text-primary"></i>
+
+          <div>
+
+            <h3 class="text-sm font-bold">
+              Filtros avanzados
+            </h3>
+
+            <p class="text-xs text-base-content/50">
+              Filtre por unidad, zona, sereno, patrullaje y otros criterios.
+            </p>
+
+          </div>
+
+        </div>
+
+        <div class="grid grid-cols-1 gap-4
+                 md:grid-cols-2 xl:grid-cols-4">
+
+          <!-- Unidad ID -->
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Unidad
+              </span>
+            </div>
+
+            <input type="number" min="1" class="input input-bordered w-full" name="unidad_id" placeholder="ID de unidad"
+              [(ngModel)]="filtrosFormulario.unidad_id" />
+
+          </label>
+
+          <!-- Zona ID -->
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Zona
+              </span>
+            </div>
+
+            <input type="number" min="1" class="input input-bordered w-full" name="zona_id" placeholder="ID de zona"
+              [(ngModel)]="filtrosFormulario.zona_id" />
+
+          </label>
+
+          <!-- Sereno -->
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Sereno
+              </span>
+            </div>
+
+            <input type="number" min="1" class="input input-bordered w-full" name="usuario_id"
+              placeholder="ID de usuario" [(ngModel)]="filtrosFormulario.usuario_id" />
+
+          </label>
+
+          <!-- Patrullaje -->
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Patrullaje
+              </span>
+            </div>
+
+            <input type="number" min="1" class="input input-bordered w-full" name="patrullaje_id"
+              placeholder="ID de patrullaje" [(ngModel)]="filtrosFormulario.patrullaje_id" />
+
+          </label>
+
+          <!-- Incidencia -->
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Incidencia
+              </span>
+            </div>
+
+            <input type="number" min="1" class="input input-bordered w-full" name="incidencia_id"
+              placeholder="ID de incidencia" [(ngModel)]="filtrosFormulario.incidencia_id" />
+
+          </label>
+
+          <!-- Tipo -->
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Tipo
+              </span>
+            </div>
+
+            <select class="select select-bordered w-full" name="tipo" [(ngModel)]="filtrosFormulario.tipo">
+
+              <option value="">
+                Todos los tipos
+              </option>
+
+              @for (
+              tipo of tipos;
+              track tipo.value
+              ) {
+              <option [value]="tipo.value">
+                {{ tipo.label }}
+              </option>
+              }
+
+            </select>
+
+          </label>
+
+          <!-- Prioridad -->
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Prioridad
+              </span>
+            </div>
+
+            <select class="select select-bordered w-full" name="prioridad" [(ngModel)]="filtrosFormulario.prioridad">
+
+              <option value="">
+                Todas las prioridades
+              </option>
+
+              @for (
+              prioridad of prioridades;
+              track prioridad.value
+              ) {
+              <option [value]="prioridad.value">
+                {{ prioridad.label }}
+              </option>
+              }
+
+            </select>
+
+          </label>
+
+          <!-- Estado -->
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Estado
+              </span>
+            </div>
+
+            <select class="select select-bordered w-full" name="estado" [(ngModel)]="filtrosFormulario.estado">
+
+              <option value="">
+                Todos los estados
+              </option>
+
+              @for (
+              estado of estados;
+              track estado.value
+              ) {
+              <option [value]="estado.value">
+                {{ estado.label }}
+              </option>
+              }
+
+            </select>
+
+          </label>
+
+          <!-- Visibilidad -->
+          <label class="form-control">
+
+            <div class="label">
+              <span class="label-text font-semibold">
+                Visibilidad
+              </span>
+            </div>
+
+            <select class="select select-bordered w-full" name="visible_para_siguiente_turno" [(ngModel)]="
+                filtrosFormulario.visible_para_siguiente_turno
+              ">
+
+              <option [ngValue]="null">
+                Todas las opciones
+              </option>
+
+              <option [ngValue]="true">
+                Visible para siguiente turno
+              </option>
+
+              <option [ngValue]="false">
+                Solo turno actual
+              </option>
+
+            </select>
+
+          </label>
+
+        </div>
+
+      </div>
+
+      }
+
+      <!-- Error de validación -->
+      @if (errorMessage && !isLoading) {
+
+      <div class="alert alert-error mt-5" role="alert">
+
+        <i class="fa-solid fa-triangle-exclamation"></i>
+
+        <span>
+          {{ errorMessage }}
+        </span>
+
+      </div>
+
+      }
+
+      <!-- Acciones -->
+      <div class="mt-5 flex flex-col-reverse gap-3
+             sm:flex-row sm:justify-end">
+
+        <button type="button" class="btn btn-ghost" [disabled]="isLoading" (click)="limpiarFiltros()">
+          <i class="fa-solid fa-eraser"></i>
+          Limpiar filtros
+        </button>
+
+        <button type="submit" class="btn btn-primary sm:min-w-36" [disabled]="isLoading">
+
+          @if (isLoading) {
+
+          <span class="loading loading-spinner loading-sm"></span>
+          Consultando...
+
+          } @else {
+
+          <i class="fa-solid fa-magnifying-glass"></i>
+          Consultar
+
+          }
+
+        </button>
+
+      </div>
+
+    </form>
+
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- TABLA -->
+  <!-- ===================================================== -->
+
+  <section class="overflow-hidden rounded-3xl
+           border border-base-300 bg-base-100
+           shadow-sm">
+
+    <!-- Encabezado tabla -->
+    <div class="flex flex-col gap-4 border-b
+             border-base-300 px-5 py-4
+             sm:flex-row sm:items-center
+             sm:justify-between">
+
+      <div>
+
+        <h2 class="font-bold">
+          Registros del historial
+        </h2>
+
+        <p class="mt-1 text-xs text-base-content/50">
+          {{ totalItems }}
+          registro{{ totalItems === 1 ? '' : 's' }}
+          encontrado{{ totalItems === 1 ? '' : 's' }}.
+        </p>
+
+      </div>
+
+      <label class="flex items-center gap-2 text-sm">
+
+        <span class="text-base-content/60">
+          Mostrar
+        </span>
+
+        <select class="select select-bordered select-sm" [ngModel]="limit" (ngModelChange)="cambiarLimite($event)">
+
+          @for (
+          option of pageSizeOptions;
+          track option
+          ) {
+          <option [ngValue]="option">
+            {{ option }}
+          </option>
+          }
+
+        </select>
+
+      </label>
+
+    </div>
+
+    <!-- Loading -->
+    @if (isLoading) {
+
+    <div class="flex min-h-100 flex-col
+               items-center justify-center text-center">
+
+      <span class="loading loading-spinner
+                 loading-lg text-primary"></span>
+
+      <h3 class="mt-4 font-bold">
+        Cargando historial
+      </h3>
+
+      <p class="mt-1 text-sm text-base-content/60">
+        Estamos consultando los registros operativos.
+      </p>
+
+    </div>
+
+    }
+
+    <!-- Error -->
+    @else if (errorMessage) {
+
+    <div class="flex min-h-100 flex-col
+               items-center justify-center p-6
+               text-center">
+
+      <div class="flex h-16 w-16 items-center
+                 justify-center rounded-full
+                 bg-error/10 text-error">
+        <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+      </div>
+
+      <h3 class="mt-4 text-lg font-bold">
+        No se pudo obtener el historial
+      </h3>
+
+      <p class="mt-2 max-w-md text-sm text-base-content/60">
+        {{ errorMessage }}
+      </p>
+
+      <button type="button" class="btn btn-primary mt-5" (click)="reintentar()">
+        <i class="fa-solid fa-rotate-right"></i>
+        Volver a intentar
+      </button>
+
+    </div>
+
+    }
+
+    <!-- Tabla -->
+    @else if (historiales.length > 0) {
+
+    <div class="overflow-x-auto">
+
+      <table class="table table-zebra">
+
+        <thead>
+
+          <tr>
+
+            <th class="whitespace-nowrap">
+              Fecha y hora
+            </th>
+
+            <th>
+              Registro
+            </th>
+
+            <th>
+              Sereno
+            </th>
+
+            <th>
+              Zona
+            </th>
+
+            <th>
+              Unidad
+            </th>
+
+            <th>
+              Patrullaje
+            </th>
+
+            <th>
+              Incidencia
+            </th>
+
+            <th>
+              Estado
+            </th>
+
+            <th class="text-center">
+              Acciones
+            </th>
+
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+          @for (
+          historial of historiales;
+          track historial.id
+          ) {
+
+          <tr>
+
+            <!-- Fecha -->
+            <td class="whitespace-nowrap">
+
+              <div class="flex items-start gap-3">
+
+                <div class="flex h-9 w-9 shrink-0
+                             items-center justify-center
+                             rounded-xl bg-base-200
+                             text-base-content/60">
+                  <i class="fa-regular fa-calendar"></i>
+                </div>
+
+                <div>
+
+                  <p class="font-semibold">
+                    {{
+                    historial.fecha_hora
+                    | date: 'dd/MM/yyyy'
+                    }}
+                  </p>
+
+                  <p class="text-xs text-base-content/50">
+                    {{
+                    historial.fecha_hora
+                    | date: 'HH:mm:ss'
+                    }}
+                  </p>
+
+                </div>
+
+              </div>
+
+            </td>
+
+            <!-- Registro -->
+            <td class="min-w-72">
+
+              <div class="flex items-start gap-3">
+
+                <div class="flex h-10 w-10 shrink-0
+                             items-center justify-center
+                             rounded-xl bg-primary/10
+                             text-primary">
+                  <i [class]="getTipoIcon(historial.tipo)"></i>
+                </div>
+
+                <div class="min-w-0">
+
+                  <div class="flex flex-wrap items-center gap-2">
+
+                    <span class="badge badge-sm" [ngClass]="
+                            getTipoBadgeClass(historial.tipo)
+                          ">
+                      {{ getTipoLabel(historial.tipo) }}
+                    </span>
+
+                    <span class="badge badge-sm" [ngClass]="
+                            getPrioridadBadgeClass(
+                              historial.prioridad
+                            )
+                          ">
+                      {{
+                      getPrioridadLabel(
+                      historial.prioridad
+                      )
+                      }}
+                    </span>
+
+                  </div>
+
+                  <p class="mt-2 font-bold">
+                    {{ historial.titulo }}
+                  </p>
+
+                  <p class="mt-1 line-clamp-2 text-sm
+                               text-base-content/60">
+                    {{ historial.descripcion }}
+                  </p>
+
+                  @if (
+                  historial.visible_para_siguiente_turno
+                  ) {
+
+                  <p class="mt-2 text-xs font-semibold
+                                 text-info">
+                    <i class="fa-solid fa-eye mr-1"></i>
+                    Visible para el siguiente turno
+                  </p>
+
+                  }
+
+                </div>
+
+              </div>
+
+            </td>
+
+            <!-- Sereno -->
+            <td class="min-w-44">
+
+              <div class="flex items-center gap-2">
+
+                <div class="flex h-8 w-8 shrink-0
+                             items-center justify-center
+                             rounded-full bg-primary/10
+                             text-primary">
+                  <i class="fa-solid fa-user-shield text-xs"></i>
+                </div>
+
+                <div class="min-w-0">
+
+                  <p class="line-clamp-2 text-sm font-semibold">
+                    {{ getNombreSereno(historial) }}
+                  </p>
+
+                  @if (historial.usuario_id) {
+
+                  <p class="text-xs text-base-content/50">
+                    ID {{ historial.usuario_id }}
+                  </p>
+
+                  }
+
+                </div>
+
+              </div>
+
+            </td>
+
+            <!-- Zona -->
+            <td class="min-w-40">
+
+              <p class="font-semibold">
+                {{ getNombreZona(historial) }}
+              </p>
+
+              <p class="text-xs text-base-content/50">
+                Zona #{{ historial.zona_id }}
+              </p>
+
+            </td>
+
+            <!-- Unidad -->
+            <td class="min-w-40">
+
+              <p class="font-semibold">
+                {{ getUnidadLabel(historial) }}
+              </p>
+
+              @if (
+              historial.patrullaje_programado?.unidad
+              ) {
+
+              <p class="text-xs text-base-content/50">
+                {{
+                historial
+                .patrullaje_programado
+                ?.unidad
+                ?.tipo
+                }}
+              </p>
+
+              }
+
+            </td>
+
+            <!-- Patrullaje -->
+            <td class="whitespace-nowrap">
+
+              <button type="button" class="btn btn-link btn-sm px-0" title="Filtrar por este patrullaje" (click)="
+                      consultarPorPatrullaje(
+                        historial.patrullaje_id
+                      )
+                    ">
+                {{ getPatrullajeLabel(historial) }}
+              </button>
+
+              @if (historial.patrullaje_programado) {
+
+              <p class="text-xs text-base-content/50">
+                {{
+                historial
+                .patrullaje_programado
+                ?.estado
+                }}
+              </p>
+
+              }
+
+            </td>
+
+            <!-- Incidencia -->
+            <td class="min-w-40">
+
+              @if (historial.incidencia_id) {
+
+              <span class="badge badge-outline">
+                {{ getIncidenciaLabel(historial) }}
+              </span>
+
+              } @else {
+
+              <span class="text-sm text-base-content/40">
+                Sin incidencia
+              </span>
+
+              }
+
+            </td>
+
+            <!-- Estado -->
+            <td>
+
+              <span class="badge whitespace-nowrap" [ngClass]="
+                      getEstadoBadgeClass(historial.estado)
+                    ">
+                {{ getEstadoLabel(historial.estado) }}
+              </span>
+
+            </td>
+
+            <!-- Acciones -->
+            <td>
+
+              <div class="flex justify-center gap-1">
+
+                <button type="button" class="btn btn-square btn-ghost btn-sm" title="Ver detalle"
+                  aria-label="Ver detalle del historial" (click)="abrirDetalle(historial)">
+                  <i class="fa-solid fa-eye text-primary"></i>
+                </button>
+
+                <button type="button" class="btn btn-square btn-ghost btn-sm" title="Ver ubicación"
+                  aria-label="Ver ubicación del historial" [disabled]="!tieneCoordenadas(historial)"
+                  (click)="abrirMapa(historial)">
+                  <i class="fa-solid fa-map-location-dot
+                               text-info"></i>
+                </button>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+          }
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+    <!-- ================================================= -->
+    <!-- PAGINACIÓN -->
+    <!-- ================================================= -->
+
+    <div class="flex flex-col gap-4 border-t
+               border-base-300 px-5 py-4
+               sm:flex-row sm:items-center
+               sm:justify-between">
+
+      <p class="text-sm text-base-content/60">
+
+        Página
+        <span class="font-semibold text-base-content">
+          {{ currentPage }}
+        </span>
+
+        de
+
+        <span class="font-semibold text-base-content">
+          {{ totalPages }}
+        </span>
+
+        · {{ totalItems }} registros
+
+      </p>
+
+      <div class="join">
+
+        <button type="button" class="btn btn-sm join-item" title="Página anterior" aria-label="Página anterior"
+          [disabled]="
+              !hasPreviousPage ||
+              isLoading
+            " (click)="paginaAnterior()">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+
+        @for (
+        pagina of paginasVisibles;
+        track pagina
+        ) {
+
+        <button type="button" class="btn btn-sm join-item" [ngClass]="{
+                'btn-primary':
+                  pagina === currentPage
+              }" [disabled]="isLoading" (click)="cambiarPagina(pagina)">
+          {{ pagina }}
+        </button>
+
+        }
+
+        <button type="button" class="btn btn-sm join-item" title="Página siguiente" aria-label="Página siguiente"
+          [disabled]="
+              !hasNextPage ||
+              isLoading
+            " (click)="paginaSiguiente()">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+
+      </div>
+
+    </div>
+
+    }
+
+    <!-- Vacío -->
+    @else {
+
+    <div class="flex min-h-100 flex-col
+               items-center justify-center p-6
+               text-center">
+
+      <div class="flex h-16 w-16 items-center
+                 justify-center rounded-full
+                 bg-base-200 text-base-content/40">
+        <i class="fa-solid fa-clock-rotate-left text-2xl"></i>
+      </div>
+
+      <h3 class="mt-4 text-lg font-bold">
+        No se encontraron registros
+      </h3>
+
+      <p class="mt-2 max-w-md text-sm text-base-content/60">
+        No existen historiales que coincidan con los filtros
+        seleccionados.
+      </p>
+
+      <button type="button" class="btn btn-outline btn-primary mt-5" (click)="limpiarFiltros()">
+        <i class="fa-solid fa-eraser"></i>
+        Limpiar filtros
+      </button>
+
+    </div>
+
+    }
+
+  </section>
+
+</div>
+
+<!-- ======================================================= -->
+<!-- SUBCOMPONENTES FUTUROS -->
+<!-- ======================================================= -->
+
+<!--
+<app-historial-detalle
+  [visible]="mostrarModalDetalle"
+  [historial]="historialSeleccionado"
+  (cerrar)="cerrarDetalle()"
+></app-historial-detalle>
+
+<app-historial-mapa
+  [visible]="mostrarModalMapa"
+  [historial]="historialSeleccionado"
+  (cerrar)="cerrarMapa()"
+></app-historial-mapa>
+-->

@@ -7,6 +7,7 @@ import { environment } from '@environments/environment';
 
 // Interface
 import { ApiResponse } from '../pages/shared/interfaces/api-response';
+import { HistorialPatrullaje, HistorialPatrullajeFilters, HistorialPatrullajePaginadoData, } from '../interfaces/historial/historial-patrullaje.interface';
 
 @Injectable({ providedIn: 'root' })
 export class HistorialPatrullajeService {
@@ -16,14 +17,13 @@ export class HistorialPatrullajeService {
   // 2.- variables publicas
   API_BASE = this.envs.main_url + 'historial';
 
-  API_GET_HISTORIAL_PATRULLAJE: string = this.API_BASE + '/patrullaje/';
+  API_GET_HISTORIAL_BY_PATRULLAJE: string = this.API_BASE + '/patrullaje/';
   API_GET_HISTORIAL_DETALLE: string = this.API_BASE + '/detalle/';
-  // API_GET_HISTORIAL_ZONA_RESUMEN: string = this.API_BASE + '/zona/';
-  // API_PUT_ARCHIVAR_HISTORIAL: string = this.API_BASE + '/archivar/';
+  API_GET_HISTORIAL_PAGINADO: string = this.API_BASE + '/paginado';
 
   constructor(private http: HttpClient) { }
 
-  // ======= HEADER CON TOKEN =======
+  // 3. HEADERS DE AUTENTICACIÓN
   private getAuthHeaders(): { headers: HttpHeaders } {
     const token = localStorage.getItem('token'); // o sessionStorage según tu login
     let headers = new HttpHeaders({
@@ -37,36 +37,121 @@ export class HistorialPatrullajeService {
     return { headers };
   }
 
+  // 4. CONSTRUIR PARAMS
+  private buildHttpParams<T extends object>(filters: T): HttpParams {
+
+    let params = new HttpParams();
+
+    Object.entries(filters)
+      .forEach(([key, value]) => {
+
+        if (
+          value === null ||
+          value === undefined ||
+          value === ''
+        ) {
+          return;
+        }
+
+        params = params.set(
+          key,
+          String(value)
+        );
+      });
+
+    return params;
+  }
+
+  // 5. SERVICES
 
   // ===========================================================
   // 1.- Obtener historial de patrullaje
   // ===========================================================
-  getHistorialByIdPatrullaje(id: number): Observable<ApiResponse<any>> {
+  getHistorialByPatrullaje(
+    patrullajeId: number,
+    filters:
+      Omit<
+        HistorialPatrullajeFilters,
+        'patrullaje_id'
+      > = {},
+  ): Observable<
+    ApiResponse<
+      HistorialPatrullajePaginadoData
+    >
+  > {
 
-    const headers = this.getAuthHeaders().headers;
-    return this.http.get<ApiResponse<any>>(`${this.API_GET_HISTORIAL_PATRULLAJE}${id}`, { headers });
+    const filtrosCompletos:
+      HistorialPatrullajeFilters = {
+      ...filters,
+      patrullaje_id: patrullajeId,
+    };
+
+    return this.getHistorialPaginado(
+      filtrosCompletos,
+    );
   }
 
   // ===========================================================
-  // 2.- Obtener historial zonas
+  // 2.- Obtener historial por ID
   // ===========================================================
-  getHistorialDetalle(id: number) {
+  getHistorialById(
+    historialId: number,
+  ): Observable<
+    ApiResponse<HistorialPatrullaje>
+  > {
 
-    const headers = this.getAuthHeaders().headers;
-    return this.http.get<any>(`${this.API_GET_HISTORIAL_DETALLE}${id}`, { headers });
+    const headers =
+      this.getAuthHeaders().headers;
+
+    return this.http.get<
+      ApiResponse<HistorialPatrullaje>
+    >(
+      `${this.API_GET_HISTORIAL_DETALLE}${historialId}`,
+      {
+        headers,
+      },
+    );
   }
 
-  // // ===========================================================
-  // // 3.- Obtener historial zonas resumen
-  // // ===========================================================
-  // getHistorialResumenZonas() {
-  //   return this.http.get<any>(`${this.API_GET_HISTORIAL_ZONA}`);
-  // }
+  // ===========================================================
+  // 3.- Obtener historial paginado
+  // ===========================================================
+  getHistorialPaginado(
+    filters:
+      HistorialPatrullajeFilters = {},
+  ): Observable<
+    ApiResponse<
+      HistorialPatrullajePaginadoData
+    >
+  > {
 
-  // // ===========================================================
-  // // 4.- Obtener historial zonas resumen
-  // // ===========================================================
-  // updateHistorialPatrullaje(id: string, data: Partial<any>): Observable<any> {
-  //   return this.http.put<any>(`${this.API_PUT_ARCHIVAR_HISTORIAL}${id}`, data);
-  // }
+    const params =
+      this.buildHttpParams(filters);
+
+    const headers =
+      this.getAuthHeaders().headers;
+
+    return this.http.get<ApiResponse<HistorialPatrullajePaginadoData>>
+      (
+        this.API_GET_HISTORIAL_PAGINADO,
+        {
+          params,
+          headers,
+        },
+      );
+  }
+
+  // =========================================================
+  // 4. ENDPOINT ANTIGUO POR PATRULLAJE
+  // =========================================================
+  getHistorialByPatrullajeEndpoint(
+    patrullajeId: number,
+  ): Observable<
+    ApiResponse<HistorialPatrullaje[]>
+  > {
+    const headers = this.getAuthHeaders().headers;
+    return this.http.get<ApiResponse<HistorialPatrullaje[]>>
+      (`${this.API_GET_HISTORIAL_BY_PATRULLAJE}${patrullajeId}`, { headers, },
+      );
+  }
 }

@@ -6,7 +6,7 @@ import { SocketService } from '../socket.service';
 
 
 // Interface
-import { TrackingPayload } from 'src/app/interfaces/tracking.interface';
+import { SerenoOfflinePayload, SerenoOnlinePayload, TrackingPayload } from 'src/app/interfaces/tracking.interface';
 
 export interface SocketResponse<T = unknown> {
   success: boolean;
@@ -49,8 +49,29 @@ export class TrackingService {
   }
 
   /**
-     * Unir y centrar los trackings.
-     */
+   * Escucha serenos desconectados.
+   */
+  listenSerenoOffline(): Observable<SerenoOfflinePayload> {
+    return this.socketService.listen<SerenoOfflinePayload>(
+      'tracking:sereno-offline'
+    );
+  }
+
+  /**
+    * Escucha serenos conectados.
+    */
+  listenSerenoOnline():
+    Observable<SerenoOnlinePayload> {
+
+    return this.socketService
+      .listen<SerenoOnlinePayload>(
+        'tracking:sereno-online',
+      );
+  }
+
+  /**
+   * Unir y centrar los trackings.
+   */
   unirseCentralTracking(): void {
     this.socketService.emit(
       'tracking:unirse-central',

@@ -106,10 +106,8 @@ export class TrackingStoreService {
         '⚠️ Ubicación antigua descartada:',
         {
           usuarioId: tracking.usuarioId,
-          fechaActual:
-            trackingActual.realtime.timestamp,
-          fechaRecibida:
-            tracking.realtime.timestamp
+          fechaActual: trackingActual.realtime.timestamp,
+          fechaRecibida: tracking.realtime.timestamp
         }
       );
 
@@ -127,16 +125,11 @@ export class TrackingStoreService {
       '🟢 Tracking actualizado en store:',
       {
         usuarioId: tracking.usuarioId,
-        sereno:
-          tracking.sereno.nombreCompleto,
-        patrullajeId:
-          tracking.patrullaje.id,
-        lat:
-          tracking.gps.lat,
-        lng:
-          tracking.gps.lng,
-        timestamp:
-          tracking.realtime.timestamp
+        sereno: tracking.sereno.nombreCompleto,
+        patrullajeId: tracking.patrullaje.id,
+        lat: tracking.gps.lat,
+        lng: tracking.gps.lng,
+        timestamp: tracking.realtime.timestamp
       }
     );
   }

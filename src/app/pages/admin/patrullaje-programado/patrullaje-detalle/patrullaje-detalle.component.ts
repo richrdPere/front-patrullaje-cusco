@@ -59,7 +59,7 @@ export class PatrullajeDetalleComponent implements OnInit, OnDestroy {
     this.loading = true;
     forkJoin({
       patrullaje: this.patrullajeService.getPatrullajeProgramadoById(this.patrullajeId),
-      historial: this.historialService.getHistorialByIdPatrullaje(this.patrullajeId)
+      historial: this.historialService.getHistorialByPatrullajeEndpoint(this.patrullajeId)
       // historial: this.historialService.getHistorialDetalle(this.patrullajeId)
 
     })
@@ -81,7 +81,7 @@ export class PatrullajeDetalleComponent implements OnInit, OnDestroy {
   // RECARGAR SOLO HISTORIAL
   recargarHistorial(): void {
     this.historialService
-      .getHistorialByIdPatrullaje(this.patrullajeId)
+      .getHistorialByPatrullajeEndpoint(this.patrullajeId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {

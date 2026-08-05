@@ -244,8 +244,7 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
         }
       });
 
-    this.trackingService
-      .listenAlertas()
+    this.trackingService.listenAlertas()
       .pipe(
         takeUntil(this.destroy$)
       )
@@ -263,61 +262,40 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
         }
       });
 
+    this.trackingService.unirseCentralTracking();
+
+
+    this.trackingService.listenSerenoOffline()
+      .subscribe(payload => {
+        this.mapaTrackingService.marcarSerenoOffline(
+          payload.usuarioId,
+          payload.realtime.timestamp,
+        );
+      });
+
     this.trackingService
-      .unirseCentralTracking();
+      .listenSerenoOnline()
+      .pipe(
+        takeUntil(this.destroy$),
+      )
+      .subscribe({
+        next: payload => {
+
+          this.mapaTrackingService
+            .marcarSerenoOnline(
+              payload.usuarioId,
+              payload.realtime.timestamp,
+            );
+        },
+
+        error: error => {
+          console.error(
+            'Error escuchando reconexión del sereno:',
+            error,
+          );
+        },
+      });
   }
-  // private initTracking(): void {
-  //   console.log(
-  //     '🛰️ Escuchando tracking en tiempo real...'
-  //   );
-
-  //   this.trackingService.unirseCentralTracking();
-
-  //   this.trackingStoreService
-  //     .tracking$
-  //     .pipe(
-  //       takeUntil(this.destroy$)
-  //     )
-  //     .subscribe({
-  //       next: trackingMap => {
-  //         this.procesarTrackingMap(
-  //           trackingMap
-  //         );
-  //       },
-
-  //       error: error => {
-  //         console.error(
-  //           '❌ Error en el estado global de tracking:',
-  //           error
-  //         );
-  //       }
-  //     });
-
-  //   this.trackingService
-  //     .listenAlertas()
-  //     .pipe(
-  //       takeUntil(this.destroy$)
-  //     )
-  //     .subscribe({
-  //       next: data => {
-  //         console.log(
-  //           '🚨 Alerta recibida:',
-  //           data
-  //         );
-
-  //         this.mostrarAlerta(
-  //           data as AlertaMapaPayload
-  //         );
-  //       },
-
-  //       error: error => {
-  //         console.error(
-  //           '❌ Error escuchando alertas:',
-  //           error
-  //         );
-  //       }
-  //     });
-  // }
 
   // =====================================================
   // PROCESAR ESTADO DE TRACKING
