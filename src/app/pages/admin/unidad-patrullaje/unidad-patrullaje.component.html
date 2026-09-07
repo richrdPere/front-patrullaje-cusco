@@ -2,7 +2,34 @@
 
 
   <!-- Titulo -->
-  <h1 class="text-2xl font-bold mb-5 text-base-content ">Gestión de Unidades de Patrullaje</h1>
+  <!-- <h1 class="text-2xl font-bold mb-5 text-base-content ">Gestión de Unidades de Patrullaje</h1> -->
+
+
+  <!-- ENCABEZADO -->
+  <header class="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+    <!-- ÍCONO + INFORMACIÓN -->
+    <div class="flex items-center gap-3">
+      <div class="flex h-12 w-12 shrink-0 items-center justify-center
+             rounded-2xl bg-primary/10 text-primary" aria-hidden="true">
+        <i class="fa-solid fa-car-side text-xl"></i>
+      </div>
+
+      <div class="min-w-0">
+        <h1 class="text-2xl font-bold leading-tight
+               text-base-content">
+          Unidades de Patrullaje
+        </h1>
+
+        <p class="mt-1 max-w-2xl text-sm leading-relaxed
+               text-base-content/60">
+          Registre y administre las unidades disponibles para
+          su asignación en las operaciones de patrullaje.
+        </p>
+      </div>
+    </div>
+  </header>
+
 
   <!-- Header -->
   <div class="p-4 mb-7 card bg-base-100 shadow-md">
@@ -83,13 +110,6 @@
 
         <!-- Botónes -->
         <div class="flex flex-row justify-center items-center gap-4">
-
-          <!-- <button class="btn btn-warning text-base-content hover:text-white bg-info hover:bg-primary border-none"
-            (click)="abrirParticipe()">
-            <i class="fa-solid fa-plus mr-1"></i>
-            Participe
-          </button> -->
-
 
           <button class="btn btn-primary text-base-content hover:text-white bg-info hover:bg-primary border-none"
             (click)="abrirModal()">
@@ -214,3 +234,451 @@
 
 
 </div>
+
+
+<!-- <div
+  class="min-h-full overflow-auto bg-base-300
+         p-4 text-base-content transition-colors duration-300
+         sm:p-6 lg:p-8"
+>
+  <div class="mx-auto max-w-7xl">
+
+    <header
+      class="mb-6 flex flex-col gap-4
+             sm:flex-row sm:items-center sm:justify-between"
+    >
+
+      <div class="flex items-center gap-3">
+        <div
+          class="flex h-12 w-12 shrink-0 items-center justify-center
+                 rounded-2xl bg-primary/10 text-primary"
+          aria-hidden="true"
+        >
+          <i class="fa-solid fa-car-side text-xl"></i>
+        </div>
+
+        <div class="min-w-0">
+          <h1
+            class="text-2xl font-bold leading-tight
+                   text-base-content"
+          >
+            Unidades de patrullaje
+          </h1>
+
+          <p
+            class="mt-1 max-w-2xl text-sm leading-relaxed
+                   text-base-content/60"
+          >
+            Registre y administre las unidades disponibles para
+            su asignación en las operaciones de patrullaje.
+          </p>
+        </div>
+      </div>
+
+
+      <button
+        type="button"
+        class="btn btn-primary min-h-11 w-full gap-2
+               rounded-xl sm:w-auto"
+        (click)="abrirModal()"
+      >
+        <i class="fa-solid fa-plus"></i>
+        Nueva unidad
+      </button>
+    </header>
+
+
+    <section
+      class="mb-6 rounded-2xl border border-base-300
+             bg-base-100 p-4 shadow-sm sm:p-5"
+      aria-label="Filtros de unidades"
+    >
+      <div
+        class="flex flex-col gap-4
+               lg:flex-row lg:items-end lg:justify-between"
+      >
+        <div
+          class="grid w-full grid-cols-1 gap-4
+                 md:grid-cols-2 lg:max-w-2xl"
+        >
+
+          <label class="form-control w-full">
+            <span
+              class="mb-1.5 text-xs font-semibold uppercase
+                     tracking-wide text-base-content/50"
+            >
+              Placa
+            </span>
+
+            <div class="relative">
+              <i
+                class="fa-solid fa-magnifying-glass
+                       pointer-events-none absolute left-3.5 top-1/2
+                       -translate-y-1/2 text-sm text-base-content/40"
+                aria-hidden="true"
+              ></i>
+
+              <input
+                type="search"
+                class="input input-bordered h-11 w-full rounded-xl
+                       bg-base-100 pl-10 pr-4 text-sm
+                       focus:outline-none focus:ring-2
+                       focus:ring-primary/30"
+                placeholder="Buscar por placa"
+                autocomplete="off"
+                aria-label="Buscar unidad por placa"
+                [(ngModel)]="placaBusqueda"
+                (ngModelChange)="onSearchChange()"
+              />
+            </div>
+          </label>
+
+
+          <label class="form-control w-full">
+            <span
+              class="mb-1.5 text-xs font-semibold uppercase
+                     tracking-wide text-base-content/50"
+            >
+              Descripción
+            </span>
+
+            <div class="relative">
+              <i
+                class="fa-solid fa-magnifying-glass
+                       pointer-events-none absolute left-3.5 top-1/2
+                       -translate-y-1/2 text-sm text-base-content/40"
+                aria-hidden="true"
+              ></i>
+
+              <input
+                type="search"
+                class="input input-bordered h-11 w-full rounded-xl
+                       bg-base-100 pl-10 pr-4 text-sm
+                       focus:outline-none focus:ring-2
+                       focus:ring-primary/30"
+                placeholder="Buscar por descripción"
+                autocomplete="off"
+                aria-label="Buscar unidad por descripción"
+                [(ngModel)]="descripcionBusqueda"
+                (ngModelChange)="onSearchChange()"
+              />
+            </div>
+          </label>
+        </div>
+
+
+        <div
+          class="flex items-center gap-2 text-sm
+                 text-base-content/60"
+        >
+          <i
+            class="fa-solid fa-list-check text-primary"
+            aria-hidden="true"
+          ></i>
+
+          <span>
+            {{ totalItems }}
+            {{ totalItems === 1 ? 'unidad encontrada' : 'unidades encontradas' }}
+          </span>
+        </div>
+      </div>
+    </section>
+
+
+    <unidad-form
+      [mostrarModal]="mostrarModal"
+      [modoEdicion]="modoEdicion"
+      [unidadSeleccionado]="unidadSeleccionado"
+      (modalCerrado)="cerrarModal()"
+      (unidadCreado)="getUnidadesPaginado()"
+    >
+    </unidad-form>
+
+
+    <section
+      class="overflow-hidden rounded-2xl border
+             border-base-300 bg-base-100 shadow-sm"
+      aria-label="Listado de unidades de patrullaje"
+    >
+
+      <div
+        class="flex flex-col gap-4 border-b border-base-300
+               p-4 sm:flex-row sm:items-center
+               sm:justify-between sm:p-5"
+      >
+        <div>
+          <h2 class="font-semibold text-base-content">
+            Unidades registradas
+          </h2>
+
+          <p class="mt-0.5 text-sm text-base-content/50">
+            Consulte, edite o elimine las unidades del sistema.
+          </p>
+        </div>
+
+
+        <label class="flex items-center gap-2 text-sm">
+          <span class="whitespace-nowrap text-base-content/60">
+            Mostrar
+          </span>
+
+          <select
+            class="select select-bordered select-sm
+                   rounded-lg bg-base-100"
+            aria-label="Cantidad de unidades por página"
+            [(ngModel)]="limit"
+            (change)="cambiarLimite()"
+          >
+            @for (size of pageSizeOptions; track size) {
+              <option [ngValue]="size">
+                {{ size }}
+              </option>
+            }
+          </select>
+
+          <span class="hidden whitespace-nowrap text-base-content/60 sm:inline">
+            por página
+          </span>
+        </label>
+      </div>
+
+
+      <div class="overflow-x-auto">
+        <table class="table w-full">
+          <thead class="bg-base-200/80">
+            <tr class="text-xs uppercase tracking-wide text-base-content/60">
+              <th class="w-16">#</th>
+              <th>Código</th>
+              <th>Descripción</th>
+              <th>Tipo</th>
+              <th>Placa</th>
+              <th>Estado</th>
+              <th>Actualización</th>
+              <th class="text-center">Acciones</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            @if (isLoading) {
+              <tr>
+                <td colspan="8">
+                  <div
+                    class="flex min-h-56 flex-col items-center
+                           justify-center gap-3 text-center"
+                  >
+                    <span
+                      class="loading loading-spinner
+                             loading-md text-primary"
+                    ></span>
+
+                    <p class="text-sm text-base-content/60">
+                      Cargando unidades de patrullaje...
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            }
+
+
+            @if (!isLoading) {
+              @for (unidad of unidades; track unidad.id; let i = $index) {
+                <tr
+                  class="border-base-200 transition-colors
+                         hover:bg-base-200/50"
+                >
+
+                  <td class="font-medium text-base-content/50">
+                    {{ ((page - 1) * limit) + i + 1 }}
+                  </td>
+
+
+                  <td>
+                    <span class="font-semibold text-base-content">
+                      {{ unidad.codigo }}
+                    </span>
+                  </td>
+
+
+                  <td>
+                    <div class="max-w-xs">
+                      <p
+                        class="truncate text-sm"
+                        [title]="unidad.descripcion || 'Sin descripción'"
+                      >
+                        {{ unidad.descripcion || 'Sin descripción' }}
+                      </p>
+                    </div>
+                  </td>
+
+
+                  <td>
+                    <span
+                      class="badge badge-ghost whitespace-nowrap
+                             font-medium"
+                    >
+                      {{ unidad.tipo }}
+                    </span>
+                  </td>
+
+
+                  <td>
+                    <span
+                      class="whitespace-nowrap font-mono text-sm
+                             font-semibold uppercase"
+                    >
+                      {{ unidad.placa || '—' }}
+                    </span>
+                  </td>
+
+
+                  <td>
+                    <span
+                      class="badge badge-soft whitespace-nowrap
+                             font-semibold"
+                      [ngClass]="getEstadoInfo(unidad.estado).class"
+                    >
+                      {{ getEstadoInfo(unidad.estado).label }}
+                    </span>
+                  </td>
+
+
+                  <td>
+                    <span class="whitespace-nowrap text-sm text-base-content/60">
+                      {{ unidad.updatedAt | date: 'dd/MM/yyyy, hh:mm a' }}
+                    </span>
+                  </td>
+
+
+                  <td>
+                    <div class="flex items-center justify-center gap-1">
+
+                      <button
+                        type="button"
+                        class="btn btn-ghost btn-square btn-sm
+                               text-info"
+                        title="Ver unidad"
+                        aria-label="Ver unidad"
+                        (click)="verUnidad(unidad)"
+                      >
+                        <i class="fa-solid fa-eye"></i>
+                      </button>
+
+
+                      <button
+                        type="button"
+                        class="btn btn-ghost btn-square btn-sm
+                               text-warning"
+                        title="Editar unidad"
+                        aria-label="Editar unidad"
+                        (click)="editarUnidad(unidad)"
+                      >
+                        <i class="fa-solid fa-pen-to-square"></i>
+                      </button>
+
+
+                      <button
+                        type="button"
+                        class="btn btn-ghost btn-square btn-sm
+                               text-error"
+                        title="Eliminar unidad"
+                        aria-label="Eliminar unidad"
+                        (click)="eliminarUnidad(unidad)"
+                      >
+                        <i class="fa-solid fa-trash-can"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+
+
+              @if (unidades.length === 0) {
+                <tr>
+                  <td colspan="8">
+                    <div
+                      class="flex min-h-72 flex-col items-center
+                             justify-center px-6 py-10 text-center"
+                    >
+                      <div
+                        class="mb-4 flex h-16 w-16 items-center
+                               justify-center rounded-2xl
+                               bg-base-200 text-base-content/40"
+                      >
+                        <i class="fa-solid fa-car-side text-2xl"></i>
+                      </div>
+
+                      <h3 class="text-lg font-semibold text-base-content">
+                        No hay unidades registradas
+                      </h3>
+
+                      <p
+                        class="mt-2 max-w-md text-sm leading-relaxed
+                               text-base-content/60"
+                      >
+                        Registre una unidad de patrullaje o modifique
+                        los criterios de búsqueda para encontrar resultados.
+                      </p>
+
+                      <button
+                        type="button"
+                        class="btn btn-primary btn-sm mt-5 rounded-lg"
+                        (click)="abrirModal()"
+                      >
+                        <i class="fa-solid fa-plus"></i>
+                        Registrar unidad
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+
+
+      @if (!isLoading && totalItems > 0) {
+        <footer
+          class="flex flex-col gap-3 border-t border-base-300
+                 bg-base-200/60 p-4
+                 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <p class="text-center text-sm text-base-content/60 sm:text-left">
+            Página
+            <span class="font-semibold text-base-content">
+              {{ page }}
+            </span>
+            de
+            <span class="font-semibold text-base-content">
+              {{ totalPages }}
+            </span>
+            · {{ totalItems }} registros
+          </p>
+
+          <div class="flex justify-center gap-2 sm:justify-end">
+            <button
+              type="button"
+              class="btn btn-sm rounded-lg"
+              [disabled]="page <= 1"
+              (click)="cambiarPagina(page - 1)"
+            >
+              <i class="fa-solid fa-chevron-left text-xs"></i>
+              Anterior
+            </button>
+
+            <button
+              type="button"
+              class="btn btn-sm rounded-lg"
+              [disabled]="page >= totalPages"
+              (click)="cambiarPagina(page + 1)"
+            >
+              Siguiente
+              <i class="fa-solid fa-chevron-right text-xs"></i>
+            </button>
+          </div>
+        </footer>
+      }
+    </section>
+  </div>
+</div> -->

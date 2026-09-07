@@ -5,7 +5,7 @@ import {
   UrlTree
 } from '@angular/router';
 
-import { AuthService } from '../services/auth.service';
+import { AuthService } from '../services/auth/auth.service';
 
 export const RoleGuard: CanActivateFn = (
   route

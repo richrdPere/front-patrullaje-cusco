@@ -8,9 +8,11 @@ import { UppercaseDirective } from 'src/app/pages/shared/directives/uppercase.di
 
 // Services
 import { UsuarioService } from '../../../../services/usuarios.service';
+import { UbigeoService } from 'src/app/services/ubigeo.service';
 
 // Interface
 import { Usuario } from 'src/app/interfaces/login/usuarioResponse';
+
 
 @Component({
   selector: 'usuarios-form',
@@ -44,15 +46,25 @@ export class UsuarioFormComponent implements OnInit, OnChanges {
     this.modalWidthClass = map[size];
   }
 
+  // Selectores
+  departamentos: any[] = [];
+  provincias: any[] = [];
+  distritos: any[] = [];
+
 
   constructor(
     private fb: FormBuilder,
     private usuarioService: UsuarioService,
+    private ubigeoService: UbigeoService,
   ) { }
 
   ngOnInit(): void {
     this.initFormUsuarios();
     this.setModalWidth('lg');
+
+    // - listen
+    this.initUbigeo();
+    this.listenUbigeoChanges();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -95,7 +107,56 @@ export class UsuarioFormComponent implements OnInit, OnChanges {
   }
 
   // ====================================
-  // Methods
+  // LISTENERS UBIDEO, DEPARTAMENTO, PROVINCIA Y DISTRITO
+  // ====================================
+  initUbigeo() {
+    this.ubigeoService.loadData().subscribe(data => {
+      this.departamentos = data;
+
+      console.log('Departamentos cargados:', this.departamentos);
+    });
+  }
+
+
+  listenUbigeoChanges() {
+    // Departamento → Provincias
+    this.formUsuario.get('departamento')?.valueChanges.subscribe(depUbigeo => {
+      if (!depUbigeo) return;
+
+      this.provincias = this.ubigeoService.getProvincias(depUbigeo);
+      this.distritos = [];
+
+      this.formUsuario.patchValue({
+        provincia: null,
+        distrito: null
+      }, { emitEvent: false });
+    });
+
+    // Provincia → Distritos
+    this.formUsuario.get('provincia')?.valueChanges.subscribe(provUbigeo => {
+      const depUbigeo = this.formUsuario.value.departamento;
+      if (!depUbigeo || !provUbigeo) return;
+
+      console.log('Provincia seleccionada:', provUbigeo, 'en departamento:', depUbigeo);
+      this.distritos = this.ubigeoService.getDistritos(depUbigeo, provUbigeo);
+      console.log('Distritos cargados:', this.distritos);
+      this.formUsuario.patchValue({
+        distrito: null
+      }, { emitEvent: false });
+    });
+  }
+
+  onDepartamentoChange(depUbigeo: string) {
+    this.provincias = this.ubigeoService.getProvincias(depUbigeo);
+    this.distritos = [];
+  }
+
+  onProvinciaChange(depUbigeo: string, provUbigeo: string) {
+    this.distritos = this.ubigeoService.getDistritos(depUbigeo, provUbigeo);
+  }
+
+  // ====================================
+  // Formulario
   // ====================================
   initFormUsuarios() {
     this.formUsuario = this.fb.group({
@@ -124,12 +185,15 @@ export class UsuarioFormComponent implements OnInit, OnChanges {
       ],
       // Campos opcionales (dependen del rol)
       direccion: ['', Validators.required,],
-      departamento: ['', Validators.required,],
-      provincia: ['', Validators.required,],
-      distrito: ['', Validators.required,],
+      departamento: [null, Validators.required,],
+      provincia: [null, Validators.required,],
+      distrito: [null, Validators.required,],
     });
   }
 
+  // ====================================
+  // Methods
+  // ====================================
 
   // Crear o Editar usuario
   crearOEditarUsuario() {

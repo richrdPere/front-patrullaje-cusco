@@ -55,7 +55,7 @@ export class AlertasComponent implements OnInit {
 
   // PAGINACIÓN
   paginaActual = 1;
-  limite = 10;
+  limite = 5;
 
   totalRegistros = 0;
   totalPaginas = 0;

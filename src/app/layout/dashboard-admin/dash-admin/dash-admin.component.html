@@ -1,40 +1,100 @@
-<main
-  class="flex w-screen h-screen antialiased text-base-content selection:bg-blue-600 selection:text-white bg-base-200">
+<div class="drawer h-dvh w-full overflow-hidden bg-base-200 lg:drawer-open">
 
-  <!-- sidebar -->
-  <div class="h-full ">
-    <sidebar-menu-admin />
-  </div>
+  <!-- Control responsive del drawer -->
+  <input id="admin-sidebar-drawer" type="checkbox" class="drawer-toggle" />
 
+  <!-- ===================================================== -->
+  <!-- CONTENIDO PRINCIPAL -->
+  <!-- ===================================================== -->
 
-  <!-- Main content -->
-  <div class="flex flex-col flex-1">
-    <!-- Header -->
-    <header>
-      <nav class="navbar border-gray-200 px-4 lg:px-6 py-2.5 bg-base-100">
-        <div class="container mx-auto my-3 xl:max-w-full flex items-center justify-between">
-          <!-- Logo a la izquierda -->
-          <div class="flex flex-col">
-            <h2 class="text-lg font-semibol">
-              Bienvenido,
-              <span class="text-info font-bold">{{ nombre || 'Usuario' }}</span>
-            </h2>
-            <p class="text-sm">Rol: {{ rol | capitalize }}</p>
+  <div class="drawer-content flex h-dvh min-h-0
+           min-w-0 flex-col overflow-hidden">
+    <!-- =================================================== -->
+    <!-- NAVBAR -->
+    <!-- =================================================== -->
+
+    <header class="relative z-30 shrink-0
+             border-b border-base-300 bg-base-100">
+      <nav class="navbar min-h-16 gap-2 px-3
+               sm:px-4 lg:px-6" aria-label="Navegación principal">
+        <!-- Abrir sidebar en móvil -->
+        <div class="flex-none lg:hidden">
+          <label for="admin-sidebar-drawer" class="btn btn-square btn-ghost" aria-label="Abrir menú de navegación">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </label>
+        </div>
+
+        <!-- Bienvenida -->
+        <div class="min-w-0 flex-1">
+          <div class="min-w-0">
+            <h1 class="truncate text-sm font-semibold
+                     text-base-content
+                     sm:text-base lg:text-lg">
+              <span class="hidden sm:inline">
+                Bienvenido,
+              </span>
+
+              <span class="font-bold text-primary">
+                {{ nombre || 'Usuario' }}
+              </span>
+            </h1>
+
+            @if (rol) {
+            <p class="mt-0.5 hidden truncate text-xs
+                       text-base-content/55 sm:block">
+              Rol:
+              <span class="font-medium">
+                {{ rol | capitalize }}
+              </span>
+            </p>
+            }
           </div>
         </div>
 
-        <!-- Menu de usuario a la derecha -->
-        <div class="flex items-center">
-          <navbar-menu-admin />
+        <!-- Indicador de sistema -->
+        <div class="hidden items-center gap-2 xl:flex">
+          <span class="h-2.5 w-2.5 rounded-full bg-success" aria-hidden="true"></span>
+
+          <span class="text-xs text-base-content/60">
+            Sistema operativo
+          </span>
         </div>
 
+        <!-- Menú del usuario -->
+        <div class="flex-none">
+          <navbar-menu-admin class="block" />
+        </div>
       </nav>
     </header>
 
-    <!-- Router outlet -->
-    <div class="flex-1 overflow-y-auto">
-      <router-outlet></router-outlet>
-    </div>
-  </div>
-</main>
+    <!-- =================================================== -->
+    <!-- CONTENIDO DE LAS PÁGINAS HIJAS -->
+    <!-- =================================================== -->
 
+    <main id="main-content" class="min-h-0 min-w-0 flex-1
+             overflow-x-hidden overflow-y-auto
+             overscroll-contain bg-base-200">
+      <router-outlet />
+    </main>
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- SIDEBAR -->
+  <!-- ===================================================== -->
+
+  <aside class="drawer-side z-50 h-dvh">
+    <!-- Overlay móvil -->
+    <label for="admin-sidebar-drawer" class="drawer-overlay" aria-label="Cerrar menú de navegación"></label>
+
+    <!-- Contenedor del sidebar -->
+    <div class="h-dvh w-72 overflow-hidden
+             border-r border-white/10
+             bg-slate-950 text-slate-100
+             sm:w-80 lg:w-72">
+      <sidebar-menu-admin class="block h-full min-h-0 w-full" />
+    </div>
+  </aside>
+</div>

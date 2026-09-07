@@ -1,3 +1,5 @@
+import { RolUsuario } from "./loginResponse";
+
 export interface Persona {
   id: number;
   nombres: string;
@@ -20,7 +22,7 @@ export interface Usuario {
   createdAt?: string;
   updatedAt?: string;
   persona: Persona;
-  roles: string[];
+  roles: RolUsuario[];
 }
 
 // RESPONSE INTERFACES FOR USUARIOS

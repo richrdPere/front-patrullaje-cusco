@@ -1,56 +1,76 @@
-<div class="min-h-full overflow-auto bg-base-200 p-4 text-base-content
-         transition-colors duration-300 sm:p-6">
-  <div class="mx-auto max-w-[1600px]">
+<section class="min-h-full w-full min-w-0
+         bg-base-200 p-3 text-base-content
+         transition-colors duration-300
+         sm:p-5 lg:p-6">
+  <div class="mx-auto w-full max-w-400 min-w-0">
 
     <!-- ====================================================== -->
     <!-- CABECERA -->
     <!-- ====================================================== -->
-    <header class="mb-6 flex flex-col gap-4 sm:flex-row
-             sm:items-center sm:justify-between">
-      <div>
-        <div class="flex items-center gap-3">
-          <div class="flex h-12 w-12 items-center justify-center
-                   rounded-2xl bg-primary/10 text-primary">
-            <i class="fa-solid fa-chart-line text-xl"></i>
-          </div>
+    <header class="mb-5 flex flex-col gap-4
+         sm:mb-6 xl:flex-row
+         xl:items-center xl:justify-between">
+      <!-- Título -->
+      <div class="flex min-w-0 items-start gap-3">
+        <div class="flex h-11 w-11 shrink-0
+             items-center justify-center
+             rounded-xl bg-primary/10
+             text-primary sm:h-12 sm:w-12
+             sm:rounded-2xl">
+          <i class="fa-solid fa-chart-line
+               text-lg sm:text-xl" aria-hidden="true"></i>
+        </div>
 
-          <div>
-            <h1 class="text-2xl font-bold text-base-content sm:text-3xl">
-              Panel de control
-            </h1>
+        <div class="min-w-0">
+          <h1 class="text-xl font-bold
+               text-base-content
+               sm:text-2xl lg:text-3xl">
+            Panel de control
+          </h1>
 
-            <p class="mt-1 text-sm text-base-content/60">
-              Resumen operativo del sistema de patrullaje municipal
-            </p>
-          </div>
+          <p class="mt-1 max-w-2xl text-xs
+               leading-5 text-base-content/60
+               sm:text-sm">
+            Resumen operativo del sistema de patrullaje municipal
+          </p>
         </div>
       </div>
 
-      <div class="flex flex-wrap items-center gap-3">
+      <!-- Acciones -->
+      <div class="grid w-full gap-3
+           sm:grid-cols-[1fr_auto]
+           xl:w-auto">
         <!-- Última actualización -->
-        <div class="hidden rounded-xl border border-base-300
-                 bg-base-100 px-4 py-2 sm:block">
+        <div class="min-w-0 rounded-xl border
+             border-base-300 bg-base-100
+             px-4 py-2">
           <p class="text-xs text-base-content/50">
             Última actualización
           </p>
 
-          <p class="mt-0.5 text-sm font-semibold">
+          <!-- <p class="mt-0.5 truncate text-sm font-semibold">
             @if (summary?.ultima_actualizacion) {
-            {{ summary?.ultima_actualizacion | date:'dd/MM/yyyy HH:mm:ss' }}
+            {{
+            summary.ultima_actualizacion
+            | date:'dd/MM/yyyy HH:mm:ss'
+            }}
             } @else {
             Sin información
             }
-          </p>
+          </p> -->
         </div>
 
         <!-- Actualizar -->
-        <button type="button" class="btn btn-primary" (click)="loadResumen()" [disabled]="loading">
+        <button type="button" class="btn btn-primary w-full
+             shadow-sm sm:w-auto" (click)="loadResumen()" [disabled]="loading">
           @if (loading) {
-          <span class="loading loading-spinner loading-sm"></span>
-          Actualizando...
+          <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
+
+          <span>Actualizando...</span>
           } @else {
-          <i class="fa-solid fa-rotate-right"></i>
-          Actualizar
+          <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
+
+          <span>Actualizar</span>
           }
         </button>
       </div>
@@ -60,20 +80,26 @@
     <!-- ERROR -->
     <!-- ====================================================== -->
     @if (errorMessage) {
-    <div role="alert" class="alert alert-error mb-6 shadow-sm">
-      <i class="fa-solid fa-circle-exclamation"></i>
+    <div role="alert" class="mb-6 flex flex-col gap-3
+           rounded-xl border border-error/25
+           bg-error/10 p-4 text-error
+           shadow-sm sm:flex-row
+           sm:items-center">
+      <i class="fa-solid fa-circle-exclamation
+             shrink-0" aria-hidden="true"></i>
 
-      <div class="flex-1">
+      <div class="min-w-0 flex-1">
         <h3 class="font-semibold">
           No se pudo cargar el panel
         </h3>
 
-        <p class="text-sm">
+        <p class="mt-1 wrap-break-word text-sm">
           {{ errorMessage }}
         </p>
       </div>
 
-      <button type="button" class="btn btn-sm btn-ghost" (click)="loadResumen()">
+      <button type="button" class="btn btn-sm w-full
+             sm:w-auto" (click)="loadResumen()" [disabled]="loading">
         Reintentar
       </button>
     </div>
@@ -83,7 +109,7 @@
     <!-- CARGA INICIAL -->
     <!-- ====================================================== -->
     @if (loading && !summary) {
-    <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
       @for (item of [1, 2, 3, 4]; track item) {
       <div class="rounded-2xl border border-base-300
                    bg-base-100 p-6 shadow-sm">
@@ -106,11 +132,11 @@
     <!-- ==================================================== -->
     <!-- TARJETAS PRINCIPALES -->
     <!-- ==================================================== -->
-    <section class="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+    <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
 
       <!-- Patrullajes activos -->
       <article class="group relative overflow-hidden rounded-2xl
-                 border border-base-300 bg-base-100 p-6 shadow-sm
+                 border border-base-300 bg-base-100 p-4 sm:p-5 xl:p-6 shadow-sm
                  transition duration-200 hover:-translate-y-0.5
                  hover:shadow-md">
         <div class="absolute -right-10 -top-10 h-32 w-32
@@ -123,7 +149,7 @@
             </p>
 
             <p class="mt-3 text-4xl font-bold text-primary">
-              {{ summary.patrullajes.en_curso ?? 0 }}
+              {{ summary.patrullajes.en_curso }}
             </p>
 
             <div class="mt-3 flex items-center gap-2">
@@ -146,7 +172,7 @@
 
       <!-- Patrullajes asignados -->
       <article class="group relative overflow-hidden rounded-2xl
-                 border border-base-300 bg-base-100 p-6 shadow-sm
+                 border border-base-300 bg-base-100 p-4 sm:p-5 xl:p-6 shadow-sm
                  transition duration-200 hover:-translate-y-0.5
                  hover:shadow-md">
         <div class="absolute -right-10 -top-10 h-32 w-32
@@ -159,7 +185,7 @@
             </p>
 
             <p class="mt-3 text-4xl font-bold text-info">
-              {{ summary.patrullajes.asignados ?? 0 }}
+              {{ summary.patrullajes.asignados }}
             </p>
 
             <div class="mt-3 flex items-center gap-2">
@@ -182,7 +208,7 @@
 
       <!-- Incidencias reportadas -->
       <article class="group relative overflow-hidden rounded-2xl
-                 border border-base-300 bg-base-100 p-6 shadow-sm
+                 border border-base-300 bg-base-100 p-4 sm:p-5 xl:p-6 shadow-sm
                  transition duration-200 hover:-translate-y-0.5
                  hover:shadow-md">
         <div class="absolute -right-10 -top-10 h-32 w-32
@@ -218,7 +244,7 @@
 
       <!-- Alertas -->
       <article class="group relative overflow-hidden rounded-2xl
-                 border border-base-300 bg-base-100 p-6 shadow-sm
+                 border border-base-300 bg-base-100 p-4 sm:p-5 xl:p-6 shadow-sm
                  transition duration-200 hover:-translate-y-0.5
                  hover:shadow-md">
         <div class="absolute -right-10 -top-10 h-32 w-32
@@ -231,12 +257,12 @@
             </p>
 
             <p class="mt-3 text-4xl font-bold text-error">
-              {{ summary.alertas.pendientes ?? 0 }}
+              {{ summary.alertas.pendientes }}
             </p>
 
             <div class="mt-3 flex items-center gap-2">
               <span class="badge badge-error badge-outline badge-sm">
-                {{ summary.alertas.criticas ?? 0 }} críticas
+                {{ summary.alertas.criticas }} críticas
               </span>
 
               <span class="text-xs text-base-content/50">
@@ -257,13 +283,15 @@
     <!-- ==================================================== -->
     <!-- RESUMEN SECUNDARIO -->
     <!-- ==================================================== -->
-    <section class="mt-6 grid gap-5 lg:grid-cols-2">
+    <section class="mt-5 grid grid-cols-1 gap-4 lg:mt-6 lg:grid-cols-2">
 
       <!-- Estado de patrullajes -->
       <article class="rounded-2xl border border-base-300
                  bg-base-100 shadow-sm">
-        <div class="flex items-center justify-between
-                   border-b border-base-300 px-6 py-5">
+        <div class="flex items-start justify-between
+         gap-3 border-b border-base-300
+         p-4 sm:items-center sm:px-5 sm:py-4
+         lg:px-6 lg:py-5">
           <div>
             <h2 class="font-bold">
               Estado de patrullajes
@@ -280,7 +308,8 @@
           </div>
         </div>
 
-        <div class="grid gap-4 p-6 sm:grid-cols-2">
+        <div class="grid grid-cols-2 gap-3
+         p-4 sm:gap-4 sm:p-5 lg:p-6">
           <div class="rounded-xl bg-base-200 p-4">
             <p class="text-xs font-medium uppercase text-base-content/50">
               Programados
@@ -678,58 +707,4 @@
     }
 
   </div>
-</div>
-
-<!-- <div class="p-6 min-h-full bg-base-300 text-base-content overflow-auto transition-colors duration-300">
-
-
-
-  <h1 class="text-2xl font-bold mb-5 text-base-content ">Panel de Control</h1>
-
-
-  <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-
-    <div class="stat rounded-2xl bg-base-100 shadow">
-      <div class="stat-title">Patrullajes activos</div>
-      <div class="stat-value text-primary">
-        {{ summary?.patrullajes?.en_curso ?? 0 }}
-      </div>
-      <div class="stat-desc">
-        {{ summary?.patrullajes?.asignados ?? 0 }} asignados
-      </div>
-    </div>
-
-    <div class="stat rounded-2xl bg-base-100 shadow">
-      <div class="stat-title">Unidades conectadas</div>
-      <div class="stat-value text-success">
-        {{ summary?.unidades?.conectadas ?? 0 }}
-      </div>
-      <div class="stat-desc">
-        {{ summary?.unidades?.inactivas ?? 0 }} inactivas
-      </div>
-    </div>
-
-    <div class="stat rounded-2xl bg-base-100 shadow">
-      <div class="stat-title">Incidencias recientes</div>
-      <div class="stat-value text-warning">
-        {{ summary?.incidencias?.total_hoy ?? 0 }}
-      </div>
-      <div class="stat-desc">
-        {{ summary?.incidencias?.reportadas ?? 0 }} pendientes
-      </div>
-    </div>
-
-    <div class="stat rounded-2xl bg-base-100 shadow">
-      <div class="stat-title">Alertas</div>
-      <div class="stat-value text-error">
-        {{ summary?.alertas?.pendientes ?? 0 }}
-      </div>
-      <div class="stat-desc">
-        {{ summary?.alertas?.criticas ?? 0 }} críticas
-      </div>
-    </div>
-
-  </div>
-
-
-</div> -->
+</section>

@@ -1,18 +1,58 @@
-<div class="bg-base-100 h-screen w-64 ">
+<aside class="flex h-full min-h-0 w-full flex-col
+         bg-base-100 text-base-content
+         transition-colors duration-200" aria-label="Navegación administrativa">
+  <!-- Cabecera fija -->
+  <div class="shrink-0 bg-base-100">
+    <side-menu-header />
+
+    <hr class="mx-4 border-base-300" />
+  </div>
+
+  <!-- Opciones con scroll independiente -->
+  <div class="min-h-0 flex-1
+           overflow-x-hidden overflow-y-auto
+           overscroll-contain bg-base-100
+           scrollbar-thin">
+    <side-menu-options />
+  </div>
+
+  <!-- Pie fijo -->
+  <footer class="shrink-0 border-t border-base-300
+           bg-base-100 px-5 py-3">
+    <div class="flex min-w-0 items-center gap-2">
+      <span class="h-2 w-2 shrink-0 rounded-full
+               bg-primary" aria-hidden="true"></span>
+
+      <div class="min-w-0">
+        <p class="truncate text-xs font-medium
+                 text-base-content/60">
+          Sistema de Patrullaje Municipal
+        </p>
+
+        <p class="mt-0.5 text-[11px]
+                 text-base-content/40">
+          Prototipo académico 2026
+        </p>
+      </div>
+    </div>
+  </footer>
+</aside>
+
+<!-- <div class="bg-base-100 h-screen w-64 ">
   <div class="flex flex-col h-full">
-    <!-- Sidebar -->
+
     <aside class=" ">
 
-      <!-- Header -->
+
       <side-menu-header />
 
-      <!-- Divider  -->
+
       <hr className="my-4 md:min-w-full border-gray-200" />
 
-      <!-- Options -->
+
 
       <side-menu-options />
 
     </aside>
   </div>
-</div>
+</div> -->

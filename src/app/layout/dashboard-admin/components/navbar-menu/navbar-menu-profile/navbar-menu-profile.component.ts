@@ -3,9 +3,10 @@ import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 
 // IziToast
 import iziToast from 'izitoast';
+import { finalize } from 'rxjs';
 
 // Servicio
-import { AuthService } from 'src/app/services/auth.service';
+import { AuthService } from 'src/app/services/auth/auth.service';
 import { PerfilService } from 'src/app/services/profile.service';
 
 // Interface
@@ -26,29 +27,8 @@ export class NavbarMenuProfileComponent {
   // variables
   public name: string = '';
   public email: string = '';
-  public avatar: string = '';
-
-
-  constructor(
-    private _authService: AuthService,
-    private perfilService: PerfilService,
-    private _router: Router
-  ) {
-
-
-  }
-  ngOnInit(): void {
-    this._authService.currentUser$.subscribe(usuario => {
-      if (usuario) {
-        this.name = usuario.persona.nombres;
-        this.email = usuario.correo;
-        // this.avatar = `${this.perfilService.envs.url_image}${usuario.foto_perfil}?t=${Date.now()}`;
-        //        ↑ evita cache del navegador
-      }
-
-      console.log('Perfil:', this.avatar);
-    });
-  }
+  public avatar: string | null = null;
+  loadingLogout = false;
 
   menuOptions: MenuOptions[] = [
     {
@@ -69,16 +49,90 @@ export class NavbarMenuProfileComponent {
 
   ];
 
-  logout() {
-    this._authService.logout();
+  constructor(
+    private authService: AuthService,
+    private perfilService: PerfilService,
+    private router: Router
+  ) { }
 
-    iziToast.info({
-      title: 'Sesión cerrada',
-      message: 'Has cerrado sesión correctamente',
-      position: 'bottomRight',
-    });
-    this._router.navigate(['/login']);   //  this._router.navigate(['/login']);
+
+  ngOnInit(): void {
+    this.authService.currentUser$
+      .subscribe((usuario) => {
+        if (!usuario) {
+          this.name = '';
+          this.email = '';
+          this.avatar = null;
+          return;
+        }
+
+        this.name = [
+          usuario.persona?.nombres,
+          usuario.persona?.apellidos,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .trim();
+
+        this.email = usuario.correo;
+
+        this.avatar =
+          usuario.persona?.foto_perfil || null;
+      });
   }
+
+  logout(): void {
+    if (this.loadingLogout) {
+      return;
+    }
+
+    this.loadingLogout = true;
+
+    this.authService.logout()
+      .pipe(
+        finalize(() => {
+          this.loadingLogout = false;
+        }),
+      )
+      .subscribe({
+        next: () => {
+          iziToast.success({
+            title: 'Sesión cerrada',
+            message:
+              'La sesión se cerró correctamente.',
+            position: 'bottomRight',
+          });
+
+          this.router.navigate(['/login']);
+        },
+
+        error: () => {
+          /*
+           * AuthService utiliza finalize para eliminar
+           * igualmente la sesión local.
+           */
+          iziToast.warning({
+            title: 'Sesión finalizada',
+            message:
+              'La sesión local fue cerrada, pero no se pudo contactar al servidor.',
+            position: 'bottomRight',
+          });
+
+          this.router.navigate(['/login']);
+        },
+      });
+  }
+
+  // logout() {
+  //   this._authService.logout();
+
+  //   iziToast.info({
+  //     title: 'Sesión cerrada',
+  //     message: 'Has cerrado sesión correctamente',
+  //     position: 'bottomRight',
+  //   });
+  //   this._router.navigate(['/login']);   //  this._router.navigate(['/login']);
+  // }
 
 
 }

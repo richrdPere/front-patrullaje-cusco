@@ -36,7 +36,14 @@ interface AlertaMapaPayload {
   selector: 'mapa-patrullaje',
   imports: [CommonModule],
   templateUrl: './mapa-patrullaje.component.html',
-  styles: ``
+  styles: `
+  :host {
+      display: block;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+    }
+  `
 })
 export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
 
@@ -102,23 +109,23 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
   // LUGARES DE REFERENCIA
   // =====================================================
 
-  lugares: Lugar[] = [
-    {
-      nombre: 'Unsaac',
-      lat: -13.52189,
-      lng: -71.95828
-    },
-    {
-      nombre: 'Ex PRONAA',
-      lat: -13.53109,
-      lng: -71.94069
-    },
-    {
-      nombre: 'Gobierno Regional Cusco',
-      lat: -13.52493,
-      lng: -71.96274
-    }
-  ];
+  // lugares: Lugar[] = [
+  //   {
+  //     nombre: 'Unsaac',
+  //     lat: -13.52189,
+  //     lng: -71.95828
+  //   },
+  //   {
+  //     nombre: 'Ex PRONAA',
+  //     lat: -13.53109,
+  //     lng: -71.94069
+  //   },
+  //   {
+  //     nombre: 'Gobierno Regional Cusco',
+  //     lat: -13.52493,
+  //     lng: -71.96274
+  //   }
+  // ];
 
   // =====================================================
   // PANEL ARRASTRABLE
@@ -429,9 +436,10 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
 
   private initMapa(): void {
     const center = {
-      lat: -13.540348,
-      lng: -71.982898
+      lat: -13.518219, // -13.540348,
+      lng: -71.978301 //-71.982898
     };
+
 
     this.map =
       new google.maps.Map(

@@ -34,7 +34,7 @@
                 <span *ngIf="esRequerido('nombres')" class="text-red-500 font-bold">*</span>
               </span>
             </label>
-            <input type="text" formControlName="nombres" placeholder="Ingrese nombres (Ej. Juan)"
+            <input type="text" formControlName="nombres" placeholder="Ingrese nombres (Ej. Juan Diego)"
               class="input input-bordered w-full placeholder-gray-400"
               [class.input-error]="formUsuario.get('nombres')?.invalid && formUsuario.get('nombres')?.touched"
               appUppercase />
@@ -230,7 +230,6 @@
 
 
       <!-- Sección: Ubicación -->
-
       <div class="space-y-3">
         <h3 class="text-lg font-semibold flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24"
@@ -253,10 +252,16 @@
                 <span *ngIf="esRequerido('departamento')" class="text-red-500 font-bold">*</span>
               </span>
             </label>
-            <input type="text" formControlName="departamento" placeholder="Ingrese departamento"
+            <select formControlName="departamento" class="select select-bordered w-full ">
+              <option [ngValue]="null" disabled>Seleccionar departamento</option>
+              <option *ngFor="let d of departamentos" [value]="d.departamento_id">
+                {{ d.departamento }}
+              </option>
+            </select>
+            <!-- <input type="text" formControlName="departamento" placeholder="Ingrese departamento"
               class="input input-bordered w-full placeholder-gray-400"
               [class.input-error]="formUsuario.get('departamento')?.invalid && formUsuario.get('departamento')?.touched"
-              appUppercase />
+              appUppercase /> -->
 
             <!-- Error local -->
             @if (formUsuario.get('departamento')?.hasError('required') && formUsuario.get('departamento')?.touched) {
@@ -273,10 +278,16 @@
                 <span *ngIf="esRequerido('provincia')" class="text-red-500 font-bold">*</span>
               </span>
             </label>
-            <input type="text" formControlName="provincia" placeholder="Ingrese la provincia"
+            <select formControlName="provincia" class="select select-bordered w-full ">
+              <option [ngValue]="null">Seleccionar provincia</option>
+              <option *ngFor="let p of provincias" [value]="p.provincia_id">
+                {{ p.nombre }}
+              </option>
+            </select>
+            <!-- <input type="text" formControlName="provincia" placeholder="Ingrese la provincia"
               class="input input-bordered w-full placeholder-gray-400"
               [class.input-error]="formUsuario.get('provincia')?.invalid && formUsuario.get('provincia')?.touched"
-              appUppercase />
+              appUppercase /> -->
 
             @if (formUsuario.get('provincia')?.hasError('required') && formUsuario.get('provincia')?.touched) {
             <p class="text-red-500 text-sm">
@@ -297,14 +308,20 @@
                 <span *ngIf="esRequerido('distrito')" class="text-red-500 font-bold">*</span>
               </span>
             </label>
-            <input type="text" formControlName="distrito" placeholder="Ingrese el distrito"
+            <select formControlName="distrito" class="select select-bordered w-full ">
+              <option [ngValue]="null">Seleccionar distrito</option>
+              <option *ngFor="let d of distritos" [value]="d.id">
+                {{ d.nombre }}
+              </option>
+            </select>
+            <!-- <input type="text" formControlName="distrito" placeholder="Ingrese el distrito"
               class="input input-bordered w-full placeholder-gray-400"
               [class.input-error]="formUsuario.get('distrito')?.invalid && formUsuario.get('distrito')?.touched"
-              appUppercase />
+              appUppercase /> -->
 
             @if (formUsuario.get('distrito')?.hasError('required') && formUsuario.get('distrito')?.touched) {
             <p class="text-red-500 text-sm">
-              La provincia es obligatorio.
+              El distrito es obligatorio.
             </p>
             }
           </div>

@@ -1,5 +1,90 @@
 <!-- Dropdown menu -->
-<div class="dropdown dropdown-end">
+<div class="dropdown dropdown-end shrink-0">
+  <!-- Botón del perfil -->
+  <button type="button" tabindex="0" class="btn btn-circle btn-ghost btn-sm
+           transition hover:bg-primary/10
+           sm:btn-md" aria-label="Abrir menú del usuario" title="Menú del usuario">
+    <div class="avatar">
+      <div class="h-8 w-8 overflow-hidden rounded-full
+               ring-2 ring-base-300
+               ring-offset-1 ring-offset-base-100
+               sm:h-10 sm:w-10">
+        <img [src]="avatar || 'assets/img/default-avatar.png'" [alt]="'Fotografía de ' + (name || 'usuario')"
+          class="h-full w-full object-cover" />
+      </div>
+    </div>
+  </button>
+
+  <!-- Dropdown -->
+  <div tabindex="0" class="dropdown-content z-60 mt-3
+           w-[min(18rem,calc(100vw-1.5rem))]
+           overflow-hidden rounded-2xl
+           border border-base-300
+           bg-base-100 text-base-content
+           shadow-xl">
+    <!-- Usuario -->
+    <div class="border-b border-base-300
+             bg-base-200/60 px-4 py-4">
+      <div class="flex min-w-0 items-center gap-3">
+        <div class="avatar shrink-0">
+          <div class="h-11 w-11 overflow-hidden rounded-full
+                   ring-2 ring-primary/20">
+            <img [src]="avatar || 'assets/img/default-avatar.png'" [alt]="'Fotografía de ' + (name || 'usuario')"
+              class="h-full w-full object-cover" />
+          </div>
+        </div>
+
+        <div class="min-w-0 flex-1">
+          <p class="truncate text-sm font-semibold
+                   text-base-content">
+            {{ name || 'Usuario' }}
+          </p>
+
+          <p class="mt-0.5 truncate text-xs
+                   text-base-content/55">
+            {{ email || 'Correo no disponible' }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Opciones con scroll propio -->
+    <ul class="menu menu-sm max-h-[min(60dvh,24rem)]
+             w-full overflow-y-auto
+             overscroll-contain p-2" aria-label="Opciones de usuario">
+      @for (item of menuOptions; track item.route) {
+      @if (item.label !== 'Cerrar Sesión') {
+      <li>
+        <a [routerLink]="item.route" routerLinkActive="active" class="min-h-5 gap-3 pb-2 rounded-xl">
+          <img [src]="item.icon" alt="" class="h-5 w-5 shrink-0 object-contain" aria-hidden="true" />
+
+          <span class="truncate">
+            {{ item.label }}
+          </span>
+        </a>
+      </li>
+      } @else {
+      <li class="mt-1 border-t border-base-300 pt-2">
+        <button type="button" class="min-h-5 gap-3 rounded-xl
+                     text-error hover:bg-error/10" (click)="logout()" [disabled]="loadingLogout">
+          @if (loadingLogout) {
+          <span class="loading loading-spinner loading-sm" aria-hidden="true"></span>
+
+          <span>Cerrando sesión...</span>
+          } @else {
+          <img [src]="item.icon" alt="" class="h-5 w-5 shrink-0 object-contain" aria-hidden="true" />
+
+          <span>Cerrar sesión</span>
+          }
+        </button>
+      </li>
+      }
+      }
+    </ul>
+  </div>
+</div>
+
+<!-- <div class="dropdown dropdown-end">
   <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
     <div class="w-10 rounded-full">
       <img [src]="avatar || 'assets/img/default-avatar.png'" alt="Avatar del user" />
@@ -7,7 +92,7 @@
   </div>
   <ul tabindex="0" class="menu menu-sm dropdown-content text-black bg-white rounded-box z-1 mt-3 w-52 p-2 shadow">
 
-    <!-- Perfil del usuario -->
+
     <li class="mb-2 border-b border-base-300 pb-2">
       <div class="flex flex-col items-start px-2">
         <span class="font-semibold text-sm">{{name}}</span>
@@ -39,4 +124,4 @@
   </ul>
 </div>
 
-
+ -->
