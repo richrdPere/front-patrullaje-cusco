@@ -67,7 +67,6 @@
           </div>
         </div>
 
-
         <!--  Correo y Password -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
 
@@ -188,6 +187,7 @@
 
             <input type="text" formControlName="documento_identidad" placeholder="Ingrese DNI" inputmode="numeric"
               pattern="[0-9]*" maxlength="8" class="input input-bordered w-full placeholder-gray-400"
+              [class.input-error]="formUsuario.get('documento_identidad')?.invalid && formUsuario.get('documento_identidad')?.touched"
               (keypress)="soloNumeros($event)" />
 
             @if (formUsuario.get('documento_identidad')?.hasError('required') &&
@@ -212,6 +212,7 @@
 
             <input type="text" formControlName="telefono" placeholder="Ingrese teléfono" inputmode="numeric"
               pattern="[0-9]*" maxlength="9" class="input input-bordered w-full placeholder-gray-400"
+              [class.input-error]="formUsuario.get('telefono')?.invalid && formUsuario.get('telefono')?.touched"
               (keypress)="soloNumeros($event)" />
 
             @if (formUsuario.get('telefono')?.hasError('required') &&
@@ -252,7 +253,8 @@
                 <span *ngIf="esRequerido('departamento')" class="text-red-500 font-bold">*</span>
               </span>
             </label>
-            <select formControlName="departamento" class="select select-bordered w-full ">
+            <select formControlName="departamento" class="select select-bordered w-full "
+              [class.input-error]="formUsuario.get('departamento')?.invalid && formUsuario.get('departamento')?.touched">
               <option [ngValue]="null" disabled>Seleccionar departamento</option>
               <option *ngFor="let d of departamentos" [value]="d.departamento_id">
                 {{ d.departamento }}

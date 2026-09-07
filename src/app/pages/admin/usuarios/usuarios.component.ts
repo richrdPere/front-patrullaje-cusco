@@ -6,14 +6,16 @@ import Swal from 'sweetalert2';
 // Directives
 import { UppercaseDirective } from 'src/app/pages/shared/directives/uppercase.directive';
 
-
 // Interface
 import { Usuario } from 'src/app/interfaces/login/usuarioResponse';
 
 // Service
-import { UsuarioService } from 'src/app/services/usuarios.service';
+import { UsuarioService } from 'src/app/services/usuarios/usuarios.service';
 import { UsuarioFormComponent } from "./usuario-form/usuario-form.component";
 import { UsuarioInfoComponent } from "./usuario-info/usuario-info.component";
+import { UsuarioData, UsuariosPaginatedQueryParams } from 'src/app/interfaces/usuarios/get-usuarios-paginated.model';
+import { UsuarioRol } from 'src/app/interfaces/usuarios/create-usuario.model';
+import { finalize } from 'rxjs';
 
 
 @Component({
@@ -24,23 +26,23 @@ import { UsuarioInfoComponent } from "./usuario-info/usuario-info.component";
 })
 export class UsuariosComponent implements OnInit {
 
-
   // Usuarios
-  usuarios: Usuario[] = [];
+  usuarios: UsuarioData[] = [];
   usuario_id: number | null = null;
   isLoading = true;
+  usuarioSeleccionado: UsuarioData | null = null;
 
+  // Modales
   mostrarModal = false;
   mostrarModalInfo = false;
   modoEdicion = false;
-  usuarioSeleccionado: Usuario | null = null;
 
   searchTimeout: any;
 
   // Search
   nombreBusqueda: string = '';
   dniBusqueda: string = '';
-  rolesBusqueda: string = '';
+  rolesBusqueda: UsuarioRol | '' = '';
 
   // Paginado
   page = 1;
@@ -57,37 +59,60 @@ export class UsuariosComponent implements OnInit {
 
   ngOnInit(): void {
     this.getUsuariosPaginados();
+  }
 
+  ngOnDestroy(): void {
+    if (this.searchTimeout) {
+      clearTimeout(
+        this.searchTimeout,
+      );
+    }
   }
 
   // ================================
   // Methods
   // ================================
   getUsuariosPaginados() {
-    this.isLoading = true;
 
-    this.usuarioService.getUsuariosPaginados({
+    const params: UsuariosPaginatedQueryParams = {
       page: this.page,
       limit: this.limit,
-      nombres: this.nombreBusqueda?.trim() || undefined,
-      dni: this.dniBusqueda?.trim() || undefined,
-      rol: this.rolesBusqueda?.trim() || undefined,
-    }
-    ).subscribe({
-      next: (res) => {
-        this.usuarios = res.data.rows;
-        this.totalItems = res.data.total;
-        this.currentPage = res.data.limit;
+      nombres: this.nombreBusqueda.trim() || undefined,
+      dni: this.dniBusqueda.trim() || undefined,
+      rol: this.rolesBusqueda || undefined,
+    };
 
-        this.totalPages = res.data.totalPages;
+    this.isLoading = true;
 
-        this.isLoading = false;
-      },
-      error: (err) => {
-        console.error(err);
-        this.isLoading = false;
-      }
-    });
+    this.usuarioService.getUsuariosPaginados(params)
+      .pipe(
+        finalize(() => {
+          this.isLoading = false;
+        }),
+      )
+      .subscribe({
+        next: (res) => {
+          const paginacion = res.data;
+
+          this.usuarios = paginacion.rows;
+          this.totalItems = paginacion.total;
+          this.currentPage = paginacion.page;
+
+          this.page = paginacion.page;
+          this.limit = paginacion.limit;
+          this.totalPages = paginacion.totalPages;
+
+          // this.isLoading = false;
+        },
+        error: (err) => {
+          console.error(err);
+          this.isLoading = false;
+
+          this.usuarios = [];
+          this.totalItems = 0;
+          this.totalPages = 0;
+        }
+      });
   }
 
   // BUSCADOR
@@ -101,7 +126,7 @@ export class UsuariosComponent implements OnInit {
   }
 
   // EDITAR USUARIO
-  editarUsuario(user: Usuario) {
+  editarUsuario(user: UsuarioData) {
 
     this.modoEdicion = true;
     this.usuarioSeleccionado = { ...user };
@@ -109,7 +134,7 @@ export class UsuariosComponent implements OnInit {
   }
 
   // ELIMINAR USUARIO
-  eliminarUsuario(usuario: Usuario) {
+  eliminarUsuario(usuario: UsuarioData) {
     Swal.fire({
       title: '¿Eliminar usuario?',
       text: `Se eliminará el usuario`,
@@ -155,22 +180,110 @@ export class UsuariosComponent implements OnInit {
     });
   }
 
+  // RESETEAR  USUARIO
+  // ========================================================
+  // RESETEAR CONTRASEÑA DEL USUARIO
+  // ========================================================
+
+  resetPassword(
+    id: number,
+  ): void {
+    Swal.fire({
+      icon: 'warning',
+      title: '¿Restablecer contraseña?',
+      html: `
+      <p>
+        La contraseña del usuario volverá a ser
+        su <strong>DNI</strong>.
+      </p>
+
+      <p class="mt-2">
+        Sus sesiones activas serán cerradas y deberá
+        cambiar la contraseña en su próximo inicio
+        de sesión.
+      </p>
+    `,
+
+      showCancelButton: true,
+      confirmButtonText: 'Sí, restablecer',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#f59e0b',
+      cancelButtonColor: '#64748b',
+
+      reverseButtons: true,
+
+      focusCancel: true,
+    }).then((result) => {
+      if (!result.isConfirmed) {
+        return;
+      }
+
+      // Mostrar carga mientras se procesa.
+      Swal.fire({
+        title:
+          'Restableciendo contraseña...',
+
+        text:
+          'Espera un momento.',
+
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      this.usuarioService
+        .resetPasswordUsuario(id)
+        .subscribe({
+          next: (response) => {
+            Swal.fire({
+              icon: 'success',
+              title: 'Contraseña restablecida',
+              text: response.message,
+              confirmButtonText: 'Aceptar',
+              confirmButtonColor: '#3085d6',
+            });
+          },
+
+          error: (error) => {
+            console.error(
+              'Error restableciendo contraseña:',
+              error,
+            );
+
+            Swal.fire({
+              icon: 'error',
+              title: 'No se pudo restablecer',
+              text: error?.error?.message ??
+                error?.message ??
+                'Ocurrió un error al restablecer la contraseña del usuario.',
+              confirmButtonText: 'Aceptar',
+              confirmButtonColor: '#d33',
+            });
+          },
+        });
+    });
+  }
+
+
   // VER USUARIO
-  verUsuario(user: Usuario) {
+  verUsuario(user: UsuarioData) {
     this.usuario_id = user.id;
     this.mostrarModalInfo = true;
   }
 
-
   // CAMBIAR ESTADO
-  cambiarEstado(usuario: Usuario) {
+  cambiarEstado(usuario: UsuarioData) {
 
     this.usuarioService
       .changeStateUsuario(usuario.id, !usuario.estado)
       .subscribe({
         next: (res) => {
 
-          usuario.estado = res.usuario.estado;
+          usuario.estado = res.data.estado;
 
           Swal.fire({
             icon: 'success',
@@ -213,6 +326,15 @@ export class UsuariosComponent implements OnInit {
     if (charCode < 48 || charCode > 57) {
       event.preventDefault();
     }
+  }
+
+  limpiarFiltros(): void {
+    this.nombreBusqueda = '';
+    this.dniBusqueda = '';
+    this.rolesBusqueda = '';
+    this.page = 1;
+
+    this.getUsuariosPaginados();
   }
 
   // MODAL

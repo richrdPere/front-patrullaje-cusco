@@ -12,7 +12,7 @@ import { UnidadPatrullajeService } from 'src/app/services/unidad-patrullaje.serv
 import { ZonaService } from 'src/app/services/zona.service';
 
 import { PatrullajeProgramadoService } from 'src/app/services/patrullaje_programado.service';
-import { UsuarioService } from 'src/app/services/usuarios.service';
+import { UsuarioService } from 'src/app/services/usuarios/usuarios.service';
 import { PoliciasService } from 'src/app/services/policias.service';
 
 @Component({

@@ -7,11 +7,12 @@ import Swal from 'sweetalert2';
 import { UppercaseDirective } from 'src/app/pages/shared/directives/uppercase.directive';
 
 // Services
-import { UsuarioService } from '../../../../services/usuarios.service';
+import { UsuarioService } from '../../../../services/usuarios/usuarios.service';
 import { UbigeoService } from 'src/app/services/ubigeo.service';
 
 // Interface
 import { Usuario } from 'src/app/interfaces/login/usuarioResponse';
+import { UsuarioData } from 'src/app/interfaces/usuarios/get-usuarios-paginated.model';
 
 
 @Component({
@@ -23,7 +24,7 @@ import { Usuario } from 'src/app/interfaces/login/usuarioResponse';
 export class UsuarioFormComponent implements OnInit, OnChanges {
   @Input() mostrarModal = false;
   @Input() modoEdicion = false;
-  @Input() usuarioSeleccionado: Usuario | null = null;
+  @Input() usuarioSeleccionado: UsuarioData | null = null;
 
   @Output() modalCerrado = new EventEmitter<void>();
   @Output() usuarioCreado = new EventEmitter<void>();

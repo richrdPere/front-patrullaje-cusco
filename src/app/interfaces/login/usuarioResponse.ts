@@ -25,44 +25,44 @@ export interface Usuario {
   roles: RolUsuario[];
 }
 
-// RESPONSE INTERFACES FOR USUARIOS
+// // RESPONSE INTERFACES FOR USUARIOS
 
-// - usuario paginado
-export interface UsuarioListResponse {
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-  data: Usuario[];
-}
+// // - usuario paginado
+// export interface UsuarioListResponse {
+//   total: number;
+//   page: number;
+//   limit: number;
+//   totalPages: number;
+//   data: Usuario[];
+// }
 
-// - usuario detalle
-export interface UsuarioDetalleResponse extends Usuario { }
+// // - usuario detalle
+// export interface UsuarioDetalleResponse extends Usuario { }
 
-// - crear usuario
-export interface CrearUsuarioResponse {
-  message: string;
-  usuario: Usuario;
-}
+// // - crear usuario
+// export interface CrearUsuarioResponse {
+//   message: string;
+//   usuario: Usuario;
+// }
 
-// - actualizar usuario
-export interface UpdateUsuarioResponse {
-  message: string;
-}
+// // - actualizar usuario
+// export interface UpdateUsuarioResponse {
+//   message: string;
+// }
 
-// - cambiar estado usuario
-export interface EstadoUsuarioResponse {
-  message: string;
-  usuario: {
-    id: number;
-    username: string;
-    estado: boolean;
-    persona: Persona;
-  };
-}
+// // - cambiar estado usuario
+// export interface EstadoUsuarioResponse {
+//   message: string;
+//   usuario: {
+//     id: number;
+//     username: string;
+//     estado: boolean;
+//     persona: Persona;
+//   };
+// }
 
-// - listar serenos y conductores
-export interface SerenosConductoresResponse {
-  total: number;
-  data: Usuario[];
-}
+// // - listar serenos y conductores
+// export interface SerenosConductoresResponse {
+//   total: number;
+//   data: Usuario[];
+// }

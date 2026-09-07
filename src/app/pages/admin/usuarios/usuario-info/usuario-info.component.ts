@@ -3,11 +3,11 @@ import { Component, EventEmitter, Input, OnInit, Output, OnChanges, SimpleChange
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import Swal from 'sweetalert2';
 
-// Directives
-import { Usuario } from 'src/app/interfaces/login/usuarioResponse';
-
 // Services
-import { UsuarioService } from 'src/app/services/usuarios.service';
+import { UsuarioService } from 'src/app/services/usuarios/usuarios.service';
+
+// Interface
+import { UsuarioDetalleData } from 'src/app/interfaces/usuarios/usuario-detalle.model';
 
 @Component({
   selector: 'usuario-info',
@@ -22,7 +22,7 @@ export class UsuarioInfoComponent {
 
   @Output() modalCerrado = new EventEmitter<void>();
 
-  usuario!: Usuario;
+  usuario: UsuarioDetalleData | null = null;
   loading = false;
 
   modalWidthClass = 'max-w-4xl'; // default
@@ -41,7 +41,7 @@ export class UsuarioInfoComponent {
 
   constructor(private usuarioService: UsuarioService) { }
 
-
+  // CICLO DE VIDA
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['usuario_id'] && this.usuario_id) {
       this.cargarDatosUsuario();
@@ -54,10 +54,10 @@ export class UsuarioInfoComponent {
     this.loading = true;
 
     this.usuarioService.getUsuarioById(this.usuario_id!).subscribe({
-      next: (data) => {
+      next: (res) => {
 
-        console.log("GET USUARIO: ", data);
-        this.usuario = data.data;
+        console.log("GET USUARIO: ", res);
+        this.usuario = res.data;
         this.loading = false;
 
       },

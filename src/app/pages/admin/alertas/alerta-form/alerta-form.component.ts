@@ -9,7 +9,7 @@ import { UppercaseDirective } from 'src/app/pages/shared/directives/uppercase.di
 
 // Services
 import { AlertaService } from 'src/app/services/alerta.service';
-import { UsuarioService } from 'src/app/services/usuarios.service';
+import { UsuarioService } from 'src/app/services/usuarios/usuarios.service';
 
 // Interfaces
 import {

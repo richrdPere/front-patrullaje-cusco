@@ -184,6 +184,11 @@
             <td class="text-right relative">
 
               <div class="flex justify-start items-center gap-1">
+                <!-- Resetear password -->
+                <button class="btn btn-ghost btn-circle btn-md" (click)="resetPassword(usuario.id)">
+                  <i class="fa-solid fa-key"></i>
+                </button>
+
                 <!-- Ver -->
                 <button class="btn btn-ghost btn-circle btn-md" (click)="verUsuario(usuario)">
                   <i class="fa-solid fa-eye"></i>
