@@ -1,452 +1,748 @@
-<div class="min-h-full overflow-auto bg-base-300 p-6
-         text-base-content transition-colors duration-300">
+<div class="min-h-full min-w-0 bg-base-300
+         px-4 py-5 text-base-content
+         transition-colors duration-300
+         sm:px-6 sm:py-6 lg:px-8">
 
-  <!-- ===================================================== -->
-  <!-- TÍTULO -->
-  <!-- ===================================================== -->
-  <div class="mb-5 flex flex-col gap-3
-           sm:flex-row sm:items-center sm:justify-between">
-    <div>
-      <h1 class="text-2xl font-bold text-base-content">
-        Incidentes reportados
-      </h1>
+  <!-- ================================================= -->
+  <!-- CONTENEDOR DEL DASHBOARD -->
+  <!-- ================================================= -->
 
-      <p class="mt-1 text-sm text-base-content/60">
-        Consulte y supervise los incidentes registrados por el personal de serenazgo.
-      </p>
-    </div>
+  <div class="mx-auto w-full max-w-500">
 
-    <button type="button" class="btn btn-outline btn-sm" [disabled]="isLoading" (click)="recargarIncidencias()">
-      <i class="fa-solid fa-rotate-right" [class.fa-spin]="isLoading"></i>
+    <!-- ================================================= -->
+    <!-- ENCABEZADO -->
+    <!-- ================================================= -->
 
-      Actualizar
-    </button>
-  </div>
+    <header class="mb-5 flex flex-col gap-4
+             sm:flex-row sm:items-center
+             sm:justify-between">
 
-  <!-- ===================================================== -->
-  <!-- FILTROS -->
-  <!-- ===================================================== -->
-  <div class="card mb-7 bg-base-100 shadow-md">
-    <div class="card-body p-4">
+      <!-- Título -->
 
-      <div class="flex flex-col gap-4
-               md:flex-row md:items-end md:justify-between">
+      <div class="flex min-w-0 items-center gap-3">
 
-        <div class="grid w-full grid-cols-1 gap-4
-                 md:grid-cols-2 lg:max-w-3xl">
+        <div class="flex h-12 w-12 shrink-0
+                 items-center justify-center
+                 rounded-2xl bg-error/10
+                 text-error" aria-hidden="true">
 
-          <!-- Buscar por descripción -->
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text font-medium">
-                Descripción
-              </span>
-            </label>
-
-            <div class="relative">
-              <input type="text" class="input input-bordered h-11 w-full
-                       bg-base-100 pl-10 text-sm" placeholder="Buscar por descripción" autocomplete="off"
-                [(ngModel)]="descripcionBusqueda" (ngModelChange)="onSearchChange()" />
-
-              <i class="fa-solid fa-magnifying-glass
-                       absolute left-3 top-1/2
-                       -translate-y-1/2 text-base-content/40"></i>
-            </div>
-          </div>
-
-          <!-- Buscar por fecha -->
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text font-medium">
-                Fecha
-              </span>
-            </label>
-
-            <div class="relative">
-              <input type="date" class="input input-bordered h-11 w-full
-                       bg-base-100 pl-10 text-sm" [(ngModel)]="fechaBusqueda" (change)="onFiltroChange()" />
-
-              <i class="fa-solid fa-calendar-days
-                       absolute left-3 top-1/2
-                       -translate-y-1/2 text-base-content/40"></i>
-            </div>
-          </div>
+          <i class="fa-solid fa-triangle-exclamation
+                   text-2xl">
+          </i>
         </div>
 
-        <!-- Limpiar filtros -->
-        <button type="button" class="btn btn-ghost" [disabled]="
-            !descripcionBusqueda &&
-            !fechaBusqueda
-          " (click)="limpiarFiltros()">
-          <i class="fa-solid fa-filter-circle-xmark"></i>
-          Limpiar
-        </button>
+        <div class="min-w-0">
+          <h1 class="text-2xl font-bold
+                   leading-tight text-base-content">
 
+            Incidentes reportados
+          </h1>
+
+          <p class="mt-1 max-w-2xl
+                   text-sm leading-relaxed
+                   text-base-content/60">
+
+            Consulte y supervise los incidentes registrados
+            por el personal de Serenazgo.
+          </p>
+        </div>
       </div>
-    </div>
-  </div>
 
-  <!-- ===================================================== -->
-  <!-- MODALES -->
-  <!-- ===================================================== -->
+      <!-- Actualizar -->
 
-  <!-- DETALLE -->
-  <incidencia-detalle [visible]="mostrarModalDetalle" [incidenciaId]="incidenciaDetalleId"
-    (cerrar)="cerrarDetalleIncidencia()" (incidenciaCargada)="onIncidenciaDetalleCargada($event)"></incidencia-detalle>
+      <button type="button" class="btn btn-outline
+               min-h-10 w-full gap-2
+               rounded-xl
+               sm:w-auto sm:min-w-32" [disabled]="isLoading" (click)="recargarIncidencias()">
 
-  <!-- MAPA -->
-  <incidencia-mapa [visible]="mostrarModalMapa" [incidencia]="incidenciaSeleccionada"
-    (cerrar)="cerrarMapaIncidencia()"></incidencia-mapa>
+        <i class="fa-solid fa-rotate-right" [class.fa-spin]="isLoading">
+        </i>
 
-  <!-- ARCHIVOS -->
-  <incidencia-archivos [visible]="mostrarArchivos" [incidenciaId]="incidenciaArchivoId"
-    (cerrar)="cerrarArchivos()"></incidencia-archivos>
+        Actualizar
+      </button>
+    </header>
 
-  <!-- ACTUALIZAR ESTADO -->
-  <incidencia-estado-form [visible]="mostrarEstadoForm" [incidencia]="incidenciaEstadoSeleccionada"
-    (cerrar)="cerrarEstadoForm()" (estadoActualizado)="onEstadoActualizado($event)"></incidencia-estado-form>
+    <!-- ================================================= -->
+    <!-- FILTROS -->
+    <!-- ================================================= -->
 
-  <!-- ===================================================== -->
-  <!-- TABLA -->
-  <!-- ===================================================== -->
-  <div class="rounded-xl bg-base-100 p-4 shadow-xl sm:p-6">
+    <section class="mb-6 rounded-2xl
+             border border-base-300
+             bg-base-100 p-4
+             shadow-sm sm:p-5">
 
-    <!-- Acciones superiores -->
-    <div class="mb-4 flex flex-col gap-4
-             sm:flex-row sm:items-center sm:justify-between">
+      <div class="grid grid-cols-1 gap-4
+               sm:grid-cols-2
+               xl:grid-cols-[minmax(250px,1fr)_minmax(220px,320px)_auto]">
 
-      <!-- Selector de cantidad -->
-      <div class="flex flex-wrap items-center gap-2 text-sm">
-        <label for="pageSize">
-          Mostrar:
+        <!-- Buscar por descripción -->
+
+        <label class="form-control w-full">
+          <span class="mb-1.5 text-xs font-semibold
+                   uppercase tracking-wide
+                   text-base-content/60">
+
+            Descripción
+          </span>
+
+          <div class="relative">
+            <i class="fa-solid fa-magnifying-glass
+                     pointer-events-none absolute
+                     left-3.5 top-1/2
+                     -translate-y-1/2
+                     text-base-content/35">
+            </i>
+
+            <input type="text" class="input input-bordered
+                     h-11 w-full rounded-xl
+                     bg-base-100 pl-10 pr-4
+                     focus:outline-none
+                     focus:ring-2
+                     focus:ring-primary/30" placeholder="Buscar por descripción" autocomplete="off"
+              [(ngModel)]="descripcionBusqueda" (ngModelChange)="onSearchChange()" />
+          </div>
         </label>
 
-        <select id="pageSize" class="select select-bordered select-sm w-auto" [(ngModel)]="limit"
-          (change)="cambiarLimite()">
-          @for (size of pageSizeOptions; track size) {
-          <option [ngValue]="size">
-            {{ size }}
-          </option>
-          }
-        </select>
+        <!-- Buscar por fecha -->
 
-        <span class="text-base-content/60">
-          registros por página
-        </span>
+        <label class="form-control w-full">
+          <span class="mb-1.5 text-xs font-semibold
+                   uppercase tracking-wide
+                   text-base-content/60">
+
+            Fecha
+          </span>
+
+          <div class="relative">
+            <i class="fa-regular fa-calendar
+                     pointer-events-none absolute
+                     left-3.5 top-1/2
+                     -translate-y-1/2
+                     text-base-content/35">
+            </i>
+
+            <input type="date" class="input input-bordered
+                     h-11 w-full rounded-xl
+                     bg-base-100 pl-10 pr-4
+                     focus:outline-none
+                     focus:ring-2
+                     focus:ring-primary/30" [(ngModel)]="fechaBusqueda" (change)="onFiltroChange()" />
+          </div>
+        </label>
+
+        <!-- Limpiar filtros -->
+
+        <div class="flex items-end
+                 sm:col-span-2
+                 xl:col-span-1">
+
+          <button type="button" class="btn btn-outline
+                   h-11 min-h-11 w-full
+                   gap-2 rounded-xl
+                   xl:w-auto" [disabled]="
+              !descripcionBusqueda &&
+              !fechaBusqueda
+            " (click)="limpiarFiltros()">
+
+            <i class="fa-solid
+                     fa-filter-circle-xmark">
+            </i>
+
+            Limpiar
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================= -->
+    <!-- MODALES -->
+    <!-- ================================================= -->
+
+    <!-- Detalle -->
+
+    <incidencia-detalle [visible]="mostrarModalDetalle" [incidenciaId]="incidenciaDetalleId"
+      (cerrar)="cerrarDetalleIncidencia()" (incidenciaCargada)="
+        onIncidenciaDetalleCargada($event)
+      ">
+    </incidencia-detalle>
+
+    <!-- Mapa -->
+
+    <incidencia-mapa [visible]="mostrarModalMapa" [incidencia]="incidenciaSeleccionada"
+      (cerrar)="cerrarMapaIncidencia()">
+    </incidencia-mapa>
+
+    <!-- Archivos -->
+
+    <incidencia-archivos [visible]="mostrarArchivos" [incidenciaId]="incidenciaArchivoId" (cerrar)="cerrarArchivos()">
+    </incidencia-archivos>
+
+    <!-- Actualizar estado -->
+
+    <incidencia-estado-form [visible]="mostrarEstadoForm" [incidencia]="incidenciaEstadoSeleccionada"
+      (cerrar)="cerrarEstadoForm()" (estadoActualizado)="
+        onEstadoActualizado($event)
+      ">
+    </incidencia-estado-form>
+
+    <!-- ================================================= -->
+    <!-- TABLA -->
+    <!-- ================================================= -->
+
+    <section class="overflow-hidden rounded-2xl
+             border border-base-300
+             bg-base-100 shadow-sm">
+
+      <!-- Cabecera de tabla -->
+
+      <div class="flex flex-col gap-4
+               border-b border-base-300
+               px-4 py-4
+               sm:flex-row
+               sm:items-center
+               sm:justify-between
+               sm:px-5">
+
+        <!-- Cantidad por página -->
+
+        <div class="flex w-full items-center
+                 justify-between gap-3
+                 text-sm text-base-content/70
+                 sm:w-auto sm:justify-start">
+
+          <label for="incidentes-page-size" class="whitespace-nowrap">
+
+            Mostrar
+          </label>
+
+          <select id="incidentes-page-size" class="select select-bordered
+                   select-sm w-auto" [(ngModel)]="limit" (change)="cambiarLimite()">
+
+            @for (
+            size of pageSizeOptions;
+            track size
+            ) {
+            <option [ngValue]="size">
+              {{ size }}
+            </option>
+            }
+          </select>
+
+          <span class="whitespace-nowrap">
+            ítems por página
+          </span>
+        </div>
+
+        <!-- Total -->
+
+        <div class="flex w-full items-center
+                 justify-center gap-2
+                 rounded-xl bg-base-200
+                 px-4 py-2 text-sm
+                 text-base-content/65
+                 sm:w-auto">
+
+          <i class="fa-solid fa-list
+                   text-base-content/40">
+          </i>
+
+          <span>Total:</span>
+
+          <strong class="text-base-content">
+            {{ totalItems }}
+          </strong>
+
+          <span>
+            {{
+            totalItems === 1
+            ? 'incidente'
+            : 'incidentes'
+            }}
+          </span>
+        </div>
       </div>
 
-      <!-- Resumen -->
-      <div class="text-sm text-base-content/60">
-        Total:
-        <span class="font-semibold text-base-content">
-          {{ totalItems }}
-        </span>
-        incidentes
-      </div>
-    </div>
+      <!-- Tabla con scroll horizontal -->
 
-    <div class="overflow-x-auto rounded-lg
-             border border-base-300/90">
-      <table class="table w-full">
+      <div class="w-full overflow-x-auto">
+        <table class="table min-w-337.5 w-full">
 
-        <!-- Encabezado -->
-        <thead class="bg-base-300/90">
-          <tr>
-            <th>#</th>
-            <th>Fecha y hora</th>
-            <th>Sereno</th>
-            <th>Tipo</th>
-            <th>Descripción</th>
-            <th>Zona</th>
-            <th>Evidencias</th>
-            <th>Estado</th>
-            <th class="text-center">Acciones</th>
-          </tr>
-        </thead>
+          <thead class="bg-base-300/90">
+            <tr class="text-xs uppercase
+                     tracking-wide
+                     text-base-content/60">
 
-        <tbody>
+              <th class="w-16 text-center">
+                N.°
+              </th>
 
-          <!-- Loading -->
-          @if (isLoading) {
-          <tr>
-            <td colspan="9">
-              <div class="flex items-center justify-center
-                         gap-3 py-10 text-base-content/60">
-                <span class="loading loading-spinner loading-md"></span>
-                Cargando incidentes...
-              </div>
-            </td>
-          </tr>
-          }
+              <th>Fecha y hora</th>
+              <th>Sereno</th>
+              <th>Tipo</th>
+              <th>Descripción</th>
+              <th>Zona</th>
+              <th class="text-center">Evidencias</th>
+              <th class="text-center">Estado</th>
+              <th class="text-center">Acciones</th>
+            </tr>
+          </thead>
 
-          <!-- Error -->
-          @if (!isLoading && errorMessage) {
-          <tr>
-            <td colspan="9">
-              <div role="alert" class="alert alert-error m-4">
-                <i class="fa-solid fa-circle-exclamation"></i>
+          <tbody>
 
-                <span>
-                  {{ errorMessage }}
-                </span>
+            <!-- Loading -->
 
-                <button type="button" class="btn btn-sm" (click)="recargarIncidencias()">
-                  Reintentar
-                </button>
-              </div>
-            </td>
-          </tr>
-          }
+            @if (isLoading) {
+            <tr>
+              <td colspan="9" class="py-14 text-center">
 
-          <!-- Incidencias -->
-          @for (
-          incidente of incidentes;
-          track incidente.id;
-          let i = $index
-          ) {
-          <tr class="hover">
+                <div class="flex flex-col
+                           items-center justify-center
+                           gap-3">
 
-            <!-- Numeración paginada -->
-            <td class="font-medium">
-              {{
-              (currentPage - 1) * limit + i + 1
-              }}
-            </td>
+                  <span class="loading loading-spinner
+                             loading-md text-primary">
+                  </span>
 
-            <!-- Fecha y hora -->
-            <td class="whitespace-nowrap">
-              <div class="flex flex-col">
-                <span class="font-medium">
-                  {{
-                  incidente.fecha_hora
-                  | date: 'dd/MM/yyyy'
-                  }}
-                </span>
+                  <span class="text-sm
+                             text-base-content/60">
 
-                <span class="text-xs text-base-content/60">
-                  {{
-                  incidente.fecha_hora
-                  | date: 'hh:mm a'
-                  }}
-                </span>
-              </div>
-            </td>
+                    Cargando incidentes...
+                  </span>
+                </div>
+              </td>
+            </tr>
+            }
 
-            <!-- Sereno -->
-            <td>
-              <div class="flex min-w-40 flex-col">
-                <span class="font-medium">
-                  {{
-                  incidente.usuario?.persona?.nombres
-                  || 'Sin nombres'
-                  }}
-                  {{
-                  incidente.usuario?.persona?.apellidos
-                  || ''
-                  }}
-                </span>
+            <!-- Error -->
 
-                <span class="text-xs text-base-content/60">
-                  {{
-                  incidente.usuario?.username
-                  || 'Sin usuario'
-                  }}
-                </span>
-              </div>
-            </td>
+            @if (!isLoading && errorMessage) {
+            <tr>
+              <td colspan="9" class="px-4 py-8">
 
-            <!-- Tipo -->
-            <td>
-              <span class="badge badge-outline whitespace-nowrap" [ngClass]="{
-                    'badge-error':
-                      incidente.tipo === 'ROBO' ||
-                      incidente.tipo === 'VIOLENCIA',
+                <div role="alert" class="alert alert-error
+                           mx-auto max-w-3xl">
 
-                    'badge-warning':
-                      incidente.tipo === 'ACCIDENTE' ||
-                      incidente.tipo === 'SOSPECHOSO',
+                  <i class="fa-solid
+                             fa-circle-exclamation">
+                  </i>
 
-                    'badge-info':
-                      incidente.tipo === 'INCENDIO',
+                  <span class="min-w-0 flex-1">
+                    {{ errorMessage }}
+                  </span>
 
-                    'badge-neutral':
-                      incidente.tipo === 'OTRO'
-                  }">
+                  <button type="button" class="btn btn-sm" (click)="recargarIncidencias()">
+
+                    Reintentar
+                  </button>
+                </div>
+              </td>
+            </tr>
+            }
+
+            <!-- Incidentes -->
+
+            @if (!isLoading && !errorMessage) {
+            @for (
+            incidente of incidentes;
+            track incidente.id;
+            let i = $index
+            ) {
+            <tr class="border-base-200
+                         transition-colors
+                         hover:bg-base-200/50">
+
+              <!-- Numeración paginada -->
+
+              <td class="text-center
+                           text-base-content/60">
+
                 {{
-                incidente.tipo.replaceAll('_', ' ')
+                ((currentPage - 1) * limit) +
+                i +
+                1
                 }}
-              </span>
-            </td>
+              </td>
 
-            <!-- Descripción -->
-            <td>
-              <p class="max-w-xs truncate" [title]="incidente.descripcion">
-                {{ incidente.descripcion }}
-              </p>
-            </td>
+              <!-- Fecha y hora -->
 
-            <!-- Zona -->
-            <td>
-              <div class="flex items-center gap-2">
-                <i class="fa-solid fa-location-dot
-                           text-primary"></i>
+              <td class="whitespace-nowrap">
+                <div class="flex flex-col">
+                  <span class="font-medium">
+                    {{
+                    incidente.fecha_hora |
+                    date: 'dd/MM/yyyy'
+                    }}
+                  </span>
 
-                <span>
+                  <span class="text-xs
+                               text-base-content/55">
+
+                    {{
+                    incidente.fecha_hora |
+                    date: 'hh:mm a'
+                    }}
+                  </span>
+                </div>
+              </td>
+
+              <!-- Sereno -->
+
+              <td>
+                <div class="flex min-w-44 flex-col">
+                  <span class="font-medium">
+                    {{
+                    incidente.usuario
+                    ?.persona?.nombres ||
+                    'Sin nombres'
+                    }}
+
+                    {{
+                    incidente.usuario
+                    ?.persona?.apellidos ||
+                    ''
+                    }}
+                  </span>
+
+                  <span class="text-xs
+                               text-base-content/55">
+
+                    &#64;{{
+                    incidente.usuario?.username ||
+                    'sin usuario'
+                    }}
+                  </span>
+                </div>
+              </td>
+
+              <!-- Tipo -->
+
+              <td>
+                <span class="badge badge-outline
+                             whitespace-nowrap" [ngClass]="{
+                        'badge-error':
+                          incidente.tipo === 'ROBO' ||
+                          incidente.tipo === 'VIOLENCIA',
+
+                        'badge-warning':
+                          incidente.tipo === 'ACCIDENTE' ||
+                          incidente.tipo === 'SOSPECHOSO',
+
+                        'badge-info':
+                          incidente.tipo === 'INCENDIO',
+
+                        'badge-neutral':
+                          incidente.tipo === 'OTRO'
+                      }">
+
                   {{
-                  incidente.zona?.nombre
-                  || 'Sin zona'
+                  incidente.tipo.replaceAll(
+                  '_',
+                  ' '
+                  )
                   }}
                 </span>
-              </div>
-            </td>
+              </td>
 
-            <!-- Evidencias -->
-            <td>
-              <div class="flex items-center gap-2">
-                <i class="fa-solid fa-paperclip
-                           text-base-content/50"></i>
+              <!-- Descripción -->
 
-                <span class="font-medium">
-                  {{ incidente.total_evidencias }}
+              <td>
+                <p class="max-w-75 truncate" [title]="incidente.descripcion">
+
+                  {{
+                  incidente.descripcion ||
+                  'Sin descripción'
+                  }}
+                </p>
+              </td>
+
+              <!-- Zona -->
+
+              <td>
+                <div class="flex max-w-55
+                             items-center gap-2">
+
+                  <i class="fa-solid fa-location-dot
+                               shrink-0 text-primary">
+                  </i>
+
+                  <span class="truncate">
+                    {{
+                    incidente.zona?.nombre ||
+                    'Sin zona'
+                    }}
+                  </span>
+                </div>
+              </td>
+
+              <!-- Evidencias -->
+
+              <td class="text-center">
+                <button type="button" class="btn btn-ghost btn-sm gap-2" [disabled]="!incidente.id"
+                  (click)="abrirArchivos(incidente.id)">
+
+                  <i class="fa-solid fa-paperclip
+                               text-base-content/45">
+                  </i>
+
+                  <span class="font-medium">
+                    {{ incidente.total_evidencias }}
+                  </span>
+                </button>
+              </td>
+
+              <!-- Estado -->
+
+              <td class="text-center">
+                <span class="badge badge-soft
+                             whitespace-nowrap
+                             font-semibold" [ngClass]="{
+                        'badge-warning':
+                          incidente.estado === 'REPORTADO',
+
+                        'badge-info':
+                          incidente.estado === 'EN_PROCESO',
+
+                        'badge-success':
+                          incidente.estado === 'ATENDIDO',
+
+                        'badge-neutral':
+                          incidente.estado === 'CERRADO'
+                      }">
+
+                  {{
+                  incidente.estado.replaceAll(
+                  '_',
+                  ' '
+                  )
+                  }}
                 </span>
-              </div>
-            </td>
+              </td>
 
-            <!-- Estado -->
-            <td>
-              <span class="badge badge-soft whitespace-nowrap font-semibold" [ngClass]="{
-                    'badge-warning':
-                      incidente.estado === 'REPORTADO',
+              <!-- Acciones -->
 
-                    'badge-info':
-                      incidente.estado === 'EN_PROCESO',
+              <td>
+                <div class="flex items-center
+                             justify-center gap-0.5">
 
-                    'badge-success':
-                      incidente.estado === 'ATENDIDO',
+                  <!-- Detalle -->
 
-                    'badge-neutral':
-                      incidente.estado === 'CERRADO'
-                  }">
-                {{
-                incidente.estado.replaceAll('_', ' ')
-                }}
-              </span>
-            </td>
+                  <div class="tooltip tooltip-left" data-tip="Ver detalle">
 
-            <!-- Acciones -->
-            <td>
-              <div class="flex justify-center">
+                    <button type="button" class="btn btn-ghost
+                                 btn-circle btn-sm
+                                 text-info" (click)="
+                            abrirDetalleIncidencia(
+                              incidente.id
+                            )
+                          " aria-label="Ver detalle del incidente">
 
-                <!-- Ver incidente detalle -->
-                <button type="button" class="btn btn-square btn-ghost btn-sm" title="Ver detalle"
-                  (click)="abrirDetalleIncidencia(incidente.id)">
-                  <i class="fa-solid fa-eye text-primary"></i>
-                </button>
+                      <i class="fa-solid fa-eye"></i>
+                    </button>
+                  </div>
 
-                <!-- Ver mapa del incidente -->
-                <button type="button" class="btn btn-square btn-ghost btn-sm" title="Ver ubicación"
-                  (click)="abrirMapaIncidencia(incidente)">
-                  <i class="fa-solid fa-map-location-dot text-primary"></i>
-                </button>
+                  <!-- Ubicación -->
 
-                <!-- Ver archivos del incidente -->
-                <button type="button" class="btn btn-square btn-ghost  btn-sm" title="Ver archivos"
-                  [disabled]="!incidente.id" (click)="abrirArchivos(incidente.id)">
-                  <i class="fa-solid fa-paperclip text-primary"></i>
-                </button>
+                  <div class="tooltip tooltip-left" data-tip="Ver ubicación">
 
-                <!-- Actualizar estado del incidente -->
-                <button type="button" class="btn btn-square btn-ghost btn-sm" title="Actualizar estado"
-                  (click)="abrirEstadoForm(incidente)">
-                  <i class="fa-solid fa-arrows-rotate text-primary"></i>
-                </button>
+                    <button type="button" class="btn btn-ghost
+                                 btn-circle btn-sm
+                                 text-success" (click)="
+                            abrirMapaIncidencia(incidente)
+                          " aria-label="Ver ubicación del incidente">
 
+                      <i class="fa-solid
+                                   fa-map-location-dot">
+                      </i>
+                    </button>
+                  </div>
 
-              </div>
-            </td>
-          </tr>
-          }
+                  <!-- Archivos -->
 
-        </tbody>
-      </table>
+                  <div class="tooltip tooltip-left" data-tip="Ver evidencias">
 
-      <!-- Estado vacío -->
-      @if (
-      !isLoading &&
-      !errorMessage &&
-      incidentes.length === 0
-      ) {
-      <div class="flex flex-col items-center justify-center
-                 px-6 py-12 text-center">
-        <img src="assets/img/empty-folder.png" alt="No hay incidentes registrados"
-          class="mb-5 h-32 w-32 object-contain opacity-70" />
+                    <button type="button" class="btn btn-ghost
+                                 btn-circle btn-sm
+                                 text-secondary" [disabled]="!incidente.id" (click)="
+                            abrirArchivos(incidente.id)
+                          " aria-label="Ver evidencias del incidente">
 
-        <h3 class="mb-2 text-lg font-semibold">
-          No hay incidentes registrados
-        </h3>
+                      <i class="fa-solid fa-paperclip"></i>
+                    </button>
+                  </div>
 
-        <p class="max-w-md text-sm text-base-content/60">
-          No se encontraron incidentes que coincidan con los filtros seleccionados.
-        </p>
+                  <!-- Estado -->
+
+                  <div class="tooltip tooltip-left" data-tip="Actualizar estado">
+
+                    <button type="button" class="btn btn-ghost
+                                 btn-circle btn-sm
+                                 text-primary" (click)="
+                            abrirEstadoForm(incidente)
+                          " aria-label="Actualizar estado del incidente">
+
+                      <i class="fa-solid
+                                   fa-arrows-rotate">
+                      </i>
+                    </button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            }
+
+            <!-- Estado vacío -->
+
+            @if (incidentes.length === 0) {
+            <tr>
+              <td colspan="9" class="py-12 text-center">
+
+                <div class="mx-auto flex max-w-md
+                             flex-col items-center
+                             justify-center">
+
+                  <img src="assets/img/empty-folder.png" alt="" class="mb-5 h-32 w-32
+                               object-contain opacity-70" />
+
+                  <h3 class="text-lg font-semibold
+                               text-base-content">
+
+                    No hay incidentes registrados
+                  </h3>
+
+                  <p class="mt-1 text-sm
+                               text-base-content/55">
+
+                    No se encontraron incidentes que
+                    coincidan con los filtros seleccionados.
+                  </p>
+
+                  @if (
+                  descripcionBusqueda ||
+                  fechaBusqueda
+                  ) {
+                  <button type="button" class="btn btn-ghost btn-sm
+                                 mt-4 gap-2" (click)="limpiarFiltros()">
+
+                    <i class="fa-solid
+                                   fa-filter-circle-xmark">
+                    </i>
+
+                    Limpiar filtros
+                  </button>
+                  }
+                </div>
+              </td>
+            </tr>
+            }
+            }
+          </tbody>
+        </table>
       </div>
-      }
 
       <!-- ================================================= -->
       <!-- PAGINACIÓN -->
       <!-- ================================================= -->
-      @if (!isLoading && totalItems > 0) {
-      <div class="flex flex-col gap-4
+
+      @if (
+      !isLoading &&
+      !errorMessage &&
+      totalItems > 0
+      ) {
+      <footer class="flex flex-col gap-4
                  border-t border-base-300
-                 bg-base-200/50 p-4
-                 sm:flex-row sm:items-center sm:justify-between">
+                 bg-base-200/50
+                 px-4 py-4
+                 lg:flex-row
+                 lg:items-center
+                 lg:justify-between
+                 sm:px-5">
 
         <!-- Resumen -->
-        <span class="text-sm text-base-content/70">
+
+        <p class="text-center text-sm
+                   text-base-content/70
+                   lg:text-left">
+
           Mostrando
-          <strong>{{ desdeRegistro }}</strong>
+
+          <strong class="text-base-content">
+            {{ desdeRegistro }}
+          </strong>
+
           a
-          <strong>{{ hastaRegistro }}</strong>
+
+          <strong class="text-base-content">
+            {{ hastaRegistro }}
+          </strong>
+
           de
-          <strong>{{ totalItems }}</strong>
+
+          <strong class="text-base-content">
+            {{ totalItems }}
+          </strong>
+
           registros
-        </span>
+        </p>
 
-        <div class="flex flex-wrap items-center gap-2">
+        <!-- Controles -->
 
-          <!-- Anterior -->
-          <button type="button" class="btn btn-sm" [disabled]="currentPage <= 1 || isLoading"
-            (click)="cambiarPagina(currentPage - 1)">
-            <i class="fa-solid fa-chevron-left"></i>
-            Anterior
-          </button>
+        <div class="flex w-full justify-center
+                   overflow-x-auto pb-1
+                   lg:w-auto lg:justify-end">
 
-          <!-- Páginas -->
-          <div class="join">
+          <div class="join whitespace-nowrap">
+
+            <!-- Anterior -->
+
+            <button type="button" class="btn join-item btn-sm" [disabled]="
+                  currentPage <= 1 ||
+                  isLoading
+                " (click)="
+                  cambiarPagina(currentPage - 1)
+                ">
+
+              <i class="fa-solid fa-chevron-left"></i>
+
+              <span class="hidden sm:inline">
+                Anterior
+              </span>
+            </button>
+
+            <!-- Páginas visibles -->
+
             @for (
             numeroPagina of paginasVisibles;
             track numeroPagina
             ) {
-            <button type="button" class="join-item btn btn-sm" [class.btn-primary]="
+            <button type="button" class="btn join-item btn-sm" [class.btn-primary]="
                     numeroPagina === currentPage
-                  " (click)="cambiarPagina(numeroPagina)">
+                  " [disabled]="isLoading" (click)="
+                    cambiarPagina(numeroPagina)
+                  ">
+
               {{ numeroPagina }}
             </button>
             }
+
+            <!-- Siguiente -->
+
+            <button type="button" class="btn join-item btn-sm" [disabled]="
+                  currentPage >= totalPages ||
+                  isLoading
+                " (click)="
+                  cambiarPagina(currentPage + 1)
+                ">
+
+              <span class="hidden sm:inline">
+                Siguiente
+              </span>
+
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
           </div>
-
-          <!-- Siguiente -->
-          <button type="button" class="btn btn-sm" [disabled]="
-                currentPage >= totalPages ||
-                isLoading
-              " (click)="cambiarPagina(currentPage + 1)">
-            Siguiente
-            <i class="fa-solid fa-chevron-right"></i>
-          </button>
-
         </div>
-      </div>
+      </footer>
       }
-
-    </div>
+    </section>
   </div>
 </div>

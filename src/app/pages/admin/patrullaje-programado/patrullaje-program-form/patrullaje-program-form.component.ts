@@ -13,7 +13,7 @@ import { ZonaService } from 'src/app/services/zona.service';
 
 import { PatrullajeProgramadoService } from 'src/app/services/patrullaje_programado.service';
 import { UsuarioService } from 'src/app/services/usuarios/usuarios.service';
-import { PoliciasService } from 'src/app/services/policias.service';
+import { PoliciasService } from 'src/app/services/usuarios/policias.service';
 
 @Component({
   selector: 'patrullaje-program-form',
@@ -167,7 +167,7 @@ export class PatrullajeProgramFormComponent implements OnInit, OnChanges {
       zonas: this.zonaService.obtenerZonas(),
       unidades: this.unidadService.getAllUnidades(),
       serenos: this.usuarioService.getSerenosAndConductores(),
-      policias: this.policiaService.getAllPolicias()
+      policias: this.policiaService.getPoliciasSelect()
     }).subscribe({
       next: (resp: any) => {
 

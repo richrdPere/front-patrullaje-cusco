@@ -1,246 +1,565 @@
-<div class="p-6 min-h-full bg-base-300 text-base-content overflow-auto transition-colors duration-300">
+<div
+  class="min-h-full min-w-0 bg-base-300 px-4 py-5 text-base-content transition-colors duration-300 sm:px-6 sm:py-6 lg:px-8">
 
-  <!-- Titulo -->
-  <!-- <h1 class="text-2xl font-bold mb-5 text-base-content ">Gestión de Serenos</h1> -->
+  <!-- CONTENEDOR DEL DASHBOARD -->
+  <div class="mx-auto w-full max-w-500">
 
-  <!-- ENCABEZADO -->
-  <header class="mb-5 flex flex-col gap-4
-           sm:flex-row sm:items-center sm:justify-between">
+    <!-- Titulo -->
+    <!-- <h1 class="text-2xl font-bold mb-5 text-base-content ">Gestión de Serenos</h1> -->
 
-    <!-- ÍCONO + TÍTULO -->
-    <div class="flex items-center gap-3">
+    <!-- ================================================= -->
+    <!-- ENCABEZADO -->
+    <!-- ================================================= -->
+    <header class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
-      <div class="flex h-12 w-12 shrink-0 items-center justify-center
-               rounded-2xl bg-primary/10 text-primary">
-        <i class="fa-solid fa-users text-2xl"></i>
-      </div>
-
-      <div class="min-w-0">
-        <h1 class="text-2xl font-bold leading-tight text-base-content">
-          Gestión de Serenos
-        </h1>
-
-        <p class="mt-1 text-sm leading-relaxed text-base-content/60">
-          Gestione a todos los serenos disponibles.
-        </p>
-      </div>
-    </div>
-  </header>
-
-
-  <!-- Header -->
-  <div class="p-4 mb-7 card bg-base-100 shadow-md">
-
-    <!-- CONTENEDOR PRINCIPAL -->
-    <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 py-4">
-
-      <!--  BUSCADOR -->
-      <div class="flex flex-col md:flex-row gap-4 items-center w-full md:w-auto">
-
-        <!-- Filtro NOMBRE Y APELLIDO -->
-        <div class="relative w-full md:max-w-xs">
-          <input type="text" class="input input-bordered w-full bg-base-100 rounded-md h-11 pl-10 pr-4 text-sm
-                 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Buscar por nombres"
-            autocomplete="off" [(ngModel)]="nombreBusqueda" (ngModelChange)="onSearchChange()" appUppercase />
-          <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+      <!-- ÍCONO + INFORMACIÓN -->
+      <div class="flex min-w-0 items-center gap-3">
+        <div
+          class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary sm:h-12 sm:w-12">
+          <i class="fa-solid fa-users text-xl sm:text-2xl"> </i>
         </div>
 
-        <!-- Input DNI -->
-        <div class="relative w-full md:max-w-xs">
-          <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="8" class="input input-bordered w-full bg-base-100 rounded-md h-11 pl-10 pr-4 text-sm
-                 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Buscar por N° DNI"
-            autocomplete="off" [(ngModel)]="dniBusqueda" (keypress)="soloNumeros($event)"
-            (ngModelChange)="onSearchChange()" />
-          <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+        <div class="min-w-0">
+          <h1 class="truncate text-xl font-bold leading-tight text-base-content sm:text-2xl">
+
+            Gestión de usuarios
+          </h1>
+
+          <p class="mt-1 text-sm leading-relaxed
+                   text-base-content/60">
+
+            Administra usuarios, roles y accesos
+            del personal de Serenazgo.
+          </p>
         </div>
       </div>
-    </div>
+    </header>
 
-  </div>
+    <!-- ================================================= -->
+    <!-- FILTROS -->
+    <!-- ================================================= -->
+    <section class="mb-6 overflow-hidden rounded-2xl
+         border border-base-300
+         bg-base-100 shadow-sm">
 
-  <!-- Modal Crear Usuario -->
-  <usuarios-form [mostrarModal]="mostrarModal" [modoEdicion]="modoEdicion" [usuarioSeleccionado]="usuarioSeleccionado"
-    (modalCerrado)="cerrarModal()" (usuarioCreado)="getUsuariosPaginados()"></usuarios-form>
+      <div class="grid grid-cols-1
+           lg:grid-cols-[minmax(0,1fr)_170px]">
 
-  <!-- Modal Ver Usuario -->
-  <usuario-info [mostrarModal]="mostrarModalInfo" [usuario_id]="usuario_id"
-    (modalCerrado)="cerrarModalInfo()"></usuario-info>
+        <!-- =============================================== -->
+        <!-- CAMPOS DE FILTRO -->
+        <!-- =============================================== -->
+        <div class="p-4 sm:p-5">
 
+          <div class="grid grid-cols-1 gap-4
+               sm:grid-cols-2
+               xl:grid-cols-[minmax(240px,1.4fr)_minmax(180px,1fr)_minmax(190px,1fr)_auto]">
 
-  <!-- Tabla -->
-  <div class="p-6 min-h-auto bg-base-100 rounded-xl shadow-xl">
-    <div class="overflow-x-auto text-base-content border border-base-300/90 shadow rounded-lg">
-      <!-- Header acciones -->
-      <div class="flex justify-between items-center p-5">
+            <!-- Buscar por nombre -->
+
+            <label class="form-control w-full">
+              <span class="mb-1.5 text-xs font-semibold
+                   uppercase tracking-wide
+                   text-base-content/60">
+
+                Nombres o apellidos
+              </span>
+
+              <div class="relative">
+                <i class="fa-solid fa-magnifying-glass
+                     pointer-events-none absolute
+                     left-3.5 top-1/2
+                     -translate-y-1/2
+                     text-base-content/35">
+                </i>
+
+                <input type="text" class="input input-bordered
+                     h-11 w-full rounded-xl
+                     bg-base-100 pl-10 pr-4
+                     focus:outline-none
+                     focus:ring-2
+                     focus:ring-primary/30" placeholder="Buscar usuario" autocomplete="off"
+                  [(ngModel)]="nombreBusqueda" (ngModelChange)="onSearchChange()" appUppercase />
+              </div>
+            </label>
+
+            <!-- Buscar por DNI -->
+
+            <label class="form-control w-full">
+              <span class="mb-1.5 text-xs font-semibold
+                   uppercase tracking-wide
+                   text-base-content/60">
+
+                Documento
+              </span>
+
+              <div class="relative">
+                <i class="fa-regular fa-id-card
+                     pointer-events-none absolute
+                     left-3.5 top-1/2
+                     -translate-y-1/2
+                     text-base-content/35">
+                </i>
+
+                <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="8" class="input input-bordered
+                     h-11 w-full rounded-xl
+                     bg-base-100 pl-10 pr-4
+                     focus:outline-none
+                     focus:ring-2
+                     focus:ring-primary/30" placeholder="Número de DNI" autocomplete="off" [(ngModel)]="dniBusqueda"
+                  (ngModelChange)="onSearchChange()" />
+              </div>
+            </label>
+
+            <!-- Filtrar por rol -->
+
+            <label class="form-control w-full">
+              <span class="mb-1.5 text-xs font-semibold
+                   uppercase tracking-wide
+                   text-base-content/60">
+
+                Rol
+              </span>
+
+              <select class="select select-bordered
+                   h-11 min-h-11 w-full
+                   rounded-xl bg-base-100
+                   focus:outline-none
+                   focus:ring-2
+                   focus:ring-primary/30" [(ngModel)]="rolesBusqueda" (change)="onFiltroChange()">
+
+                <option value="">
+                  Todos los roles
+                </option>
+
+                <option value="SERENO">
+                  Sereno
+                </option>
+
+                <option value="CONDUCTOR">
+                  Conductor
+                </option>
+
+                <option value="OPERADOR">
+                  Operador
+                </option>
+
+                <option value="SUPERVISOR_SERENAZGO">
+                  Supervisor
+                </option>
+
+                <option value="GERENTE_SERENAZGO">
+                  Gerente
+                </option>
+
+                <option value="ADMIN">
+                  Administrador
+                </option>
+              </select>
+            </label>
+
+            <!-- Limpiar filtros -->
+
+            <div class="flex items-end
+                 sm:col-span-2
+                 xl:col-span-1">
+
+              <button type="button" class="btn btn-outline
+                   h-11 min-h-11 w-full
+                   gap-2 rounded-xl
+                   xl:w-auto xl:min-w-28" [disabled]="
+              !nombreBusqueda &&
+              !dniBusqueda &&
+              !rolesBusqueda
+            " (click)="limpiarFiltros()">
+
+                <i class="fa-solid
+                     fa-filter-circle-xmark">
+                </i>
+
+                Limpiar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- =============================================== -->
+        <!-- ILUSTRACIÓN DE BÚSQUEDA -->
+        <!-- =============================================== -->
+        <div class="hidden items-center justify-center border-base-300 px-5 lg:flex">
+
+          <img src="assets/img/search.png" alt="" aria-hidden="true" class="h-32 w-32
+               select-none object-contain
+               opacity-90
+               drop-shadow-sm" draggable="false" />
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================= -->
+    <!-- MODALES -->
+    <!-- ================================================= -->
+
+    <!-- Modal Crear Usuario -->
+    <usuarios-form [mostrarModal]="mostrarModal" [modoEdicion]="modoEdicion" [usuarioSeleccionado]="usuarioSeleccionado"
+      (modalCerrado)="cerrarModal()" (usuarioCreado)="getUsuariosPaginados()"></usuarios-form>
+
+    <!-- Modal Ver Usuario -->
+    <usuario-info [mostrarModal]="mostrarModalInfo" [usuario_id]="usuario_id"
+      (modalCerrado)="cerrarModalInfo()"></usuario-info>
+
+    <!-- ================================================= -->
+    <!-- TABLA -->
+    <!-- ================================================= -->
+    <section class="overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-sm">
+
+      <!-- Cabecera de tabla -->
+      <div class="flex flex-col gap-4
+         border-b border-base-300
+         px-4 py-4
+         sm:flex-row
+         sm:items-center
+         sm:justify-between
+         sm:px-5">
 
         <!-- Selector de cantidad -->
-        <div class="flex items-center gap-2 text-sm">
-          <label>Mostrar:</label>
+        <div class="flex w-full items-center
+           justify-between gap-3
+           text-sm text-base-content/70
+           sm:w-auto sm:justify-start">
 
-          <select class="select select-bordered select-sm w-auto" [(ngModel)]="limit" (change)="cambiarLimite()">
+          <label for="usuarios-page-size" class="whitespace-nowrap">
+            Mostrar
+          </label>
+
+          <select id="usuarios-page-size" class="select select-bordered select-sm w-auto" [(ngModel)]="limit"
+            (change)="cambiarLimite()">
+
             <option *ngFor="let size of pageSizeOptions" [ngValue]="size">
               {{ size }}
             </option>
           </select>
 
-          <span>items por página</span>
+          <span class="whitespace-nowrap">
+            items por página
+          </span>
         </div>
 
-        <!-- Botónes -->
-        <div class="flex flex-row justify-center items-center gap-4">
+        <!-- Botones -->
+        <div class="flex w-full items-center justify-end sm:w-auto">
 
-          <button class="btn btn-primary text-base-content hover:text-white bg-info hover:bg-primary border-none"
-            (click)="abrirModal()">
+          <button type="button" class="btn btn-primary
+             min-h-10 w-full gap-2
+             rounded-xl border-none
+            hover:text-white bg-info hover:bg-primary
+             sm:w-auto sm:min-w-36" (click)="abrirModal()">
+
             <i class="fa-solid fa-plus mr-1"></i>
+
             Usuario
           </button>
         </div>
-
       </div>
 
-      <!-- Tabla  -->
-      <table class="table w-full">
+      <!-- Contenedor de scroll exclusivo para tabla -->
+      <div class="w-full overflow-x-auto">
+        <table class="table min-w-295 w-full">
 
-        <thead class="bg-base-300/90">
-          <tr>
-            <th>#</th>
-            <th>Usuario</th>
-            <!-- <th>Apellidos</th> -->
-            <th>Correo</th>
-            <th>DNI</th>
-            <th>Telefono</th>
-            <th>Roles</th>
-            <th>Estado</th>
-            <th>Actualización</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          @if (isLoading) {
-          <tr>
-            <td colspan="7" class="text-center py-4 text-base-content/70">Cargando usuarios...</td>
-          </tr>
-          }
+          <thead class="bg-base-200/80">
+            <tr class="text-xs uppercase tracking-wide text-base-content/60">
+              <th class="w-16 text-center">N.°</th>
+              <th>Usuario</th>
+              <th>Correo</th>
+              <th>DNI</th>
+              <th class="text-center">Teléfono</th>
+              <th>Roles</th>
+              <th class="text-center">Estado</th>
+              <th>Actualización</th>
+              <th class="text-center">Acciones</th>
+            </tr>
+          </thead>
 
-          @for (usuario of usuarios; track usuario.id; let i = $index) {
-          <tr class="hover ">
+          <tbody>
 
-            <!-- Numeracion -->
-            <td>{{i + 1}}</td>
+            <!-- Loading -->
+            @if (isLoading) {
+            <tr>
+              <td colspan="9" class="py-14 text-center">
 
-            <!-- Usuario -->
-            <td>
-              <div class="flex items-center gap-3">
-                <div class="avatar">
-                  <div class="mask mask-squircle h-12 w-12">
-                    <img [src]="usuario.persona.foto_perfil || 'assets/img/default-avatar.png'"
-                      alt="Avatar del usuario" />
+                <div class="flex flex-col items-center justify-center gap-3">
+                  <span class="loading loading-spinner loading-md text-primary">
+                  </span>
+
+                  <span class="text-sm text-base-content/60">
+                    Cargando usuarios...
+                  </span>
+                </div>
+              </td>
+            </tr>
+            }
+
+            <!-- Usuarios -->
+            @if (!isLoading) {
+            @for ( usuario of usuarios; track usuario.id; let i = $index ) {
+            <tr class="border-base-200 transition-colors hover:bg-base-200/50">
+
+              <!-- Numeración paginada -->
+              <td class="text-center text-base-content/60">
+                {{ ((page - 1) * limit) + i + 1 }}
+              </td>
+
+              <!-- Usuario -->
+              <td>
+                <div class="flex items-center gap-3">
+                  <div class="avatar shrink-0">
+                    <div class="h-10 w-10 overflow-hidden rounded-xl bg-base-200">
+                      <img [src]="usuario.persona.foto_perfil || 'assets/img/default-avatar.png'"
+                        [alt]="'Foto de ' + usuario.persona.nombres" class="h-full w-full object-cover" />
+                    </div>
+                  </div>
+
+                  <div class="min-w-0">
+                    <p class="max-w-55 truncate font-semibold text-base-content">
+                      {{ usuario.persona.nombres }}
+                      {{ usuario.persona.apellidos }}
+                    </p>
+
+                    <p class="mt-0.5 text-xs text-base-content/45">
+                      &#64;{{ usuario.username }}
+                    </p>
                   </div>
                 </div>
-                <div>
-                  <div class="font-bold">{{ usuario.persona.nombres }}</div>
-                  <div class="text-sm opacity-50">{{ usuario.persona.apellidos }}</div>
-                </div>
-              </div>
-            </td>
+              </td>
 
-            <!-- Correo -->
-            <th>
-              {{usuario.correo}}
-            </th>
-
-            <!-- DNI -->
-            <td>{{usuario.persona.documento_identidad}}</td>
-
-            <!-- Telefono -->
-            <td>{{usuario.persona.telefono}}</td>
-
-            <!-- Rol -->
-            <td class="align-middle">
-              <div class="flex flex-wrap gap-1 justify-start">
-                <span *ngFor="let rol of usuario.roles" class="badge badge-soft badge-info badge-sm font-semibold">
-                  {{ rol }}
+              <!-- Correo -->
+              <td>
+                <span class="block max-w-55 truncate text-sm" [title]="usuario.correo || ''">
+                  {{ usuario.correo || 'Sin correo' }}
                 </span>
-              </div>
-            </td>
+              </td>
 
-            <!-- Estado -->
-            <td class="align-middle text-center">
+              <!-- DNI -->
+              <td class="font-sans text-sm">
+                {{ usuario.persona.documento_identidad }}
+              </td>
 
-              <div class="flex justify-center items-center">
-                <input type="checkbox"
-                  class="toggle border-red-600 bg-red-500 checked:border-green-500 checked:bg-green-400 checked:text-green-700"
-                  [checked]="usuario.estado" (change)="cambiarEstado(usuario)" />
-              </div>
+              <!-- Teléfono -->
+              <td class="font-sans text-sm text-center">
+                {{ usuario.persona.telefono || '—' }}
+              </td>
 
-            </td>
+              <!-- Roles -->
+              <td class="align-middle">
+                <div class="flex flex-wrap gap-1 justify-start">
+                  <span *ngFor="let rol of usuario.roles" class="badge badge-soft badge-info badge-sm font-semibold">
+                    {{ rol }}
+                  </span>
+                </div>
+              </td>
 
-            <!-- Actualización -->
-            <td>
-              {{ usuario.updatedAt | date: 'dd/MM/yyyy, hh:mm a' }}
-            </td>
+              <!-- <td>
+                <div class="flex max-w-55 flex-wrap gap-1.5">
+                  @for (
+                  rol of usuario.roles;
+                  track rol
+                  ) {
+                  <span class="badge badge-info
+                                 badge-outline badge-sm
+                                 whitespace-nowrap
+                                 font-medium">
 
-            <!-- ACCIONES PRINCIPALES  -->
-            <td class="text-right relative">
+                    {{ rol }}
+                  </span>
+                  }
+                </div>
+              </td> -->
 
-              <div class="flex justify-start items-center gap-1">
-                <!-- Resetear password -->
-                <button class="btn btn-ghost btn-circle btn-md" (click)="resetPassword(usuario.id)">
-                  <i class="fa-solid fa-key"></i>
-                </button>
+              <!-- Estado -->
+              <td class="text-center">
+                <div class="inline-flex items-center justify-center gap-2">
 
-                <!-- Ver -->
-                <button class="btn btn-ghost btn-circle btn-md" (click)="verUsuario(usuario)">
-                  <i class="fa-solid fa-eye"></i>
-                </button>
+                  <input type="checkbox" class="toggle toggle-sm
+                               border-error
+                               bg-error/70
+                               checked:border-success
+                               checked:bg-success" [checked]="usuario.estado" (change)="cambiarEstado(usuario)"
+                    [attr.aria-label]="
+                          usuario.estado
+                            ? 'Desactivar usuario'
+                            : 'Activar usuario'
+                        " />
 
-                <!-- Editar -->
-                <button class="btn btn-ghost btn-circle btn-md" (click)="editarUsuario(usuario)">
-                  <i class="fa-solid fa-pencil"></i>
-                </button>
+                  <span class="min-w-14 text-left text-xs font-medium" [class.text-success]="usuario.estado"
+                    [class.text-error]="!usuario.estado">
 
-                <!-- Eliminar -->
-                <button class="btn btn-ghost btn-circle btn-md" (click)="eliminarUsuario(usuario)">
-                  <i class="fa-solid fa-trash"></i>
-                </button>
+                    {{ usuario.estado ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </div>
+              </td>
 
-              </div>
+              <!-- Actualización -->
+              <td class="whitespace-nowrap text-sm">
+                {{ usuario.updatedAt | date: 'dd/MM/yyyy, hh:mm a' }}
+              </td>
 
-            </td>
-          </tr>
-          }
+              <!-- ACCIONES PRINCIPALES  -->
+              <td>
+                <div class="flex items-center justify-center gap-0.5">
 
+                  <!-- Resetear password -->
+                  <div class="tooltip tooltip-left" data-tip="Restablecer contraseña">
+                    <button type="button" class="btn btn-ghost btn-circle btn-sm" (click)="resetPassword(usuario.id)"
+                      aria-label="Restablecer contraseña">
+                      <i class="fa-solid fa-key"></i>
+                    </button>
+                  </div>
 
-        </tbody>
+                  <!-- Ver detalles -->
+                  <div class="tooltip tooltip-left" data-tip="Ver detalles">
+                    <button type="button" class="btn btn-ghost btn-circle btn-sm" (click)="verUsuario(usuario)"
+                      aria-label="Ver detalles">
+                      <i class="fa-solid fa-eye"></i>
+                    </button>
+                  </div>
 
+                  <!-- Editar usuario -->
+                  <div class="tooltip tooltip-left" data-tip="Editar usuario">
+                    <button type="button" class="btn btn-ghost btn-circle btn-sm" (click)="editarUsuario(usuario)"
+                      aria-label="Editar usuario">
 
-      </table>
+                      <i class="fa-solid fa-pencil"></i>
+                    </button>
+                  </div>
 
-      @if (!isLoading && usuarios.length === 0) {
-      <div class="flex flex-col items-center justify-center my-10 text-center text-base-content/70">
-        <img src="assets/img/empty-folder.png" alt="Sin solicitudes" class="w-40 h-40 mb-6 opacity-80" />
-        <h3 class="text-lg font-semibold text-base-content mb-2">
-          No hay usuarios registrados
-        </h3>
-        <p class="text-sm max-w-md">Cuando se registren nuevos usuarios, aparecerán aquí automáticamente.</p>
-      </div>}
+                  <!-- Eliminar usuario -->
+                  <div class="tooltip tooltip-left" data-tip="Eliminar usuario">
+                    <button type="button" class="btn btn-ghost btn-circle btn-sm" (click)="eliminarUsuario(usuario)"
+                      aria-label="Eliminar usuario">
 
-      <!-- Paginación -->
-      <div class="flex justify-end items-center p-4 text-sm text-base-content bg-base-300/90">
-        <span> Página {{ page }} de {{ totalPages }} registros</span>
-        <div class="join ml-4 gap-2">
-          <button class="join-item btn btn-sm" [disabled]="page === 1" (click)="cambiarPagina(page - 1)">
-            Anterior
-          </button>
+                      <i class="fa-solid fa-trash"></i>
+                    </button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            }
 
-          <button class="join-item btn btn-sm" [disabled]="page === totalItems" (click)="cambiarPagina(page + 1)">
-            Siguiente
-          </button>
-        </div>
+            <!-- Estado vacío -->
+
+            @if (usuarios.length === 0) {
+            <tr>
+              <td colspan="9" class="py-12 text-center">
+
+                <div class="mx-auto flex max-w-md
+                             flex-col items-center">
+
+                  <img src="assets/img/empty-folder.png" alt="" class="mb-4 h-28 w-28
+                               object-contain opacity-70" />
+
+                  <h3 class="text-base font-semibold
+                               text-base-content">
+
+                    No se encontraron usuarios
+                  </h3>
+
+                  <p class="mt-1 text-sm
+                               text-base-content/55">
+
+                    No existen usuarios que coincidan
+                    con los filtros seleccionados.
+                  </p>
+
+                  @if (
+                  nombreBusqueda ||
+                  dniBusqueda ||
+                  rolesBusqueda
+                  ) {
+                  <button type="button" class="btn btn-ghost
+                                 btn-sm mt-4" (click)="limpiarFiltros()">
+
+                    Limpiar filtros
+                  </button>
+                  }
+                </div>
+              </td>
+            </tr>
+            }
+            }
+          </tbody>
+        </table>
       </div>
-    </div>
 
+      <!-- ================================================= -->
+      <!-- PAGINACIÓN -->
+      <!-- ================================================= -->
+      <footer class="flex flex-col gap-4
+         border-t border-base-300
+         bg-base-200/50
+         px-4 py-4
+         sm:flex-row
+         sm:items-center
+         sm:justify-between
+         sm:px-5">
 
+        <!-- Resumen de usuarios -->
+        <div class="text-center sm:text-left">
+          <h2 class="font-semibold text-base-content">
+            Usuarios registrados
+          </h2>
+
+          <p class="mt-0.5 text-sm text-base-content/55">
+            {{ totalItems }}
+            {{ totalItems === 1 ? 'usuario' : 'usuarios' }}
+            encontrados
+          </p>
+        </div>
+
+        <!-- Controles de paginación -->
+        <div class="flex w-full flex-col
+           items-center gap-3
+           text-sm text-base-content/70
+           sm:w-auto sm:flex-row">
+
+          <!-- Página actual -->
+          <span class="whitespace-nowrap">
+            @if (totalPages > 0) {
+            Página
+            <strong class="text-base-content">
+              {{ page }}
+            </strong>
+            de
+            <strong class="text-base-content">
+              {{ totalPages }}
+            </strong>
+            } @else {
+            Sin páginas disponibles
+            }
+          </span>
+
+          <!-- Botones -->
+          <div class="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
+            <button type="button" class="btn btn-sm w-full
+               gap-2 rounded-lg
+               sm:w-auto" [disabled]="isLoading || page <= 1" (click)="cambiarPagina(page - 1)">
+              <i class="fa-solid fa-chevron-left"></i>
+
+              Anterior
+            </button>
+
+            <button type="button" class="btn btn-sm w-full
+              gap-2 rounded-lg
+              sm:w-auto" [disabled]="
+                  isLoading ||
+                  totalPages === 0 ||
+                  page >= totalPages
+                " (click)="cambiarPagina(page + 1)">
+
+              Siguiente
+
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </footer>
+    </section>
   </div>
-
 </div>

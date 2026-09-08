@@ -136,6 +136,20 @@ export class UnidadPatrullajeComponent implements OnInit {
     this.mostrarModal = true;
   }
 
+  getIconoUnidad(
+    tipo: string | null | undefined,
+  ): string {
+    const tipoNormalizado =
+      tipo?.trim().toUpperCase() ?? '';
+
+    if (
+      tipoNormalizado.includes('MOTO')
+    ) {
+      return 'fa-motorcycle';
+    }
+
+    return 'fa-truck-field-un';
+  }
 
   // ================================
   // Helpers methods

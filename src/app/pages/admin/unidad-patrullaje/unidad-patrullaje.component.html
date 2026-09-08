@@ -1,458 +1,233 @@
-<div class="p-6 min-h-full bg-base-300 text-base-content overflow-auto transition-colors duration-300">
+<div class="min-h-full min-w-0 bg-base-300
+         px-4 py-5 text-base-content
+         transition-colors duration-300
+         sm:px-6 sm:py-6 lg:px-8">
 
+  <!-- ================================================= -->
+  <!-- CONTENEDOR DEL DASHBOARD -->
+  <!-- ================================================= -->
+  <div class="mx-auto w-full max-w-500">
 
-  <!-- Titulo -->
-  <!-- <h1 class="text-2xl font-bold mb-5 text-base-content ">Gestión de Unidades de Patrullaje</h1> -->
+    <!-- ================================================= -->
+    <!-- ENCABEZADO -->
+    <!-- ================================================= -->
+    <header class="mb-5 flex flex-col gap-4
+             sm:flex-row sm:items-center
+             sm:justify-between">
 
+      <div class="flex min-w-0 items-center gap-3">
 
-  <!-- ENCABEZADO -->
-  <header class="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex h-12 w-12 shrink-0
+                 items-center justify-center
+                 rounded-2xl bg-primary/10
+                 text-primary" aria-hidden="true">
 
-    <!-- ÍCONO + INFORMACIÓN -->
-    <div class="flex items-center gap-3">
-      <div class="flex h-12 w-12 shrink-0 items-center justify-center
-             rounded-2xl bg-primary/10 text-primary" aria-hidden="true">
-        <i class="fa-solid fa-car-side text-xl"></i>
-      </div>
-
-      <div class="min-w-0">
-        <h1 class="text-2xl font-bold leading-tight
-               text-base-content">
-          Unidades de Patrullaje
-        </h1>
-
-        <p class="mt-1 max-w-2xl text-sm leading-relaxed
-               text-base-content/60">
-          Registre y administre las unidades disponibles para
-          su asignación en las operaciones de patrullaje.
-        </p>
-      </div>
-    </div>
-  </header>
-
-
-  <!-- Header -->
-  <div class="p-4 mb-7 card bg-base-100 shadow-md">
-
-    <!-- CONTENEDOR PRINCIPAL -->
-    <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 py-4">
-
-      <!--  BUSCADOR -->
-      <div class="flex flex-col md:flex-row gap-4 items-center w-full md:w-auto">
-
-        <!-- Filtro Placa -->
-        <div class="relative w-full md:max-w-xs">
-          <input type="text" class="input input-bordered w-full bg-base-100 rounded-md h-11 pl-10 pr-4 text-sm
-                 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Buscar por placa"
-            autocomplete="off" [(ngModel)]="placaBusqueda" (ngModelChange)="onSearchChange()" />
-          <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-        </div>
-
-        <!-- Input descripcion -->
-        <div class="relative w-full md:max-w-xs">
-          <input type="text" class="input input-bordered w-full bg-base-100 rounded-md h-11 pl-10 pr-4 text-sm
-                 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Buscar por descripción"
-            autocomplete="off" [(ngModel)]="descripcionBusqueda" (ngModelChange)="onSearchChange()" />
-          <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-        </div>
-
-
-        <!-- Filtro MES -->
-        <!-- <select class="select select-bordered h-11 bg-base-100 text-base-content w-full md:w-40" [(ngModel)]="filtroMes"
-          (change)="aplicarFiltros()">
-
-          <option value="">Mes</option>
-          <option *ngFor="let mes of meses" [value]="mes.value">
-            {{ mes.label }}
-          </option>
-        </select> -->
-
-        <!-- Filtro AÑO -->
-        <!-- <select class="select select-bordered h-11 bg-base-100 text-base-content w-full md:w-32"
-          [(ngModel)]="filtroAnio" (change)="aplicarFiltros()">
-
-          <option value="">Año</option>
-          <option *ngFor="let anio of anios" [value]="anio">
-            {{ anio }}
-          </option>
-        </select> -->
-
-      </div>
-    </div>
-  </div>
-
-
-  <!-- Modal crear unidad -->
-  <unidad-form [mostrarModal]="mostrarModal" [modoEdicion]="modoEdicion" [unidadSeleccionado]="unidadSeleccionado"
-    (modalCerrado)="cerrarModal()" (unidadCreado)="getUnidadesPaginado()"></unidad-form>
-
-  <!-- Modal ver unidad -->
-
-
-  <!-- Tabla -->
-  <div class="p-6 min-h-auto bg-base-100 rounded-xl shadow-xl">
-    <div class="overflow-x-auto text-base-content border border-base-300/90 shadow rounded-lg">
-      <!-- Header acciones -->
-      <div class="flex justify-between items-center p-5">
-
-        <!-- Selector de cantidad -->
-        <div class="flex items-center gap-2 text-sm">
-          <label>Mostrar:</label>
-
-          <select class="select select-bordered select-sm w-auto" [(ngModel)]="limit" (change)="cambiarLimite()">
-            <option *ngFor="let size of pageSizeOptions" [ngValue]="size">
-              {{ size }}
-            </option>
-          </select>
-
-          <span>items por página</span>
-        </div>
-
-        <!-- Botónes -->
-        <div class="flex flex-row justify-center items-center gap-4">
-
-          <button class="btn btn-primary text-base-content hover:text-white bg-info hover:bg-primary border-none"
-            (click)="abrirModal()">
-            <i class="fa-solid fa-plus mr-1"></i>
-            Unidad
-          </button>
-        </div>
-
-      </div>
-
-      <!-- Tabla  -->
-      <table class="table w-full">
-
-        <thead class="bg-base-300/90">
-          <tr>
-            <th>#</th>
-            <th>Codigo</th>
-            <th>Descripcion</th>
-            <th>Tipo</th>
-            <th>Placa</th>
-            <th>Estado</th>
-            <th>Actualización</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          @if (isLoading) {
-          <tr>
-            <td colspan="7" class="text-center py-4 text-base-content/70">Cargando unidades...</td>
-          </tr>
-          }
-
-          @for (unidad of unidades; track unidad.id; let i = $index) {
-          <tr class="hover ">
-
-            <!-- Numeracion -->
-            <td>{{i + 1}}</td>
-
-            <!-- Codigo -->
-            <td>{{ unidad.codigo }}</td>
-
-            <!-- Descripcion -->
-            <td>{{ unidad.descripcion }}</td>
-
-            <!-- Tipo -->
-            <th>
-              {{unidad.tipo}}
-            </th>
-
-            <!-- Placa -->
-            <td>{{unidad.placa}}</td>
-
-            <!-- Estado -->
-            <td>
-              <span class="badge badge-soft font-semibold" [ngClass]="getEstadoInfo(unidad.estado).class">
-                {{ getEstadoInfo(unidad.estado).label }}
-              </span>
-            </td>
-
-            <!-- Actualización -->
-            <td>
-              {{ unidad.updatedAt | date: 'dd/MM/yyyy, hh:mm a' }}
-            </td>
-
-            <!-- ACCIONES PRINCIPALES  -->
-            <td class="text-right relative">
-
-              <div class="flex justify-start items-center gap-1">
-                <!-- Ver -->
-                <button class="btn btn-ghost btn-circle btn-md" (click)="verUnidad(unidad)">
-                  <i class="fa-solid fa-eye"></i>
-                </button>
-
-                <!-- Editar -->
-                <button class="btn btn-ghost btn-circle btn-md" (click)="editarUnidad(unidad)">
-                  <i class="fa-solid fa-pencil"></i>
-                </button>
-
-                <!-- Eliminar -->
-                <button class="btn btn-ghost btn-circle btn-md" (click)="eliminarUnidad(unidad)">
-                  <i class="fa-solid fa-trash"></i>
-                </button>
-
-              </div>
-
-            </td>
-          </tr>
-          }
-
-
-        </tbody>
-
-
-      </table>
-
-      @if (!isLoading && unidades.length === 0) {
-      <div class="flex flex-col items-center justify-center my-10 text-center text-base-content/70">
-        <img src="assets/img/empty-folder.png" alt="Sin solicitudes" class="w-40 h-40 mb-6 opacity-80" />
-        <h3 class="text-lg font-semibold text-base-content mb-2">
-          No hay usuarios registrados
-        </h3>
-        <p class="text-sm max-w-md">Cuando se registren nuevos usuarios, aparecerán aquí automáticamente.</p>
-      </div>}
-
-      <!-- Paginación -->
-      <div class="flex justify-end items-center p-4 text-sm text-base-content bg-base-300/90">
-        <span> Página {{ page }} de {{ totalPages }} registros</span>
-        <div class="join ml-4 gap-2">
-          <button class="join-item btn btn-sm" [disabled]="page === 1" (click)="cambiarPagina(page - 1)">
-            Anterior
-          </button>
-
-          <button class="join-item btn btn-sm" [disabled]="page === totalItems" (click)="cambiarPagina(page + 1)">
-            Siguiente
-          </button>
-        </div>
-      </div>
-    </div>
-
-
-  </div>
-
-
-</div>
-
-
-<!-- <div
-  class="min-h-full overflow-auto bg-base-300
-         p-4 text-base-content transition-colors duration-300
-         sm:p-6 lg:p-8"
->
-  <div class="mx-auto max-w-7xl">
-
-    <header
-      class="mb-6 flex flex-col gap-4
-             sm:flex-row sm:items-center sm:justify-between"
-    >
-
-      <div class="flex items-center gap-3">
-        <div
-          class="flex h-12 w-12 shrink-0 items-center justify-center
-                 rounded-2xl bg-primary/10 text-primary"
-          aria-hidden="true"
-        >
-          <i class="fa-solid fa-car-side text-xl"></i>
+          <i class="fa-solid fa-car-side text-2xl"></i>
         </div>
 
         <div class="min-w-0">
-          <h1
-            class="text-2xl font-bold leading-tight
-                   text-base-content"
-          >
+          <h1 class="text-2xl font-bold
+                   leading-tight text-base-content">
+
             Unidades de patrullaje
           </h1>
 
-          <p
-            class="mt-1 max-w-2xl text-sm leading-relaxed
-                   text-base-content/60"
-          >
-            Registre y administre las unidades disponibles para
-            su asignación en las operaciones de patrullaje.
+          <p class="mt-1 max-w-2xl
+                   text-sm leading-relaxed
+                   text-base-content/60">
+
+            Registre y administre las unidades disponibles
+            para las operaciones de patrullaje.
           </p>
         </div>
       </div>
-
-
-      <button
-        type="button"
-        class="btn btn-primary min-h-11 w-full gap-2
-               rounded-xl sm:w-auto"
-        (click)="abrirModal()"
-      >
-        <i class="fa-solid fa-plus"></i>
-        Nueva unidad
-      </button>
     </header>
 
+    <!-- ================================================= -->
+    <!-- FILTROS -->
+    <!-- ================================================= -->
+    <section class="mb-6 overflow-hidden rounded-2xl
+         border border-base-300
+         bg-base-100 shadow-sm">
 
-    <section
-      class="mb-6 rounded-2xl border border-base-300
-             bg-base-100 p-4 shadow-sm sm:p-5"
-      aria-label="Filtros de unidades"
-    >
-      <div
-        class="flex flex-col gap-4
-               lg:flex-row lg:items-end lg:justify-between"
-      >
-        <div
-          class="grid w-full grid-cols-1 gap-4
-                 md:grid-cols-2 lg:max-w-2xl"
-        >
+      <div class="grid grid-cols-1
+           lg:grid-cols-[minmax(0,1fr)_170px]">
 
-          <label class="form-control w-full">
-            <span
-              class="mb-1.5 text-xs font-semibold uppercase
-                     tracking-wide text-base-content/50"
-            >
-              Placa
-            </span>
+        <!-- =============================================== -->
+        <!-- CAMPOS DE FILTRO -->
+        <!-- =============================================== -->
+        <div class="p-4 sm:p-5">
 
-            <div class="relative">
-              <i
-                class="fa-solid fa-magnifying-glass
-                       pointer-events-none absolute left-3.5 top-1/2
-                       -translate-y-1/2 text-sm text-base-content/40"
-                aria-hidden="true"
-              ></i>
-
-              <input
-                type="search"
-                class="input input-bordered h-11 w-full rounded-xl
-                       bg-base-100 pl-10 pr-4 text-sm
-                       focus:outline-none focus:ring-2
-                       focus:ring-primary/30"
-                placeholder="Buscar por placa"
-                autocomplete="off"
-                aria-label="Buscar unidad por placa"
-                [(ngModel)]="placaBusqueda"
-                (ngModelChange)="onSearchChange()"
-              />
-            </div>
-          </label>
+          <div class="grid grid-cols-1 gap-4
+               sm:grid-cols-2
+               xl:grid-cols-[minmax(240px,1.4fr)_minmax(180px,1fr)_minmax(190px,1fr)_auto]">
 
 
-          <label class="form-control w-full">
-            <span
-              class="mb-1.5 text-xs font-semibold uppercase
-                     tracking-wide text-base-content/50"
-            >
-              Descripción
-            </span>
+            <!-- Buscar por placa -->
+            <label class="form-control w-full">
+              <span class="mb-1.5 text-xs font-semibold
+                   uppercase tracking-wide
+                   text-base-content/60">
+                Placa
+              </span>
 
-            <div class="relative">
-              <i
-                class="fa-solid fa-magnifying-glass
-                       pointer-events-none absolute left-3.5 top-1/2
-                       -translate-y-1/2 text-sm text-base-content/40"
-                aria-hidden="true"
-              ></i>
+              <div class="relative">
+                <i class="fa-solid fa-magnifying-glass
+                     pointer-events-none absolute
+                     left-3.5 top-1/2
+                     -translate-y-1/2
+                     text-base-content/35">
+                </i>
 
-              <input
-                type="search"
-                class="input input-bordered h-11 w-full rounded-xl
-                       bg-base-100 pl-10 pr-4 text-sm
-                       focus:outline-none focus:ring-2
-                       focus:ring-primary/30"
-                placeholder="Buscar por descripción"
-                autocomplete="off"
-                aria-label="Buscar unidad por descripción"
-                [(ngModel)]="descripcionBusqueda"
-                (ngModelChange)="onSearchChange()"
-              />
-            </div>
-          </label>
+                <input type="text" class="input input-bordered
+                     h-11 w-full rounded-xl
+                     bg-base-100 pl-10 pr-4
+                     focus:outline-none
+                     focus:ring-2
+                     focus:ring-primary/30" placeholder="Buscar por placa" autocomplete="off"
+                  [(ngModel)]="placaBusqueda" (ngModelChange)="onSearchChange()" />
+              </div>
+            </label>
+
+            <!-- Buscar por descripción -->
+
+            <label class="form-control w-full">
+              <span class="mb-1.5 text-xs font-semibold
+                   uppercase tracking-wide
+                   text-base-content/60">
+
+                Descripción
+              </span>
+
+              <div class="relative">
+                <i class="fa-solid fa-magnifying-glass
+                     pointer-events-none absolute
+                     left-3.5 top-1/2
+                     -translate-y-1/2
+                     text-base-content/35">
+                </i>
+
+                <input type="text" class="input input-bordered
+                     h-11 w-full rounded-xl
+                     bg-base-100 pl-10 pr-4
+                     focus:outline-none
+                     focus:ring-2
+                     focus:ring-primary/30" placeholder="Buscar por descripción" autocomplete="off"
+                  [(ngModel)]="descripcionBusqueda" (ngModelChange)="onSearchChange()" />
+              </div>
+            </label>
+
+          </div>
         </div>
 
+        <!-- =============================================== -->
+        <!-- ILUSTRACIÓN DE BÚSQUEDA -->
+        <!-- =============================================== -->
+        <div class="hidden items-center justify-center border-base-300 px-5 lg:flex">
 
-        <div
-          class="flex items-center gap-2 text-sm
-                 text-base-content/60"
-        >
-          <i
-            class="fa-solid fa-list-check text-primary"
-            aria-hidden="true"
-          ></i>
-
-          <span>
-            {{ totalItems }}
-            {{ totalItems === 1 ? 'unidad encontrada' : 'unidades encontradas' }}
-          </span>
+          <img src="assets/img/search.png" alt="" aria-hidden="true" class="h-32 w-32
+               select-none object-contain
+               opacity-90
+               drop-shadow-sm" draggable="false" />
         </div>
       </div>
     </section>
 
+    <!-- ================================================= -->
+    <!-- MODALES -->
+    <!-- ================================================= -->
 
-    <unidad-form
-      [mostrarModal]="mostrarModal"
-      [modoEdicion]="modoEdicion"
-      [unidadSeleccionado]="unidadSeleccionado"
-      (modalCerrado)="cerrarModal()"
-      (unidadCreado)="getUnidadesPaginado()"
-    >
+    <unidad-form [mostrarModal]="mostrarModal" [modoEdicion]="modoEdicion" [unidadSeleccionado]="unidadSeleccionado"
+      (modalCerrado)="cerrarModal()" (unidadCreado)="getUnidadesPaginado()">
     </unidad-form>
 
+    <!-- Agrega aquí unidad-info cuando esté implementado. -->
 
-    <section
-      class="overflow-hidden rounded-2xl border
-             border-base-300 bg-base-100 shadow-sm"
-      aria-label="Listado de unidades de patrullaje"
-    >
+    <!-- ================================================= -->
+    <!-- TABLA -->
+    <!-- ================================================= -->
 
-      <div
-        class="flex flex-col gap-4 border-b border-base-300
-               p-4 sm:flex-row sm:items-center
-               sm:justify-between sm:p-5"
-      >
-        <div>
-          <h2 class="font-semibold text-base-content">
-            Unidades registradas
-          </h2>
+    <section class="overflow-hidden rounded-2xl
+             border border-base-300
+             bg-base-100 shadow-sm">
 
-          <p class="mt-0.5 text-sm text-base-content/50">
-            Consulte, edite o elimine las unidades del sistema.
-          </p>
-        </div>
+      <!-- Cabecera de tabla -->
 
+      <div class="flex flex-col gap-4
+               border-b border-base-300
+               px-4 py-4
+               sm:flex-row
+               sm:items-center
+               sm:justify-between
+               sm:px-5">
 
-        <label class="flex items-center gap-2 text-sm">
-          <span class="whitespace-nowrap text-base-content/60">
+        <!-- Selector de cantidad -->
+
+        <div class="flex w-full items-center
+                 justify-between gap-3
+                 text-sm text-base-content/70
+                 sm:w-auto sm:justify-start">
+
+          <label for="unidades-page-size" class="whitespace-nowrap">
+
             Mostrar
-          </span>
+          </label>
 
-          <select
-            class="select select-bordered select-sm
-                   rounded-lg bg-base-100"
-            aria-label="Cantidad de unidades por página"
-            [(ngModel)]="limit"
-            (change)="cambiarLimite()"
-          >
-            @for (size of pageSizeOptions; track size) {
-              <option [ngValue]="size">
-                {{ size }}
-              </option>
+          <select id="unidades-page-size" class="select select-bordered
+                   select-sm w-auto" [(ngModel)]="limit" (change)="cambiarLimite()">
+
+            @for (
+            size of pageSizeOptions;
+            track size
+            ) {
+            <option [ngValue]="size">
+              {{ size }}
+            </option>
             }
           </select>
 
-          <span class="hidden whitespace-nowrap text-base-content/60 sm:inline">
-            por página
+          <span class="whitespace-nowrap">
+            ítems por página
           </span>
-        </label>
+        </div>
+
+        <!-- Botón crear -->
+
+        <div class="flex w-full items-center
+                 justify-end sm:w-auto">
+
+          <button type="button" class="btn btn-primary
+                  min-h-10 w-full gap-2
+                  rounded-xl border-none
+                hover:text-white bg-info hover:bg-primary
+                  sm:w-auto sm:min-w-36" (click)="abrirModal()">
+
+            <i class="fa-solid fa-plus"></i>
+
+            Unidad
+          </button>
+        </div>
       </div>
 
+      <!-- Tabla con scroll horizontal -->
 
-      <div class="overflow-x-auto">
-        <table class="table w-full">
-          <thead class="bg-base-200/80">
-            <tr class="text-xs uppercase tracking-wide text-base-content/60">
-              <th class="w-16">#</th>
+      <div class="w-full overflow-x-auto">
+        <table class="table min-w-262.5 w-full">
+
+          <thead class="bg-base-300/90">
+            <tr class="text-xs uppercase
+                     tracking-wide
+                     text-base-content/60">
+
+              <th class="w-16 text-center">
+                N.°
+              </th>
+
               <th>Código</th>
               <th>Descripción</th>
               <th>Tipo</th>
               <th>Placa</th>
-              <th>Estado</th>
+              <th class="text-center">Estado</th>
               <th>Actualización</th>
               <th class="text-center">Acciones</th>
             </tr>
@@ -460,225 +235,260 @@
 
           <tbody>
 
-            @if (isLoading) {
-              <tr>
-                <td colspan="8">
-                  <div
-                    class="flex min-h-56 flex-col items-center
-                           justify-center gap-3 text-center"
-                  >
-                    <span
-                      class="loading loading-spinner
-                             loading-md text-primary"
-                    ></span>
+            <!-- Loading -->
 
-                    <p class="text-sm text-base-content/60">
-                      Cargando unidades de patrullaje...
-                    </p>
-                  </div>
-                </td>
-              </tr>
+            @if (isLoading) {
+            <tr>
+              <td colspan="8" class="py-14 text-center">
+
+                <div class="flex flex-col
+                           items-center justify-center
+                           gap-3">
+
+                  <span class="loading loading-spinner
+                             loading-md text-primary">
+                  </span>
+
+                  <span class="text-sm
+                             text-base-content/60">
+
+                    Cargando unidades...
+                  </span>
+                </div>
+              </td>
+            </tr>
             }
 
+            <!-- Registros -->
 
             @if (!isLoading) {
-              @for (unidad of unidades; track unidad.id; let i = $index) {
-                <tr
-                  class="border-base-200 transition-colors
-                         hover:bg-base-200/50"
-                >
+            @for (
+            unidad of unidades;
+            track unidad.id;
+            let i = $index
+            ) {
+            <tr class="border-base-200
+                         transition-colors
+                         hover:bg-base-200/50">
 
-                  <td class="font-medium text-base-content/50">
-                    {{ ((page - 1) * limit) + i + 1 }}
-                  </td>
+              <!-- Numeración paginada -->
 
+              <td class="text-center text-base-content/60">
+                {{ ((page - 1) * limit) + i + 1 }}
+              </td>
 
-                  <td>
-                    <span class="font-semibold text-base-content">
-                      {{ unidad.codigo }}
-                    </span>
-                  </td>
+              <!-- Código -->
 
+              <td>
+                <span class="badge badge-ghost
+                             whitespace-nowrap
+                             font-semibold">
 
-                  <td>
-                    <div class="max-w-xs">
-                      <p
-                        class="truncate text-sm"
-                        [title]="unidad.descripcion || 'Sin descripción'"
-                      >
-                        {{ unidad.descripcion || 'Sin descripción' }}
-                      </p>
-                    </div>
-                  </td>
+                  {{ unidad.codigo || '—' }}
+                </span>
+              </td>
 
+              <!-- Descripción -->
 
-                  <td>
-                    <span
-                      class="badge badge-ghost whitespace-nowrap
-                             font-medium"
-                    >
-                      {{ unidad.tipo }}
-                    </span>
-                  </td>
+              <td>
+                <span class="block max-w-70
+                             truncate font-medium
+                             text-base-content" [title]="unidad.descripcion || ''">
 
+                  {{ unidad.descripcion || 'Sin descripción' }}
+                </span>
+              </td>
 
-                  <td>
-                    <span
-                      class="whitespace-nowrap font-mono text-sm
-                             font-semibold uppercase"
-                    >
-                      {{ unidad.placa || '—' }}
-                    </span>
-                  </td>
+              <!-- Tipo -->
+              <td>
+                <span class="whitespace-nowrap text-sm">
+                  {{ unidad.tipo || '—' }}
+                </span>
+              </td>
 
+              <!-- Placa -->
+              <td>
+                <div class="inline-flex items-center gap-2 whitespace-nowrap">
+                  <i class="fa-solid text-base-content/40" [ngClass]="getIconoUnidad(unidad.tipo)" aria-hidden="true">
+                  </i>
 
-                  <td>
-                    <span
-                      class="badge badge-soft whitespace-nowrap
-                             font-semibold"
-                      [ngClass]="getEstadoInfo(unidad.estado).class"
-                    >
-                      {{ getEstadoInfo(unidad.estado).label }}
-                    </span>
-                  </td>
+                  <span class="font-mono font-semibold">
+                    {{ unidad.placa || 'Sin placa' }}
+                  </span>
+                </div>
+              </td>
 
+              <!-- Estado -->
 
-                  <td>
-                    <span class="whitespace-nowrap text-sm text-base-content/60">
-                      {{ unidad.updatedAt | date: 'dd/MM/yyyy, hh:mm a' }}
-                    </span>
-                  </td>
+              <td class="text-center">
+                <span class="badge badge-soft
+                             whitespace-nowrap
+                             font-semibold" [ngClass]="
+                        getEstadoInfo(unidad.estado).class
+                      ">
 
+                  {{ getEstadoInfo(unidad.estado).label }}
+                </span>
+              </td>
 
-                  <td>
-                    <div class="flex items-center justify-center gap-1">
+              <!-- Actualización -->
 
-                      <button
-                        type="button"
-                        class="btn btn-ghost btn-square btn-sm
-                               text-info"
-                        title="Ver unidad"
-                        aria-label="Ver unidad"
-                        (click)="verUnidad(unidad)"
-                      >
-                        <i class="fa-solid fa-eye"></i>
-                      </button>
+              <td class="whitespace-nowrap text-sm">
+                {{ unidad.updatedAt | date: 'dd/MM/yyyy, hh:mm a' }}
+              </td>
 
+              <!-- Acciones -->
 
-                      <button
-                        type="button"
-                        class="btn btn-ghost btn-square btn-sm
-                               text-warning"
-                        title="Editar unidad"
-                        aria-label="Editar unidad"
-                        (click)="editarUnidad(unidad)"
-                      >
-                        <i class="fa-solid fa-pen-to-square"></i>
-                      </button>
+              <td>
+                <div class="flex items-center justify-center gap-0.5">
 
+                  <!-- Ver -->
+                  <div class="tooltip tooltip-left" data-tip="Ver detalles">
+                    <button type="button" class="btn btn-ghost btn-circle btn-sm" (click)="verUnidad(unidad)"
+                      aria-label="Ver detalles de la unidad">
 
-                      <button
-                        type="button"
-                        class="btn btn-ghost btn-square btn-sm
-                               text-error"
-                        title="Eliminar unidad"
-                        aria-label="Eliminar unidad"
-                        (click)="eliminarUnidad(unidad)"
-                      >
-                        <i class="fa-solid fa-trash-can"></i>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              }
+                      <i class="fa-solid fa-eye"></i>
+                    </button>
+                  </div>
 
+                  <!-- Editar -->
+                  <div class="tooltip tooltip-left" data-tip="Editar unidad">
+                    <button type="button" class="btn btn-ghost btn-circle btn-sm" (click)="editarUnidad(unidad)"
+                      aria-label="Editar unidad">
+                      <i class="fa-solid fa-pencil"></i>
+                    </button>
+                  </div>
 
-              @if (unidades.length === 0) {
-                <tr>
-                  <td colspan="8">
-                    <div
-                      class="flex min-h-72 flex-col items-center
-                             justify-center px-6 py-10 text-center"
-                    >
-                      <div
-                        class="mb-4 flex h-16 w-16 items-center
-                               justify-center rounded-2xl
-                               bg-base-200 text-base-content/40"
-                      >
-                        <i class="fa-solid fa-car-side text-2xl"></i>
-                      </div>
+                  <!-- Eliminar -->
+                  <div class="tooltip tooltip-left" data-tip="Eliminar unidad">
+                    <button type="button" class="btn btn-ghost btn-circle btn-sm" (click)="eliminarUnidad(unidad)"
+                      aria-label="Eliminar unidad">
+                      <i class="fa-solid fa-trash"></i>
+                    </button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            }
 
-                      <h3 class="text-lg font-semibold text-base-content">
-                        No hay unidades registradas
-                      </h3>
+            <!-- Estado vacío -->
 
-                      <p
-                        class="mt-2 max-w-md text-sm leading-relaxed
-                               text-base-content/60"
-                      >
-                        Registre una unidad de patrullaje o modifique
-                        los criterios de búsqueda para encontrar resultados.
-                      </p>
+            @if (unidades.length === 0) {
+            <tr>
+              <td colspan="8" class="py-12 text-center">
 
-                      <button
-                        type="button"
-                        class="btn btn-primary btn-sm mt-5 rounded-lg"
-                        (click)="abrirModal()"
-                      >
-                        <i class="fa-solid fa-plus"></i>
-                        Registrar unidad
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              }
+                <div class="mx-auto flex max-w-md
+                             flex-col items-center
+                             justify-center">
+
+                  <img src="assets/img/empty-folder.png" alt="" class="mb-5 h-32 w-32
+                               object-contain opacity-70" />
+
+                  <h3 class="text-lg font-semibold
+                               text-base-content">
+
+                    No hay unidades registradas
+                  </h3>
+
+                  <p class="mt-1 text-sm
+                               text-base-content/55">
+
+                    Cuando se registren nuevas unidades,
+                    aparecerán aquí automáticamente.
+                  </p>
+                </div>
+              </td>
+            </tr>
+            }
             }
           </tbody>
         </table>
       </div>
 
+      <!-- ================================================= -->
+      <!-- PAGINACIÓN -->
+      <!-- ================================================= -->
 
-      @if (!isLoading && totalItems > 0) {
-        <footer
-          class="flex flex-col gap-3 border-t border-base-300
-                 bg-base-200/60 p-4
-                 sm:flex-row sm:items-center sm:justify-between"
-        >
-          <p class="text-center text-sm text-base-content/60 sm:text-left">
-            Página
-            <span class="font-semibold text-base-content">
-              {{ page }}
-            </span>
-            de
-            <span class="font-semibold text-base-content">
-              {{ totalPages }}
-            </span>
-            · {{ totalItems }} registros
+      <footer class="flex flex-col gap-4
+               border-t border-base-300
+               bg-base-200/50
+               px-4 py-4
+               sm:flex-row
+               sm:items-center
+               sm:justify-between
+               sm:px-5">
+
+        <!-- Resumen -->
+
+        <div class="text-center sm:text-left">
+          <h2 class="font-semibold text-base-content">
+            Unidades registradas
+          </h2>
+
+          <p class="mt-0.5 text-sm
+                   text-base-content/55">
+
+            {{ totalItems }}
+            {{ totalItems === 1 ? 'unidad' : 'unidades' }}
+            encontradas
           </p>
+        </div>
 
-          <div class="flex justify-center gap-2 sm:justify-end">
-            <button
-              type="button"
-              class="btn btn-sm rounded-lg"
-              [disabled]="page <= 1"
-              (click)="cambiarPagina(page - 1)"
-            >
-              <i class="fa-solid fa-chevron-left text-xs"></i>
+        <!-- Controles -->
+
+        <div class="flex w-full flex-col
+                 items-center gap-3
+                 text-sm text-base-content/70
+                 sm:w-auto sm:flex-row">
+
+          <span class="whitespace-nowrap">
+            @if (totalPages > 0) {
+            Página
+
+            <strong class="text-base-content">
+              {{ page }}
+            </strong>
+
+            de
+
+            <strong class="text-base-content">
+              {{ totalPages }}
+            </strong>
+            } @else {
+            Sin páginas disponibles
+            }
+          </span>
+
+          <div class="grid w-full grid-cols-2
+                   gap-2 sm:flex sm:w-auto">
+
+            <button type="button" class="btn btn-sm w-full
+                     gap-2 rounded-lg
+                     sm:w-auto" [disabled]="
+                isLoading ||
+                page <= 1
+              " (click)="cambiarPagina(page - 1)">
+
+              <i class="fa-solid fa-chevron-left"></i>
+
               Anterior
             </button>
 
-            <button
-              type="button"
-              class="btn btn-sm rounded-lg"
-              [disabled]="page >= totalPages"
-              (click)="cambiarPagina(page + 1)"
-            >
+            <button type="button" class="btn btn-sm w-full
+                     gap-2 rounded-lg
+                     sm:w-auto" [disabled]="
+                isLoading ||
+                totalPages === 0 ||
+                page >= totalPages
+              " (click)="cambiarPagina(page + 1)">
+
               Siguiente
-              <i class="fa-solid fa-chevron-right text-xs"></i>
+
+              <i class="fa-solid fa-chevron-right"></i>
             </button>
           </div>
-        </footer>
-      }
+        </div>
+      </footer>
     </section>
   </div>
-</div> -->
+</div>

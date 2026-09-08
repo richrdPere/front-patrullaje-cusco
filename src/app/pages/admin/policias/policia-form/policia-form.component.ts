@@ -7,12 +7,14 @@ import Swal from 'sweetalert2';
 import { UppercaseDirective } from 'src/app/pages/shared/directives/uppercase.directive';
 
 // Interfaces
-import { Policia } from 'src/app/interfaces/policia/IPolicia';
-import { CrearPoliciaResponse, UpdatePoliciaResponse } from 'src/app/interfaces/policia/policia_response';
+import { PoliciaData } from 'src/app/interfaces/policia/get-policia-paginated.model';
 
 // Services
-import { PoliciasService } from 'src/app/services/policias.service';
+import { PoliciasService } from 'src/app/services/usuarios/policias.service';
 import { UbigeoService } from 'src/app/services/ubigeo.service';
+import { updateUsuarioRequest } from 'src/app/interfaces/usuarios/update-usuario.model';
+import { UpdatePoliciaRequest, UpdatePoliciaResponse } from 'src/app/interfaces/policia/update-policia.model';
+import { CreartePoliciaRequest, CreatePoliciaResponse } from '../../../../interfaces/policia/create-policia.model';
 
 
 @Component({
@@ -25,7 +27,7 @@ export class PoliciaFormComponent implements OnInit, OnChanges {
 
   @Input() mostrarModal = false;
   @Input() modoEdicion = false;
-  @Input() policiaSeleccionado: Policia | null = null;
+  @Input() policiaSeleccionado: PoliciaData | null = null;
 
   @Output() modalCerrado = new EventEmitter<void>();
   @Output() policiaCreado = new EventEmitter<void>();
@@ -79,6 +81,95 @@ export class PoliciaFormComponent implements OnInit, OnChanges {
     this.listenUbigeoChanges();
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    //  Si el formulario aún no está creado, salir
+    if (!this.formPolicia) return;
+
+    // EDITAR
+    if (changes['policiaSeleccionado'] && this.policiaSeleccionado) {
+      this.modoEdicion = true;
+
+      const poli = this.policiaSeleccionado;
+
+      console.log("POLICIA SELECCIONADO: ", poli);
+
+      // const depUbigeo = this.mapNombreToUbigeo(poli.persona.departamento, 'dep');
+      // const provUbigeo = this.mapNombreToUbigeo(poli.persona.provincia, 'prov');
+      // const distUbigeo = this.mapNombreToUbigeo(poli.persona.distrito, 'dist');
+
+      // Cargar cascada
+      // this.provincias = depUbigeo
+      //   ? this.ubigeoService.getProvincias(depUbigeo)
+      //   : [];
+
+      // this.distritos = (depUbigeo && provUbigeo)
+      //   ? this.ubigeoService.getDistritos(depUbigeo, provUbigeo)
+      //   : [];
+
+      this.formPolicia.patchValue({
+        id: poli.id,
+        nombres: poli.persona.nombres,
+        apellidos: poli.persona.apellidos,
+        telefono: poli.persona.telefono,
+        documento_identidad: poli.persona.documento_identidad,
+        direccion: poli.persona.direccion,
+        // departamento: depUbigeo,
+        // provincia: provUbigeo,
+        // distrito: distUbigeo,
+        departamento: poli.persona.departamento,
+        provincia: poli.persona.provincia,
+        distrito: poli.persona.distrito,
+        grado: poli.grado,
+        comisaria: poli.comisaria,
+        codigo_institucional: poli.codigo_institucional,
+      });
+    }
+
+    // CREAR / CERRAR MODAL
+    if (changes['mostrarModal'] && !this.mostrarModal) {
+      this.formPolicia.reset();
+      this.modoEdicion = false;
+    }
+  }
+
+  // ====================================
+  // Inicializar formulario
+  // ====================================
+  initFormPolicias() {
+    this.formPolicia = this.fb.group({
+      id: [null],
+      nombres: ['', Validators.required],
+      apellidos: ['', Validators.required],
+      documento_identidad: [
+        '',
+        [
+          Validators.required,
+          Validators.pattern('^[0-9]+$'),
+        ],
+      ],
+      telefono: [
+        '',
+        [
+          Validators.required,
+          Validators.pattern('^[0-9]+$'),
+        ],
+      ],
+      direccion: ['', Validators.required],
+      departamento: [null, Validators.required],
+      provincia: [null, Validators.required],
+      distrito: [null, Validators.required],
+      // Campos opcionales (dependen del rol)
+
+      grado: [null, Validators.required],
+      comisaria: ['', Validators.required],
+      codigo_institucional: ['', Validators.required],
+
+    });
+  }
+
+  // ====================================
+  // Cargar ubigeo
+  // ====================================
   initUbigeo() {
     this.ubigeoService.loadData().subscribe(data => {
       this.departamentos = data;
@@ -116,8 +207,6 @@ export class PoliciaFormComponent implements OnInit, OnChanges {
     });
   }
 
-
-
   onDepartamentoChange(depUbigeo: string) {
     this.provincias = this.ubigeoService.getProvincias(depUbigeo);
     this.distritos = [];
@@ -127,111 +216,38 @@ export class PoliciaFormComponent implements OnInit, OnChanges {
     this.distritos = this.ubigeoService.getDistritos(depUbigeo, provUbigeo);
   }
 
-
-  // ====================================
-  // Formulario
-  // ====================================
-  initFormPolicias() {
-    this.formPolicia = this.fb.group({
-      id: [null],
-      nombres: ['', Validators.required],
-      apellidos: ['', Validators.required],
-      documento_identidad: [
-        '',
-        [
-          Validators.required,
-          Validators.pattern('^[0-9]+$'),
-        ],
-      ],
-      telefono: [
-        '',
-        [
-          Validators.required,
-          Validators.pattern('^[0-9]+$'),
-        ],
-      ],
-      direccion: ['', Validators.required],
-      departamento: [null, Validators.required],
-      provincia: [null, Validators.required],
-      distrito: [null, Validators.required],
-      // Campos opcionales (dependen del rol)
-
-      grado: [null, Validators.required],
-      comisaria: ['', Validators.required],
-      codigo_institucional: ['', Validators.required],
-
-    });
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    //  Si el formulario aún no está creado, salir
-    if (!this.formPolicia) return;
-
-    // EDITAR
-    if (changes['policiaSeleccionado'] && this.policiaSeleccionado) {
-      this.modoEdicion = true;
-
-      const poli = this.policiaSeleccionado;
-
-      const depUbigeo = this.mapNombreToUbigeo(poli.persona?.departamento, 'dep');
-      const provUbigeo = this.mapNombreToUbigeo(poli.persona?.provincia, 'prov');
-      const distUbigeo = this.mapNombreToUbigeo(poli.persona?.distrito, 'dist');
-
-      // Cargar cascada
-      this.provincias = depUbigeo
-        ? this.ubigeoService.getProvincias(depUbigeo)
-        : [];
-
-      this.distritos = (depUbigeo && provUbigeo)
-        ? this.ubigeoService.getDistritos(depUbigeo, provUbigeo)
-        : [];
-
-      this.formPolicia.patchValue({
-        id: poli.id,
-        nombres: poli.persona?.nombres ?? '',
-        apellidos: poli.persona?.apellidos ?? '',
-        telefono: poli.persona?.telefono ?? '',
-        documento_identidad: poli.persona?.documento_identidad ?? '',
-        direccion: poli.persona?.direccion ?? '',
-        departamento: depUbigeo,
-        provincia: provUbigeo,
-        distrito: distUbigeo,
-        grado: poli.grado,
-        comisaria: poli.comisaria,
-        codigo_institucional: poli.codigo_institucional,
-      });
-    }
-
-    // CREAR / CERRAR MODAL
-    if (changes['mostrarModal'] && !this.mostrarModal) {
-      this.formPolicia.reset();
-      this.modoEdicion = false;
-    }
-  }
-
   // ====================================
   // Methods
   // ====================================
   crearOEditarPolicia() {
+
+    if (this.formPolicia.invalid) {
+      this.formPolicia.markAllAsTouched();
+      return;
+    }
+
     const formValue = this.formPolicia.value;
 
     const dep = this.ubigeoService.findByUbigeo(formValue.departamento);
     const prov = this.ubigeoService.findByUbigeo(formValue.provincia);
     const dist = this.ubigeoService.findByUbigeo(formValue.distrito);
 
+    // PAYLOAD COMÚN para CREAR y EDITAR
     const payload = {
       nombres: formValue.nombres,
       apellidos: formValue.apellidos,
       documento_identidad: formValue.documento_identidad,
       telefono: formValue.telefono,
       direccion: formValue.direccion,
-      departamento: dep.departamento?.departamento,
-      provincia: prov.provincia?.nombre,
-      distrito: dist.distrito?.nombre,
+      departamento: formValue.departamento,
+      provincia: formValue.provincia,
+      distrito: formValue.distrito,
       grado: formValue.grado,
       comisaria: formValue.comisaria,
       codigo_institucional: formValue.codigo_institucional,
     };
+
+    this.isLoading = true;
 
     // ============================
     // MODO EDICIÓN
@@ -260,7 +276,7 @@ export class PoliciaFormComponent implements OnInit, OnChanges {
     // MODO CREACIÓN
     // ============================
     this.policiasService.newPolicia(payload).subscribe({
-      next: (resp: CrearPoliciaResponse) => {
+      next: (resp: CreatePoliciaResponse) => {
         Swal.fire({
           icon: 'success',
           title: 'Policía creado correctamente',
@@ -303,7 +319,7 @@ export class PoliciaFormComponent implements OnInit, OnChanges {
     return control?.hasValidator(Validators.required) ?? false;
   }
 
-  mapNombreToUbigeo(nombre: string | undefined, tipo: 'dep' | 'prov' | 'dist'): string | null {
+  mapNombreToUbigeo(nombre: string | null, tipo: 'dep' | 'prov' | 'dist'): string | null {
     for (const dep of this.ubigeoService.getDepartamentos()) {
 
       if (tipo === 'dep' && dep.departamento === nombre) {

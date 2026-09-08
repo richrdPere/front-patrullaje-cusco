@@ -1,217 +1,415 @@
-<div class="p-6 min-h-full bg-base-300 text-base-content overflow-auto transition-colors duration-300">
+<div
+  class="min-h-full min-w-0 bg-base-300 px-4 py-5 text-base-content transition-colors duration-300 sm:px-6 sm:py-6 lg:px-8">
 
-  <!-- Titulo -->
-  <!-- <h1 class="text-2xl font-bold mb-5 text-base-content ">Gestión de Policias</h1> -->
+  <!-- CONTENEDOR DEL DASHBOARD -->
+  <div class="mx-auto w-full max-w-500">
 
-  <!-- ENCABEZADO -->
-  <header class="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <!-- Titulo -->
+    <!-- <h1 class="text-2xl font-bold mb-5 text-base-content ">Gestión de Policias</h1> -->
 
-    <!-- ÍCONO + INFORMACIÓN -->
-    <div class="flex items-center gap-3">
-      <div class="flex h-12 w-12 shrink-0 items-center justify-center
+    <!-- ================================================= -->
+    <!-- ENCABEZADO -->
+    <!-- ================================================= -->
+    <header class="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+      <!-- ÍCONO + INFORMACIÓN -->
+      <div class="flex items-center gap-3">
+        <div class="flex h-12 w-12 shrink-0 items-center justify-center
              rounded-2xl bg-primary/10 text-primary" aria-hidden="true">
-        <i class="fa-solid fa-user-shield text-2xl"></i>
-      </div>
+          <i class="fa-solid fa-user-shield text-2xl"></i>
+        </div>
 
-      <div class="min-w-0">
-        <h1 class="text-2xl font-bold leading-tight
+        <div class="min-w-0">
+          <h1 class="text-2xl font-bold leading-tight
                text-base-content">
-          Policías registrados
-        </h1>
+            Policías registrados
+          </h1>
 
-        <p class="mt-1 max-w-2xl text-sm leading-relaxed
+          <p class="mt-1 max-w-2xl text-sm leading-relaxed
                text-base-content/60">
-          Administre al personal policial disponible para su
-          asignación y participación en los patrullajes conjuntos.
-        </p>
-      </div>
-    </div>
-  </header>
-
-
-  <!-- Header -->
-  <div class="p-4 mb-7 card bg-base-100 shadow-md">
-
-    <!-- CONTENEDOR PRINCIPAL -->
-    <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 py-4">
-
-      <!--  BUSCADOR -->
-      <div class="flex flex-col md:flex-row gap-4 items-center w-full md:w-auto">
-
-        <!-- Filtro NOMBRE Y APELLIDO -->
-        <div class="relative w-full md:max-w-xs">
-          <input type="text" class="input input-bordered w-full bg-base-100 rounded-md h-11 pl-10 pr-4 text-sm
-                 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Buscar por nombres"
-            autocomplete="off" [(ngModel)]="nombreBusqueda" (ngModelChange)="onSearchChange()" appUppercase />
-          <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-        </div>
-
-        <!-- Input DNI -->
-        <div class="relative w-full md:max-w-xs">
-          <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="8" class="input input-bordered w-full bg-base-100 rounded-md h-11 pl-10 pr-4 text-sm
-                 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Buscar por N° DNI"
-            autocomplete="off" [(ngModel)]="dniBusqueda" (keypress)="soloNumeros($event)"
-            (ngModelChange)="onSearchChange()" />
-          <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            Administre personal policial disponible para su
+            asignación y participación en los patrullajes conjuntos.
+          </p>
         </div>
       </div>
-    </div>
+    </header>
 
-  </div>
+    <!-- ================================================= -->
+    <!-- FILTROS -->
+    <!-- ================================================= -->
+    <section class="mb-6 overflow-hidden rounded-2xl
+         border border-base-300
+         bg-base-100 shadow-sm">
 
+      <div class="grid grid-cols-1
+           lg:grid-cols-[minmax(0,1fr)_170px]">
 
-  <!-- Modal Crear Policia -->
-  <policia-form [mostrarModal]="mostrarModal" [modoEdicion]="modoEdicion" [policiaSeleccionado]="policiaSeleccionado"
-    (modalCerrado)="cerrarModal()" (policiaCreado)="getPoliciasPaginated()"></policia-form>
+        <!-- =============================================== -->
+        <!-- CAMPOS DE FILTRO -->
+        <!-- =============================================== -->
+        <div class="p-4 sm:p-5">
 
-  <!-- Modal Ver Policia -->
-  <policia-info [mostrarModal]="mostrarModalInfo" [policia_id]="policia_id"
-    (modalCerrado)="cerrarModalInfo()"></policia-info>
+          <div class="grid grid-cols-1 gap-4
+               sm:grid-cols-2
+               xl:grid-cols-[minmax(240px,1.4fr)_minmax(180px,1fr)_minmax(190px,1fr)_auto]">
 
-  <!-- Tabla -->
-  <div class="p-6 min-h-auto bg-base-100 rounded-xl shadow-xl">
-    <div class="overflow-x-auto text-base-content border border-base-300/90 shadow rounded-lg">
-      <!-- Header acciones -->
-      <div class="flex justify-between items-center p-5">
+            <!-- Buscar por nombre -->
+            <label class="form-control w-full">
+              <span class="mb-1.5 text-xs font-semibold
+                   uppercase tracking-wide
+                   text-base-content/60">
+
+                Nombres o apellidos
+              </span>
+
+              <div class="relative">
+                <i class="fa-solid fa-magnifying-glass
+                     pointer-events-none absolute
+                     left-3.5 top-1/2
+                     -translate-y-1/2
+                     text-base-content/35">
+                </i>
+
+                <input type="text" class="input input-bordered
+                     h-11 w-full rounded-xl
+                     bg-base-100 pl-10 pr-4
+                     focus:outline-none
+                     focus:ring-2
+                     focus:ring-primary/30" placeholder="Buscar usuario" autocomplete="off"
+                  [(ngModel)]="nombreBusqueda" (ngModelChange)="onSearchChange()" appUppercase />
+              </div>
+            </label>
+
+            <!-- Buscar por DNI -->
+
+            <label class="form-control w-full">
+              <span class="mb-1.5 text-xs font-semibold
+                   uppercase tracking-wide
+                   text-base-content/60">
+
+                Documento
+              </span>
+
+              <div class="relative">
+                <i class="fa-regular fa-id-card
+                     pointer-events-none absolute
+                     left-3.5 top-1/2
+                     -translate-y-1/2
+                     text-base-content/35">
+                </i>
+
+                <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="8" class="input input-bordered
+                     h-11 w-full rounded-xl
+                     bg-base-100 pl-10 pr-4
+                     focus:outline-none
+                     focus:ring-2
+                     focus:ring-primary/30" placeholder="Número de DNI" autocomplete="off" [(ngModel)]="dniBusqueda"
+                  (ngModelChange)="onSearchChange()" />
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- =============================================== -->
+        <!-- ILUSTRACIÓN DE BÚSQUEDA -->
+        <!-- =============================================== -->
+        <div class="hidden items-center justify-center border-base-300 px-5 lg:flex">
+
+          <img src="assets/img/search.png" alt="" aria-hidden="true" class="h-32 w-32
+               select-none object-contain
+               opacity-90
+               drop-shadow-sm" draggable="false" />
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================= -->
+    <!-- MODALES -->
+    <!-- ================================================= -->
+
+    <!-- Modal Crear Policia -->
+    <policia-form [mostrarModal]="mostrarModal" [modoEdicion]="modoEdicion" [policiaSeleccionado]="policiaSeleccionado"
+      (modalCerrado)="cerrarModal()" (policiaCreado)="getPoliciasPaginated()"></policia-form>
+
+    <!-- Modal Ver Policia -->
+    <policia-info [mostrarModal]="mostrarModalInfo" [policia_id]="policia_id"
+      (modalCerrado)="cerrarModalInfo()"></policia-info>
+
+    <!-- ================================================= -->
+    <!-- TABLA -->
+    <!-- ================================================= -->
+    <section class="overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-sm">
+
+      <!-- Cabecera de tabla -->
+      <div class="flex flex-col gap-4
+         border-b border-base-300
+         px-4 py-4
+         sm:flex-row
+         sm:items-center
+         sm:justify-between
+         sm:px-5">
 
         <!-- Selector de cantidad -->
-        <div class="flex items-center gap-2 text-sm">
-          <label>Mostrar:</label>
+        <div class="flex w-full items-center
+           justify-between gap-3
+           text-sm text-base-content/70
+           sm:w-auto sm:justify-start">
 
-          <select class="select select-bordered select-sm w-auto" [(ngModel)]="limit" (change)="cambiarLimite()">
+          <label for="usuarios-page-size" class="whitespace-nowrap">
+            Mostrar
+          </label>
+
+          <select id="usuarios-page-size" class="select select-bordered select-sm w-auto" [(ngModel)]="limit"
+            (change)="cambiarLimite()">
             <option *ngFor="let size of pageSizeOptions" [ngValue]="size">
               {{ size }}
             </option>
           </select>
 
-          <span>items por página</span>
+          <span class="whitespace-nowrap">
+            items por página
+          </span>
         </div>
 
         <!-- Botónes -->
-        <div class="flex flex-row justify-center items-center gap-4">
+        <div class="flex w-full items-center justify-end sm:w-auto">
 
-          <button class="btn btn-primary text-base-content hover:text-white bg-info hover:bg-primary border-none"
-            (click)="abrirModal()">
+          <button type="button" class="btn btn-primary
+              min-h-10 w-full gap-2
+              rounded-xl border-none
+             hover:text-white bg-info hover:bg-primary
+              sm:w-auto sm:min-w-36" (click)="abrirModal()">
+
             <i class="fa-solid fa-plus mr-1"></i>
+
             Policia
           </button>
         </div>
-
       </div>
 
-      <!-- Tabla  -->
-      <table class="table w-full">
+      <!-- Contenedor de scroll exclusivo para tabla -->
+      <div class="w-full overflow-x-auto">
+        <table class="table min-w-295 w-full">
 
-        <thead class="bg-base-300/90">
-          <tr>
-            <th>#</th>
-            <th>Nombres</th>
-            <th>Apellidos</th>
-            <th>DNI</th>
-            <th>Telefono</th>
-            <th>Grado</th>
-            <th>Comisaria</th>
-            <th>Actualización</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          @if (isLoading) {
-          <tr>
-            <td colspan="7" class="text-center py-4 text-base-content/70">Cargando expedientes...</td>
-          </tr>
-          }
+          <thead class="bg-base-300/90">
+            <tr class="text-xs uppercase tracking-wide text-base-content/60">
+              <th class="w-16 text-center">N.°</th>
+              <th>Policia</th>
+              <!-- <th>Correo</th> -->
+              <th>DNI</th>
+              <th class="text-center">Teléfono</th>
+              <th>Grado</th>
+              <th>Comisaria</th>
+              <th>Actualización</th>
+              <th class="text-center">Acciones</th>
+            </tr>
+          </thead>
 
-          @for (poli of policias; track poli.id; let i = $index) {
-          <tr class="hover ">
+          <tbody>
+            <!-- Loading -->
+            @if (isLoading) {
+            <tr>
+              <td colspan="9" class="py-14 text-center">
 
-            <!-- Numeracion -->
-            <td>{{i + 1}}</td>
+                <div class="flex flex-col items-center justify-center gap-3">
+                  <span class="loading loading-spinner loading-md text-primary">
+                  </span>
 
-            <!-- Nombres -->
-            <td>{{ poli.persona.nombres || '—'}}</td>
+                  <span class="text-sm text-base-content/60">
+                    Cargando policias...
+                  </span>
+                </div>
+              </td>
+            </tr>
+            }
 
-            <!-- Apellidos -->
-            <td>{{ poli.persona.apellidos || '—' }}</td>
+            <!-- Policias -->
+            @if (!isLoading){
+            @for (poli of policias; track poli.id; let i = $index) {
+            <tr class="hover ">
 
-            <!-- DNI -->
-            <td>{{poli.persona.documento_identidad || '—'}}</td>
+              <!-- Numeración paginada -->
+              <td class="text-center text-base-content/60">
+                {{ ((page - 1) * limit) + i + 1 }}
+              </td>
 
-            <!-- Telefono -->
-            <td>{{poli.persona.telefono || '—'}}</td>
+              <!-- Policia -->
+              <td>
+                <div class="flex items-center gap-3">
+                  <div class="avatar shrink-0">
+                    <div class="h-10 w-10 overflow-hidden rounded-xl bg-base-200">
+                      <img [src]="poli.persona.foto_perfil || 'assets/img/default-avatar.png'"
+                        [alt]="'Foto de ' + poli.persona.nombres" class="h-full w-full object-cover" />
+                    </div>
+                  </div>
 
-            <!-- Grado -->
-            <th>
-              {{poli.grado}}
-            </th>
+                  <div class="min-w-0">
+                    <p class="max-w-55 truncate font-semibold text-base-content">
+                      {{ poli.persona.nombres }}
+                      {{ poli.persona.apellidos }}
+                    </p>
 
-            <!-- Comisaria -->
-            <th>
-              {{poli.comisaria}}
-            </th>
+                    <p class="mt-0.5 text-xs text-base-content/45">
+                      &#64;{{ poli.codigo_institucional }}
+                    </p>
+                  </div>
+                </div>
+              </td>
 
-            <!-- Actualización -->
-            <td>
-              {{ poli.persona.updatedAt | date: 'dd/MM/yyyy, hh:mm a' }}
-            </td>
+              <!-- Correo -->
+              <!-- <td>
+                <span class="block max-w-55 truncate text-sm" [title]="poli.grado">
+                  {{ poli.grado || 'Sin correo' }}
+                </span>
+              </td> -->
 
-            <!-- ACCIONES PRINCIPALES  -->
-            <td class="text-right relative">
+              <!-- DNI -->
+              <td class="font-sans text-sm">{{poli.persona.documento_identidad || '—'}}</td>
 
-              <div class="flex justify-start items-center gap-1">
-                <!-- Ver -->
-                <button class="btn btn-ghost btn-circle btn-md" (click)="verPolicia(poli)">
-                  <i class="fa-solid fa-eye"></i>
-                </button>
+              <!-- Telefono -->
+              <td class="font-sans text-sm text-center">{{poli.persona.telefono || '—'}}</td>
+
+              <!-- Grado -->
+              <th class="font-sans text-sm">
+                {{poli.grado}}
+              </th>
+
+              <!-- Comisaria -->
+              <th class="font-sans text-sm">
+                {{poli.comisaria}}
+              </th>
+
+              <!-- Actualización -->
+              <td class="whitespace-nowrap text-sm">
+                {{ poli.persona.updatedAt | date: 'dd/MM/yyyy, hh:mm a' }}
+              </td>
+
+              <!-- ACCIONES PRINCIPALES  -->
+              <td class="flex items-center justify-center gap-0.5">
+
+                <!-- Ver detalles -->
+                <div class="tooltip tooltip-left" data-tip="Ver detalles">
+                  <button type="button" class="btn btn-ghost btn-circle btn-sm" (click)="verPolicia(poli)"
+                    aria-label="Ver detalles">
+                    <i class="fa-solid fa-eye"></i>
+                  </button>
+                </div>
 
                 <!-- Editar -->
-                <button class="btn btn-ghost btn-circle btn-md" (click)="editarPolicia(poli)">
-                  <i class="fa-solid fa-pencil"></i>
-                </button>
+                <div class="tooltip tooltip-left" data-tip="Editar policia">
+                  <button type="button" class="btn btn-ghost btn-circle btn-sm" (click)="editarPolicia(poli)"
+                    aria-label="Editar policia">
+                    <i class="fa-solid fa-pencil"></i>
+                  </button>
+                </div>
 
                 <!-- Eliminar -->
-                <button class="btn btn-ghost btn-circle btn-md" (click)="eliminarPolicia(poli)">
-                  <i class="fa-solid fa-trash"></i>
-                </button>
+                <div class="tooltip tooltip-left" data-tip="Eliminar policia">
+                  <button type="button" class="btn btn-ghost btn-circle btn-sm" (click)="eliminarPolicia(poli)"
+                    aria-label="Eliminar policia">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            }
 
-              </div>
+            <!-- Estado vacío -->
+            @if (policias.length === 0) {
+            <tr>
+              <td colspan="9" class="py-12 text-center">
+                <div class="flex flex-col items-center justify-center my-10 text-center text-base-content/70">
+                  <img src="assets/img/empty-folder.png" alt="Sin solicitudes" class="w-40 h-40 mb-6 opacity-80" />
+                  <h3 class="text-lg font-semibold text-base-content mb-2">
+                    No hay policias registrados
+                  </h3>
+                  <p class="text-sm max-w-md">Cuando se registren nuevos policias, aparecerán aquí automáticamente.</p>
+                </div>
+              </td>
+            </tr>
+            }
 
-            </td>
-          </tr>
-          }
 
 
-        </tbody>
+            }
+          </tbody>
 
 
-      </table>
-
-      @if (!isLoading && policias.length === 0) {
-      <div class="flex flex-col items-center justify-center my-10 text-center text-base-content/70">
-        <img src="assets/img/empty-folder.png" alt="Sin solicitudes" class="w-40 h-40 mb-6 opacity-80" />
-        <h3 class="text-lg font-semibold text-base-content mb-2">
-          No hay policias registrados
-        </h3>
-        <p class="text-sm max-w-md">Cuando se registren nuevos policias, aparecerán aquí automáticamente.</p>
-      </div>}
-
-      <!-- Paginación -->
-      <div class="flex justify-end items-center p-4 text-sm text-base-content bg-base-300/90">
-        <span> Página {{ page }} de {{ totalPages }} registros</span>
-        <div class="join ml-4 gap-2">
-          <button class="join-item btn btn-sm" [disabled]="page === 1" (click)="cambiarPagina(page - 1)">
-            Anterior
-          </button>
-
-          <button class="join-item btn btn-sm" [disabled]="page === totalItems" (click)="cambiarPagina(page + 1)">
-            Siguiente
-          </button>
-        </div>
+        </table>
       </div>
-    </div>
 
+      <!-- ================================================= -->
+      <!-- PAGINACIÓN -->
+      <!-- ================================================= -->
+      <footer class="flex flex-col gap-4
+         border-t border-base-300
+         bg-base-200/50
+         px-4 py-4
+         sm:flex-row
+         sm:items-center
+         sm:justify-between
+         sm:px-5">
 
+        <!-- Resumen de usuarios -->
+        <div class="text-center sm:text-left">
+          <h2 class="font-semibold text-base-content">
+            Usuarios registrados
+          </h2>
+
+          <p class="mt-0.5 text-sm text-base-content/55">
+            {{ totalItems }}
+            {{ totalItems === 1 ? 'usuario' : 'usuarios' }}
+            encontrados
+          </p>
+        </div>
+
+        <!-- Controles de paginación -->
+        <div class="flex w-full flex-col
+           items-center gap-3
+           text-sm text-base-content/70
+           sm:w-auto sm:flex-row">
+
+          <!-- Página actual -->
+          <span class="whitespace-nowrap">
+            @if (totalPages > 0) {
+            Página
+            <strong class="text-base-content">
+              {{ page }}
+            </strong>
+            de
+            <strong class="text-base-content">
+              {{ totalPages }}
+            </strong>
+            } @else {
+            Sin páginas disponibles
+            }
+          </span>
+
+          <!-- Botones -->
+          <div class="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
+            <button type="button" class="btn btn-sm w-full
+               gap-2 rounded-lg
+               sm:w-auto" [disabled]="isLoading || page <= 1" (click)="cambiarPagina(page - 1)">
+              <i class="fa-solid fa-chevron-left"></i>
+
+              Anterior
+            </button>
+
+            <button type="button" class="btn btn-sm w-full
+              gap-2 rounded-lg
+              sm:w-auto" [disabled]="
+                  isLoading ||
+                  totalPages === 0 ||
+                  page >= totalPages
+                " (click)="cambiarPagina(page + 1)">
+
+              Siguiente
+
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </footer>
+    </section>
   </div>
-
-
 </div>

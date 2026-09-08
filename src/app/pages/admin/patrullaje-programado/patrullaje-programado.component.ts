@@ -19,6 +19,7 @@ import { PatrullajeRecorridoComponent } from "./patrullaje-recorrido/patrullaje-
 export class PatrullajeProgramadoComponent implements OnInit {
 
 
+
   // Unidad patrullaje
   patrullajes: any[] = [];
   patrullaje_id: number | null = null;
@@ -150,6 +151,11 @@ export class PatrullajeProgramadoComponent implements OnInit {
       patrulla.id
     ]);
   }
+
+    // - Finalizar patrullaje
+  finishedPatrullaje(_t73: any) {
+throw new Error('Method not implemented.');
+}
 
   // - Ver patrullaje
   verPatrullaje(patrullaje: any) {

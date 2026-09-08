@@ -1,21 +1,22 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { finalize } from 'rxjs';
 import Swal from 'sweetalert2';
 
 // Directives
 import { UppercaseDirective } from 'src/app/pages/shared/directives/uppercase.directive';
 
 // Interface
-import { Usuario } from 'src/app/interfaces/login/usuarioResponse';
+import { UsuarioData, UsuariosPaginatedQueryParams } from 'src/app/interfaces/usuarios/get-usuarios-paginated.model';
+import { UsuarioRol } from 'src/app/interfaces/usuarios/create-usuario.model';
 
 // Service
 import { UsuarioService } from 'src/app/services/usuarios/usuarios.service';
+
+// Componentes
 import { UsuarioFormComponent } from "./usuario-form/usuario-form.component";
 import { UsuarioInfoComponent } from "./usuario-info/usuario-info.component";
-import { UsuarioData, UsuariosPaginatedQueryParams } from 'src/app/interfaces/usuarios/get-usuarios-paginated.model';
-import { UsuarioRol } from 'src/app/interfaces/usuarios/create-usuario.model';
-import { finalize } from 'rxjs';
 
 
 @Component({
@@ -84,7 +85,7 @@ export class UsuariosComponent implements OnInit {
 
     this.isLoading = true;
 
-    this.usuarioService.getUsuariosPaginados(params)
+    this.usuarioService.getUsuariosPaginated(params)
       .pipe(
         finalize(() => {
           this.isLoading = false;
@@ -337,7 +338,9 @@ export class UsuariosComponent implements OnInit {
     this.getUsuariosPaginados();
   }
 
-  // MODAL
+  // ================================
+  // Modales methods
+  // ================================
   abrirModal() {
     this.modoEdicion = false;
     this.usuarioSeleccionado = null;

@@ -1,16 +1,19 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { finalize } from 'rxjs';
 import Swal from 'sweetalert2';
-
-// Interface
-import { Policia } from 'src/app/interfaces/policia/IPolicia';
 
 // Directives
 import { UppercaseDirective } from 'src/app/pages/shared/directives/uppercase.directive';
 
 // Service
-import { PoliciasService } from 'src/app/services/policias.service';
+import { PoliciasService } from 'src/app/services/usuarios/policias.service';
+
+// Interface
+import { PoliciaData, PoliciasPaginadoParams } from 'src/app/interfaces/policia/get-policia-paginated.model';
+
+// Componentes
 import { PoliciaFormComponent } from "./policia-form/policia-form.component";
 import { PoliciaInfoComponent } from "./policia-info/policia-info.component";
 
@@ -25,7 +28,7 @@ export class PoliciasComponent implements OnInit {
 
 
   // Policias
-  policias: Policia[] = [];
+  policias: PoliciaData[] = [];
   policia_id: number | null = null;
   isLoading = true;
 
@@ -55,35 +58,50 @@ export class PoliciasComponent implements OnInit {
 
   ngOnInit(): void {
     this.getPoliciasPaginated();
-
   }
 
+  // ================================
   // Methods
-
-  // - Policias paginated
+  // ================================
   getPoliciasPaginated() {
-    this.isLoading = true;
 
-    this.policiasService.getPoliciasPaginated({
+    const params: PoliciasPaginadoParams = {
       page: this.page,
       limit: this.limit,
-      nombres: this.nombreBusqueda?.trim() || undefined,
-      dni: this.dniBusqueda?.trim() || undefined,
-    }
-    ).subscribe({
-      next: (res) => {
+      nombres: this.nombreBusqueda.trim() || undefined,
+      dni: this.dniBusqueda.trim() || undefined,
+    };
 
-        this.policias = res.data.rows;
-        this.totalItems = res.data.total;
-        this.currentPage = res.data.page;
-        this.totalPages = res.data.totalPages;
-        this.isLoading = false;
-      },
-      error: (err) => {
-        console.error(err);
-        this.isLoading = false;
-      }
-    });
+    this.isLoading = true;
+
+    this.policiasService.getPoliciasPaginated(params)
+      .pipe(
+        finalize(() => {
+          this.isLoading = false;
+        }),
+      )
+      .subscribe({
+        next: (res) => {
+
+          const paginacion = res.data;
+
+          this.policias = paginacion.items;
+          this.totalItems = paginacion.total;
+          this.currentPage = paginacion.page;
+
+          this.page = paginacion.page;
+          this.limit = paginacion.limit;
+          this.totalPages = paginacion.totalPages;
+        },
+        error: (err) => {
+          console.error(err);
+          this.isLoading = false;
+
+          this.policias = [];
+          this.totalItems = 0;
+          this.totalPages = 0;
+        }
+      });
   }
 
   // - Buscador
@@ -97,10 +115,10 @@ export class PoliciasComponent implements OnInit {
   }
 
   // - Eliminar policia
-  eliminarPolicia(poli: any) {
+  eliminarPolicia(poli: PoliciaData) {
     Swal.fire({
       title: '¿Eliminar policia?',
-      text: `Se eliminará el policia ${poli.usuario.nombre}`,
+      text: `Se eliminará el policia ${poli.persona.nombres}`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Sí, eliminar',
@@ -144,20 +162,21 @@ export class PoliciasComponent implements OnInit {
   }
 
   // - Editar policia
-  editarPolicia(poli: any) {
+  editarPolicia(poli: PoliciaData) {
     this.modoEdicion = true;
     this.policiaSeleccionado = { ...poli };
     this.mostrarModal = true;
   }
 
   // - Ver policia
-  verPolicia(poli: Policia) {
+  verPolicia(poli: PoliciaData) {
     this.policia_id = poli.id;
     this.mostrarModalInfo = true;
   }
 
-
+  // ================================
   // Helpers methods
+  // ================================
   onPageSizeChange() {
     this.currentPage = 1; // vuelve a la primera página
   }
@@ -186,7 +205,9 @@ export class PoliciasComponent implements OnInit {
     }
   }
 
-  // - Modales
+  // ================================
+  // Modales methods
+  // ================================
   abrirModal() {
     this.modoEdicion = false;
     this.policiaSeleccionado = null;

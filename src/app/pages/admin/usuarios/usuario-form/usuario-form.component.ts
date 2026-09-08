@@ -11,7 +11,6 @@ import { UsuarioService } from '../../../../services/usuarios/usuarios.service';
 import { UbigeoService } from 'src/app/services/ubigeo.service';
 
 // Interface
-import { Usuario } from 'src/app/interfaces/login/usuarioResponse';
 import { UsuarioData } from 'src/app/interfaces/usuarios/get-usuarios-paginated.model';
 
 
@@ -78,8 +77,6 @@ export class UsuarioFormComponent implements OnInit, OnChanges {
 
       const user = this.usuarioSeleccionado;
 
-      console.log('Usuario seleccionado para edición:', user);
-
       // Campos comunes
       const formData = {
         id: user.id,
@@ -92,7 +89,7 @@ export class UsuarioFormComponent implements OnInit, OnChanges {
         direccion: user.persona.direccion,
         departamento: user.persona.departamento,
         provincia: user.persona.provincia,
-        distrito: user.persona.distrito
+        distrito: user.persona.distrito,
       };
 
       // Aplicar al formulario
@@ -117,7 +114,6 @@ export class UsuarioFormComponent implements OnInit, OnChanges {
       console.log('Departamentos cargados:', this.departamentos);
     });
   }
-
 
   listenUbigeoChanges() {
     // Departamento → Provincias
@@ -195,8 +191,6 @@ export class UsuarioFormComponent implements OnInit, OnChanges {
   // ====================================
   // Methods
   // ====================================
-
-  // Crear o Editar usuario
   crearOEditarUsuario() {
 
     if (this.formUsuario.invalid) {

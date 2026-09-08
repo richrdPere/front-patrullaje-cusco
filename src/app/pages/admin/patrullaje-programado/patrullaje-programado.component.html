@@ -1,215 +1,536 @@
-<div class="p-6 min-h-full bg-base-300 text-base-content overflow-auto transition-colors duration-300">
+<div class="min-h-full min-w-0 bg-base-300
+         px-4 py-5 text-base-content
+         transition-colors duration-300
+         sm:px-6 sm:py-6 lg:px-8">
 
-  <!-- Titulo -->
-  <h1 class="text-2xl font-bold mb-5 text-base-content ">Operativos Programados</h1>
+  <!-- ================================================= -->
+  <!-- CONTENEDOR DEL DASHBOARD -->
+  <!-- ================================================= -->
+  <div class="mx-auto w-full max-w-500">
 
-  <!-- Header -->
-  <div class="p-4 mb-7 card bg-base-100 shadow-md">
-    <!-- CONTENEDOR PRINCIPAL -->
-    <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 py-4">
+    <!-- ================================================= -->
+    <!-- ENCABEZADO -->
+    <!-- ================================================= -->
 
-      <!--  BUSCADOR -->
-      <div class="flex flex-col md:flex-row gap-4 items-center w-full md:w-auto">
+    <header class="mb-5 flex flex-col gap-4
+             sm:flex-row sm:items-center
+             sm:justify-between">
 
-        <!-- Input descripcion -->
-        <div class="relative w-full md:max-w-xs">
-          <input type="text" class="input input-bordered w-full bg-base-100 rounded-md h-11 pl-10 pr-4 text-sm
-                 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Buscar por descripción"
-            autocomplete="off" [(ngModel)]="descripcionBusqueda" (ngModelChange)="onSearchChange()" />
-          <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+      <div class="flex min-w-0 items-center gap-3">
+
+        <div class="flex h-12 w-12 shrink-0
+                 items-center justify-center
+                 rounded-2xl bg-primary/10
+                 text-primary" aria-hidden="true">
+
+          <i class="fa-solid fa-calendar-check
+                   text-2xl">
+          </i>
         </div>
 
-        <!-- Filtro Fecha -->
-        <div class="relative w-full md:max-w-xs">
-          <input type="date" class="input input-bordered w-full bg-base-100 rounded-md h-11 pl-10 pr-4 text-sm
-           focus:outline-none focus:ring-2 focus:ring-indigo-500" [(ngModel)]="fechaBusqueda"
-            (change)="onSearchChange()" />
+        <div class="min-w-0">
+          <h1 class="text-2xl font-bold
+                   leading-tight text-base-content">
 
-          <i class="fa fa-calendar absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            Operativos programados
+          </h1>
+
+          <p class="mt-1 max-w-2xl
+                   text-sm leading-relaxed
+                   text-base-content/60">
+
+            Programe y administre las operaciones de
+            patrullaje asignadas al personal de Serenazgo.
+          </p>
         </div>
       </div>
-    </div>
-  </div>
+    </header>
 
-  <!-- Modal Crear patrullaje  -->
-  <patrullaje-program-form [mostrarModal]="mostrarModal" [modoEdicion]="modoEdicion"
-    [patrullajeSeleccionado]="patrullajeSeleccionado" (modalCerrado)="cerrarModal()"
-    (patrullajeCreado)="getPatrullajePaginado()"></patrullaje-program-form>
+    <!-- ================================================= -->
+    <!-- FILTROS -->
+    <!-- ================================================= -->
 
+    <section class="mb-6 rounded-2xl
+             border border-base-300
+             bg-base-100 p-4
+             shadow-sm sm:p-5">
 
-  <!-- Modal Ver patrullaje -->
-  <patrullaje-program-info [mostrarModal]="mostrarModalInfo" [patrullaje_id]="patrullaje_id"
-    (modalCerrado)="cerrarModalInfo()"></patrullaje-program-info>
+      <div class="grid grid-cols-1 gap-4
+               md:grid-cols-2">
 
+        <!-- Buscar por descripción -->
 
-  <!-- Modal Ver recorrido -->
-  @if (
-  mostrarModalRecorrido &&
-  patrullajeRecorridoId !== null
-  ) {
-  <patrullaje-recorrido [patrullajeId]="patrullajeRecorridoId" (cerrar)="cerrarModalRecorrido()" />
-  }
+        <label class="form-control w-full">
+          <span class="mb-1.5 text-xs font-semibold
+                   uppercase tracking-wide
+                   text-base-content/60">
 
+            Descripción
+          </span>
 
-  <!-- Tabla -->
-  <div class="p-6 min-h-auto bg-base-100 rounded-xl shadow-xl">
-    <div class="overflow-x-auto text-base-content border border-base-300/90 shadow rounded-lg">
-      <!-- Header acciones -->
-      <div class="flex justify-between items-center p-5">
+          <div class="relative">
+            <i class="fa-solid fa-magnifying-glass
+                     pointer-events-none absolute
+                     left-3.5 top-1/2
+                     -translate-y-1/2
+                     text-base-content/35">
+            </i>
 
-        <!-- Selector de cantidad -->
-        <div class="flex items-center gap-2 text-sm">
-          <label>Mostrar:</label>
+            <input type="text" class="input input-bordered
+                     h-11 w-full rounded-xl
+                     bg-base-100 pl-10 pr-4
+                     focus:outline-none
+                     focus:ring-2
+                     focus:ring-primary/30" placeholder="Buscar por descripción" autocomplete="off"
+              [(ngModel)]="descripcionBusqueda" (ngModelChange)="onSearchChange()" />
+          </div>
+        </label>
 
-          <select class="select select-bordered select-sm w-auto" [(ngModel)]="limit" (change)="cambiarLimite()">
-            <option *ngFor="let size of pageSizeOptions" [ngValue]="size">
+        <!-- Buscar por fecha -->
+
+        <label class="form-control w-full">
+          <span class="mb-1.5 text-xs font-semibold
+                   uppercase tracking-wide
+                   text-base-content/60">
+
+            Fecha programada
+          </span>
+
+          <div class="relative">
+            <i class="fa-regular fa-calendar
+                     pointer-events-none absolute
+                     left-3.5 top-1/2
+                     -translate-y-1/2
+                     text-base-content/35">
+            </i>
+
+            <input type="date" class="input input-bordered
+                     h-11 w-full rounded-xl
+                     bg-base-100 pl-10 pr-4
+                     focus:outline-none
+                     focus:ring-2
+                     focus:ring-primary/30" [(ngModel)]="fechaBusqueda" (change)="onSearchChange()" />
+          </div>
+        </label>
+      </div>
+    </section>
+
+    <!-- ================================================= -->
+    <!-- MODALES -->
+    <!-- ================================================= -->
+
+    <!-- Crear o editar operativo -->
+
+    <patrullaje-program-form [mostrarModal]="mostrarModal" [modoEdicion]="modoEdicion"
+      [patrullajeSeleccionado]="patrullajeSeleccionado" (modalCerrado)="cerrarModal()"
+      (patrullajeCreado)="getPatrullajePaginado()">
+    </patrullaje-program-form>
+
+    <!-- Ver operativo -->
+
+    <patrullaje-program-info [mostrarModal]="mostrarModalInfo" [patrullaje_id]="patrullaje_id"
+      (modalCerrado)="cerrarModalInfo()">
+    </patrullaje-program-info>
+
+    <!-- Ver recorrido GPS -->
+
+    @if (
+    mostrarModalRecorrido &&
+    patrullajeRecorridoId !== null
+    ) {
+    <patrullaje-recorrido [patrullajeId]="patrullajeRecorridoId" (cerrar)="cerrarModalRecorrido()">
+    </patrullaje-recorrido>
+    }
+
+    <!-- ================================================= -->
+    <!-- TABLA -->
+    <!-- ================================================= -->
+
+    <section class="overflow-hidden rounded-2xl
+             border border-base-300
+             bg-base-100 shadow-sm">
+
+      <!-- Cabecera de tabla -->
+
+      <div class="flex flex-col gap-4
+               border-b border-base-300
+               px-4 py-4
+               sm:flex-row
+               sm:items-center
+               sm:justify-between
+               sm:px-5">
+
+        <!-- Cantidad por página -->
+
+        <div class="flex w-full items-center
+                 justify-between gap-3
+                 text-sm text-base-content/70
+                 sm:w-auto sm:justify-start">
+
+          <label for="operativos-page-size" class="whitespace-nowrap">
+
+            Mostrar
+          </label>
+
+          <select id="operativos-page-size" class="select select-bordered
+                   select-sm w-auto" [(ngModel)]="limit" (change)="cambiarLimite()">
+
+            @for (
+            size of pageSizeOptions;
+            track size
+            ) {
+            <option [ngValue]="size">
               {{ size }}
             </option>
+            }
           </select>
 
-          <span>items por página</span>
+          <span class="whitespace-nowrap">
+            ítems por página
+          </span>
         </div>
 
-        <!-- Botónes -->
-        <div class="flex flex-row justify-center items-center gap-4">
+        <!-- Crear operativo -->
 
-          <button class="btn btn-primary text-base-content hover:text-white bg-info hover:bg-primary border-none"
-            (click)="abrirModal()">
-            <i class="fa-solid fa-plus mr-1"></i>
+        <div class="flex w-full items-center
+                 justify-end sm:w-auto">
+
+          <button type="button" class="btn btn-primary
+                   min-h-10 w-full gap-2
+                   rounded-xl border-none
+                   sm:w-auto sm:min-w-40" (click)="abrirModal()">
+
+            <i class="fa-solid fa-plus"></i>
+
             Operativo
           </button>
         </div>
-
       </div>
 
-      <!-- Tabla  -->
-      <table class="table w-full">
+      <!-- Tabla con scroll horizontal -->
 
-        <thead class="bg-base-300/90">
-          <tr>
-            <th>#</th>
-            <th>Descripcion</th>
-            <th>Hora Inicio</th>
-            <th>Hora Final</th>
-            <th>Estado</th>
-            <th>Actualización</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          @if (isLoading) {
-          <tr>
-            <td colspan="7" class="text-center py-4 text-base-content/70">Cargando unidades...</td>
-          </tr>
-          }
+      <div class="w-full overflow-x-auto">
+        <table class="table min-w-275 w-full">
 
-          @for (patrulla of patrullajes; track patrulla.id; let i = $index) {
-          <tr class="hover ">
+          <thead class="bg-base-300/90">
+            <tr class="text-xs uppercase
+                     tracking-wide
+                     text-base-content/60">
 
-            <!-- Numeracion -->
-            <td>{{i + 1}}</td>
+              <th class="w-16 text-center">
+                N.°
+              </th>
 
-            <!-- Descripcion -->
-            <td>{{ patrulla.descripcion }}</td>
+              <th>Descripción</th>
+              <th>Hora de inicio</th>
+              <th>Hora de finalización</th>
+              <th class="text-center">Estado</th>
+              <th>Actualización</th>
+              <th class="text-center">Acciones</th>
+            </tr>
+          </thead>
 
-            <!-- Hora Inicio -->
-            <th>
-              {{patrulla.hora_inicio}}
-            </th>
+          <tbody>
 
-            <!-- Hora Fin -->
-            <td>{{patrulla.hora_fin}}</td>
+            <!-- Loading -->
 
-            <!-- Estado -->
-            <td>
-              <span class="badge font-semibold" [ngClass]="getEstadoClass(patrulla.estado)">
-                {{ patrulla.estado }}
-              </span>
-            </td>
+            @if (isLoading) {
+            <tr>
+              <td colspan="7" class="py-14 text-center">
 
-            <!-- Actualización -->
-            <td>
-              {{ patrulla.updatedAt | date: 'dd/MM/yyyy, hh:mm a' }}
-            </td>
+                <div class="flex flex-col
+                           items-center justify-center
+                           gap-3">
 
-            <!-- ACCIONES PRINCIPALES  -->
-            <td class="text-right relative">
+                  <span class="loading loading-spinner
+                             loading-md text-primary">
+                  </span>
 
-              <div class="flex justify-start items-center gap-1">
-                <!-- Ver -->
-                <button class="btn btn-ghost btn-circle btn-md" (click)="verPatrullaje(patrulla)">
-                  <i class="fa-solid fa-eye"></i>
-                </button>
+                  <span class="text-sm
+                             text-base-content/60">
 
-                <!-- Agregar tiempo -->
-                <!-- <button class="btn btn-ghost btn-circle btn-md">
-                  <i class="fa-solid fa-angles-right"></i>
-                </button> -->
+                    Cargando operativos...
+                  </span>
+                </div>
+              </td>
+            </tr>
+            }
 
-                <!-- Ver Recorrido -->
-                @if (
-                patrulla.estado === 'EN_CURSO'
-                || patrulla.estado === 'FINALIZADO'
-                ) {
-                <button type="button" class="btn btn-ghost btn-circle btn-md" title="Ver recorrido GPS"
-                  (click)="verRecorrido(patrulla.id)">
-                  <i class="fa-solid fa-route"></i>
-                </button>
-                }
+            <!-- Operativos -->
 
-                <!-- Historial -->
-                <button class="btn btn-ghost btn-circle btn-md" (click)="verHistorial(patrulla)">
-                  <i class="fa-solid fa-clock-rotate-left"></i>
-                </button>
+            @if (!isLoading) {
+            @for (
+            patrulla of patrullajes;
+            track patrulla.id;
+            let i = $index
+            ) {
+            <tr class="border-base-200
+                         transition-colors
+                         hover:bg-base-200/50">
 
-                <!-- Editar -->
-                <button class="btn btn-ghost btn-circle btn-md" (click)="editarPatrullaje(patrulla)">
-                  <i class="fa-solid fa-pencil"></i>
-                </button>
+              <!-- Numeración paginada -->
 
-                <!-- Eliminar -->
-                <button class="btn btn-ghost btn-circle btn-md" (click)="eliminarPatrullaje(patrulla)">
-                  <i class="fa-solid fa-trash"></i>
-                </button>
+              <td class="text-center text-base-content/60">
+                {{ ((page - 1) * limit) + i + 1 }}
+              </td>
+
+              <!-- Descripción -->
+              <td>
+                <div class="min-w-0">
+                  <p class="max-w-[320px] truncate
+                               font-semibold
+                               text-base-content" [title]="patrulla.descripcion || ''">
+
+                    {{ patrulla.descripcion || 'Sin descripción' }}
+                  </p>
+
+                  <p class="mt-0.5 text-xs text-base-content/45">
+                    Operativo N.° {{ patrulla.id }}
+                  </p>
+                </div>
+              </td>
+
+              <!-- Hora de inicio -->
+
+              <td>
+                <div class="inline-flex items-center
+                             gap-2 whitespace-nowrap">
+
+                  <i class="fa-regular fa-clock
+                               text-success">
+                  </i>
+
+                  <span class="text-sm font-medium">
+                    {{ patrulla.hora_inicio || '—' }}
+                  </span>
+                </div>
+              </td>
+
+              <!-- Hora de finalización -->
+
+              <td>
+                <div class="inline-flex items-center
+                             gap-2 whitespace-nowrap">
+
+                  <i class="fa-regular fa-clock
+                               text-error">
+                  </i>
+
+                  <span class="text-sm font-medium">
+                    {{ patrulla.hora_fin || '—' }}
+                  </span>
+                </div>
+              </td>
+
+              <!-- Estado -->
+
+              <td class="text-center">
+                <span class="badge whitespace-nowrap
+                             font-semibold" [ngClass]="
+                        getEstadoClass(patrulla.estado)
+                      ">
+
+                  {{ patrulla.estado }}
+                </span>
+              </td>
+
+              <!-- Actualización -->
+
+              <td class="whitespace-nowrap text-sm">
+                {{ patrulla.updatedAt | date: 'dd/MM/yyyy, hh:mm a' }}
+              </td>
+
+              <!-- Acciones -->
+              <td>
+                <div class="flex items-center justify-center gap-0.5">
+
+                  <!-- Ver detalles -->
+                  <div class="tooltip tooltip-left" data-tip="Ver detalles">
+                    <button type="button" class="btn btn-ghost btn-circle btn-sm" (click)="verPatrullaje(patrulla)"
+                      aria-label="Ver detalles del operativo">
+
+                      <i class="fa-solid fa-eye"></i>
+                    </button>
+                  </div>
 
 
+                  <!-- Finalizar patrullaje -->
+                  <div class="tooltip tooltip-left" data-tip="Finalizar patrullaje">
+                    <button type="button" class="btn btn-ghost btn-circle btn-sm" (click)="finishedPatrullaje(patrulla)"
+                      aria-label="Finalizar patrullaje">
 
-              </div>
+                      <i class="fa-regular fa-circle-check"></i>
+                    </button>
+                  </div>
 
-            </td>
-          </tr>
-          }
+                  <!-- Ver recorrido -->
+                  @if (
+                  patrulla.estado === 'EN_CURSO' ||
+                  patrulla.estado === 'FINALIZADO'
+                  ) {
+                  <div class="tooltip tooltip-left" data-tip="Ver recorrido GPS">
+                    <button type="button" class="btn btn-ghost btn-circle btn-sm" (click)="verRecorrido(patrulla.id)"
+                      aria-label="Ver recorrido GPS">
 
+                      <i class="fa-solid fa-route"></i>
+                    </button>
+                  </div>
+                  }
 
-        </tbody>
+                  <!-- Historial -->
+                  <div class="tooltip tooltip-left" data-tip="Ver historial">
+                    <button type="button" class="btn btn-ghost btn-circle btn-sm" (click)="verHistorial(patrulla)"
+                      aria-label="Ver historial del operativo">
 
+                      <i class="fa-solid fa-clock-rotate-left"></i>
+                    </button>
+                  </div>
 
-      </table>
+                  <!-- Editar -->
+                  <div class="tooltip tooltip-left" data-tip="Editar operativo">
+                    <button type="button" class="btn btn-ghost btn-circle btn-sm" (click)="editarPatrullaje(patrulla)"
+                      aria-label="Editar operativo">
 
-      @if (!isLoading && patrullajes.length === 0) {
-      <div class="flex flex-col items-center justify-center my-10 text-center text-base-content/70">
-        <img src="assets/img/empty-folder.png" alt="Sin solicitudes" class="w-40 h-40 mb-6 opacity-80" />
-        <h3 class="text-lg font-semibold text-base-content mb-2">
-          No hay operativos registrados
-        </h3>
-        <p class="text-sm max-w-md">Cuando se asignen nuevos operativos, aparecerán aquí automáticamente.</p>
-      </div>}
+                      <i class="fa-solid fa-pencil"></i>
+                    </button>
+                  </div>
 
-      <!-- Paginación -->
-      <div class="flex justify-end items-center p-4 text-sm text-base-content bg-base-300/90">
-        <span> Página {{ page }} de {{ totalPages }} registros</span>
-        <div class="join ml-4 gap-2">
-          <button class="join-item btn btn-sm" [disabled]="page === 1" (click)="cambiarPagina(page - 1)">
-            Anterior
-          </button>
+                  <!-- Eliminar -->
+                  <div class="tooltip tooltip-left" data-tip="Eliminar operativo">
+                    <button type="button" class="btn btn-ghost btn-circle btn-sm" (click)="eliminarPatrullaje(patrulla)"
+                      aria-label="Eliminar operativo">
 
-          <button class="join-item btn btn-sm" [disabled]="page === totalItems" (click)="cambiarPagina(page + 1)">
-            Siguiente
-          </button>
+                      <i class="fa-solid fa-trash"></i>
+                    </button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            }
+
+            <!-- Estado vacío -->
+            @if (patrullajes.length === 0) {
+            <tr>
+              <td colspan="7" class="py-12 text-center">
+
+                <div class="mx-auto flex max-w-md
+                             flex-col items-center
+                             justify-center">
+
+                  <img src="assets/img/empty-folder.png" alt="" class="mb-5 h-32 w-32
+                               object-contain opacity-70" />
+
+                  <h3 class="text-lg font-semibold
+                               text-base-content">
+
+                    No hay operativos registrados
+                  </h3>
+
+                  <p class="mt-1 text-sm
+                               text-base-content/55">
+
+                    Cuando se programen nuevos operativos,
+                    aparecerán aquí automáticamente.
+                  </p>
+                </div>
+              </td>
+            </tr>
+            }
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ================================================= -->
+      <!-- PAGINACIÓN -->
+      <!-- ================================================= -->
+
+      <footer class="flex flex-col gap-4
+               border-t border-base-300
+               bg-base-200/50
+               px-4 py-4
+               sm:flex-row
+               sm:items-center
+               sm:justify-between
+               sm:px-5">
+
+        <!-- Resumen -->
+
+        <div class="text-center sm:text-left">
+          <h2 class="font-semibold text-base-content">
+            Operativos registrados
+          </h2>
+
+          <p class="mt-0.5 text-sm
+                   text-base-content/55">
+
+            {{ totalItems }}
+
+            {{
+            totalItems === 1
+            ? 'operativo'
+            : 'operativos'
+            }}
+
+            encontrados
+          </p>
         </div>
-      </div>
-    </div>
 
+        <!-- Controles de paginación -->
 
+        <div class="flex w-full flex-col
+                 items-center gap-3
+                 text-sm text-base-content/70
+                 sm:w-auto sm:flex-row">
+
+          <span class="whitespace-nowrap">
+            @if (totalPages > 0) {
+            Página
+
+            <strong class="text-base-content">
+              {{ page }}
+            </strong>
+
+            de
+
+            <strong class="text-base-content">
+              {{ totalPages }}
+            </strong>
+            } @else {
+            Sin páginas disponibles
+            }
+          </span>
+
+          <div class="grid w-full grid-cols-2
+                   gap-2 sm:flex sm:w-auto">
+
+            <button type="button" class="btn btn-sm w-full
+                     gap-2 rounded-lg
+                     sm:w-auto" [disabled]="
+                isLoading ||
+                page <= 1
+              " (click)="cambiarPagina(page - 1)">
+
+              <i class="fa-solid fa-chevron-left"></i>
+
+              Anterior
+            </button>
+
+            <button type="button" class="btn btn-sm w-full
+                     gap-2 rounded-lg
+                     sm:w-auto" [disabled]="
+                isLoading ||
+                totalPages === 0 ||
+                page >= totalPages
+              " (click)="cambiarPagina(page + 1)">
+
+              Siguiente
+
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </footer>
+    </section>
   </div>
 </div>
