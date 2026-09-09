@@ -1,14 +1,16 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
 
 // Service
-import { PatrullajeProgramadoService } from 'src/app/services/patrullaje_programado.service';
+import { PatrullajeProgramadoService } from 'src/app/services/patrullaje/patrullaje_programado.service';
 import { PatrullajeProgramFormComponent } from "./patrullaje-program-form/patrullaje-program-form.component";
 import { PatrullajeProgramInfoComponent } from "./patrullaje-program-info/patrullaje-program-info.component";
 import { PatrullajeRecorridoComponent } from "./patrullaje-recorrido/patrullaje-recorrido.component";
+import { GetPatrullajesPaginatedParams } from 'src/app/interfaces/patrullaje_programado/get-patrullajes-paginated.model';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-patrullaje-programado',
@@ -17,8 +19,6 @@ import { PatrullajeRecorridoComponent } from "./patrullaje-recorrido/patrullaje-
   styles: ``
 })
 export class PatrullajeProgramadoComponent implements OnInit {
-
-
 
   // Unidad patrullaje
   patrullajes: any[] = [];
@@ -33,6 +33,9 @@ export class PatrullajeProgramadoComponent implements OnInit {
   patrullajeRecorridoId: number | null = null;
 
   searchTimeout: any;
+
+  menuActivo: any = null;
+  dropdownStyle: any = {};
 
   // Search
   descripcionBusqueda: string = '';
@@ -58,31 +61,43 @@ export class PatrullajeProgramadoComponent implements OnInit {
 
   }
 
-  // - Patrullaje paginado
+  // ================================
+  // Methods
+  // ================================
   getPatrullajePaginado() {
-    this.isLoading = true;
 
-    this.patrullajeService.getPatrullajesProgramadoPaginated({
+    const params: GetPatrullajesPaginatedParams = {
       page: this.page,
       limit: this.limit,
       descripcion: this.descripcionBusqueda?.trim() || '',
       fecha: this.fechaBusqueda?.trim() || '',
+    };
 
-    }).subscribe({
-      next: (res) => {
+    this.isLoading = true;
 
-        console.log("UNIDADES: ", res);
-        this.patrullajes = res.data.rows;
-        this.totalItems = res.data.total;
-        this.currentPage = res.data.page;
-        this.totalPages = res.data.totalPages;
-        this.isLoading = false;
-      },
-      error: (err) => {
-        console.error(err);
-        this.isLoading = false;
-      }
-    });
+    this.patrullajeService.getPatrullajesPaginated(params)
+      .pipe(
+        finalize(() => {
+          this.isLoading = false;
+        }),
+      )
+      .subscribe({
+        next: (res) => {
+          const paginacion = res.data;
+
+          this.patrullajes = paginacion.items;
+          this.totalItems = paginacion.total;
+          this.currentPage = paginacion.page;
+
+          this.page = paginacion.page;
+          this.limit = paginacion.limit;
+          this.totalPages = paginacion.totalPages;
+        },
+        error: (err) => {
+          console.error(err);
+          this.isLoading = false;
+        }
+      });
   }
 
   // - Eliminar patrullaje
@@ -152,10 +167,10 @@ export class PatrullajeProgramadoComponent implements OnInit {
     ]);
   }
 
-    // - Finalizar patrullaje
+  // - Finalizar patrullaje
   finishedPatrullaje(_t73: any) {
-throw new Error('Method not implemented.');
-}
+    throw new Error('Method not implemented.');
+  }
 
   // - Ver patrullaje
   verPatrullaje(patrullaje: any) {
@@ -196,6 +211,26 @@ throw new Error('Method not implemented.');
   // ================================
   // Helpers methods
   // ================================
+  toggleDropdown(event: MouseEvent, opciones: any) {
+    event.stopPropagation();
+
+    const button = event.currentTarget as HTMLElement;
+    const rect = button.getBoundingClientRect();
+
+    this.menuActivo = opciones;
+
+    this.dropdownStyle = {
+      top: `${rect.bottom + 8}px`,
+      left: `${rect.right - 200}px`, // ancho del menú
+    };
+  }
+
+  // Cerrar al hacer click fuera
+  @HostListener('document:click')
+  cerrarDropdown() {
+    this.menuActivo = null;
+  }
+
   getEstadoClass(estado: string): string {
 
     switch (estado) {

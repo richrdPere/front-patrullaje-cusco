@@ -4,9 +4,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, forkJoin, takeUntil } from 'rxjs';
 
 // Services
-import { PatrullajeProgramadoService } from 'src/app/services/patrullaje_programado.service';
+import { PatrullajeProgramadoService } from 'src/app/services/patrullaje/patrullaje_programado.service';
 import { HistorialPatrullajeService } from 'src/app/services/historial-patrullaje.service';
-
+import { PatrullajeByIdData } from 'src/app/interfaces/patrullaje_programado/get-patrullaje-by-id.model';
 
 @Component({
   selector: 'patrullaje-detalle',
@@ -21,16 +21,15 @@ export class PatrullajeDetalleComponent implements OnInit, OnDestroy {
     private historialService: HistorialPatrullajeService,
     private router: Router,
     private route: ActivatedRoute
-  ) {
-
-  }
+  ) { }
 
   private destroy$ = new Subject<void>();
 
   // VARIABLES
   patrullajeId!: number;
   loading = false;
-  patrullaje: any = null;
+
+  patrullaje!: PatrullajeByIdData;
   historial: any[] = [];
 
   // CICLO DE VIDA
@@ -54,14 +53,11 @@ export class PatrullajeDetalleComponent implements OnInit, OnDestroy {
   }
 
   // CARGAR INFORMACIÓN
-
   cargarDatos(): void {
     this.loading = true;
     forkJoin({
       patrullaje: this.patrullajeService.getPatrullajeProgramadoById(this.patrullajeId),
       historial: this.historialService.getHistorialByPatrullajeEndpoint(this.patrullajeId)
-      // historial: this.historialService.getHistorialDetalle(this.patrullajeId)
-
     })
       .pipe(takeUntil(this.destroy$))
       .subscribe({

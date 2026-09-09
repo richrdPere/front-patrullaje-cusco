@@ -340,7 +340,7 @@
                 {{ patrulla.updatedAt | date: 'dd/MM/yyyy, hh:mm a' }}
               </td>
 
-              <!-- Acciones -->
+              <!-- ACCIONES PRINCIPALES -->
               <td>
                 <div class="flex items-center justify-center gap-0.5">
 
@@ -350,16 +350,6 @@
                       aria-label="Ver detalles del operativo">
 
                       <i class="fa-solid fa-eye"></i>
-                    </button>
-                  </div>
-
-
-                  <!-- Finalizar patrullaje -->
-                  <div class="tooltip tooltip-left" data-tip="Finalizar patrullaje">
-                    <button type="button" class="btn btn-ghost btn-circle btn-sm" (click)="finishedPatrullaje(patrulla)"
-                      aria-label="Finalizar patrullaje">
-
-                      <i class="fa-regular fa-circle-check"></i>
                     </button>
                   </div>
 
@@ -376,6 +366,59 @@
                     </button>
                   </div>
                   }
+
+                  <!-- Finalizar patrullaje -->
+                  <div class="tooltip tooltip-left" data-tip="Finalizar patrullaje">
+                    <button type="button" class="btn btn-ghost btn-circle btn-sm" (click)="finishedPatrullaje(patrulla)"
+                      aria-label="Finalizar patrullaje">
+
+                      <i class="fa-regular fa-circle-check"></i>
+                    </button>
+                  </div>
+
+                  <!-- Más opciones -->
+                  <!-- <div class="tooltip tooltip-left" data-tip="Más opciones">
+                    <button class="btn btn-ghost btn-circle btn-md" title="Más opciones"
+                      (click)="toggleDropdown($event, patrulla)">
+
+                      <i class="fa-solid fa-ellipsis-vertical"></i>
+                    </button>
+                  </div> -->
+
+                  <!-- @if (menuActivo?.id === patrulla.id ) {
+                  <div class="fixed bg-base-100 shadow-xl rounded-xl w-auto border border-base-300 z-9999"
+                    [ngStyle]="dropdownStyle">
+                    <ul class="menu menu-md ">
+                      <li class="menu-title text-xs text-base-content/60 text-start">Otras acciones</li>
+
+
+                      <li>
+                        <button type="button" class="btn btn-ghost btn-circle btn-sm" (click)="verHistorial(patrulla)"
+                          aria-label="Ver historial del operativo">
+
+                          <i class="fa-solid fa-clock-rotate-left"></i>
+                        </button>
+                      </li>
+
+
+                      <li>
+                        <button type="button" class="btn btn-ghost btn-circle btn-sm"
+                          (click)="editarPatrullaje(patrulla)" aria-label="Editar operativo">
+
+                          <i class="fa-solid fa-pencil"></i>
+                      </li>
+
+
+                      <li>
+                        <button type="button" class="btn btn-ghost btn-circle btn-sm"
+                          (click)="eliminarPatrullaje(patrulla)" aria-label="Eliminar operativo">
+
+                          <i class="fa-solid fa-trash"></i>
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
+                  } -->
 
                   <!-- Historial -->
                   <div class="tooltip tooltip-left" data-tip="Ver historial">

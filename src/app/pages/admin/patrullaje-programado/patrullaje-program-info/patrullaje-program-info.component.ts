@@ -1,12 +1,13 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, EventEmitter, Input, Output, SimpleChanges } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
+import { PatrullajeByIdData } from 'src/app/interfaces/patrullaje_programado/get-patrullaje-by-id.model';
 
 // Interface
 import { IPatrullajeDetalle } from 'src/app/interfaces/patrullaje_programado/IPatrullajeProgramadoInfo';
 
 // Service
-import { PatrullajeProgramadoService } from 'src/app/services/patrullaje_programado.service';
+import { PatrullajeProgramadoService } from 'src/app/services/patrullaje/patrullaje_programado.service';
 
 @Component({
   selector: 'patrullaje-program-info',
@@ -21,7 +22,7 @@ export class PatrullajeProgramInfoComponent {
 
   @Output() modalCerrado = new EventEmitter<void>();
 
-  p: IPatrullajeDetalle | null = null;
+  patrullajeDetalle!: PatrullajeByIdData;
   loading = false;
 
   modalWidthClass = 'max-w-4xl'; // default
@@ -43,7 +44,6 @@ export class PatrullajeProgramInfoComponent {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['patrullaje_id'] && this.patrullaje_id) {
-      this.p = null;
       this.cargarDatosPatrullaje();
       this.setModalWidth('lg');
     }
@@ -53,11 +53,8 @@ export class PatrullajeProgramInfoComponent {
 
     this.patrullajeService.getPatrullajeProgramadoById(this.patrullaje_id!).subscribe({
       next: (res) => {
-        this.p = res.data;
-
-
+        this.patrullajeDetalle = res.data;
         this.loading = false;
-
       },
       error: (err) => {
         this.loading = false;
@@ -71,7 +68,7 @@ export class PatrullajeProgramInfoComponent {
 
   }
 
-  formatearHora(hora: string ): string {
+  formatearHora(hora: string): string {
     if (!hora) return '';
 
     const partes = hora.split(':'); // HH:mm:ss
@@ -88,7 +85,7 @@ export class PatrullajeProgramInfoComponent {
     return `${horasStr}:${minutos} ${ampm}`;
   }
 
-  formatearFecha(fecha: string ): string {
+  formatearFecha(fecha: string): string {
     if (!fecha) return '';
 
     const partes = fecha.split('-'); // YYYY-MM-DD

@@ -39,6 +39,8 @@ export class PoliciasComponent implements OnInit {
 
   searchTimeout: any;
 
+  estadosActualizando = new Set<number>();
+
   // Search
   nombreBusqueda: string = '';
   dniBusqueda: string = '';
@@ -173,6 +175,28 @@ export class PoliciasComponent implements OnInit {
     this.policia_id = poli.id;
     this.mostrarModalInfo = true;
   }
+
+  // CAMBIAR ESTADO
+  // cambiarEstado(policia: PoliciaData) {
+
+  //   this.policiasService
+  //     .changePoliciaEstado(policia.id,)
+  //     .subscribe({
+  //       next: (res) => {
+
+  //         policia.estado = res.data.estado;
+
+  //         Swal.fire({
+  //           icon: 'success',
+  //           title: res.message,
+  //           timer: 1500,
+  //           showConfirmButton: false
+  //         });
+  //       },
+  //       error: (err) => console.error(err)
+  //     });
+
+  // }
 
   // ================================
   // Helpers methods

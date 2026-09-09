@@ -16,22 +16,23 @@
     </div>
 
     <!-- CONTENIDO -->
-    <div *ngIf="!loading && p as p" class="p-6 space-y-6 max-h-[80vh] ">
+    <div *ngIf="!loading &&  patrullajeDetalle" class="p-6 space-y-6 max-h-[80vh] ">
 
       <!-- Estado del Patrullaje -->
       <div class="alert" [ngClass]="{
-       'alert-info': p.estado === 'PROGRAMADO',
-       'alert-success': p.estado === 'EN_CURSO',
-       'alert-warning': p.estado === 'COMPLETADO',
-       'alert-error': p.estado === 'CANCELADO'
+       'alert-primary': patrullajeDetalle.estado === 'PROGRAMADO',
+       'alert-success': patrullajeDetalle.estado === 'EN_CURSO',
+       'alert-warning': patrullajeDetalle.estado === 'ACEPTADO',
+       'alert-info': patrullajeDetalle.estado === 'EN_CURSO',
+       'alert-error': patrullajeDetalle.estado === 'FINALIZADO'
      }">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
         </svg>
         <div>
-          <h3 class="font-bold">Estado: {{ p.estado || 'PROGRAMADO' }}</h3>
-          <div class="text-sm">Patrullaje programado para el día {{ p.fecha | date:'dd/MM/yyyy' }}</div>
+          <h3 class="font-bold">Estado: {{ patrullajeDetalle.estado || 'PROGRAMADO' }}</h3>
+          <div class="text-sm">Patrullaje programado para el día {{ patrullajeDetalle.fecha | date:'dd/MM/yyyy' }}</div>
         </div>
       </div>
 
@@ -50,28 +51,28 @@
           <div class="bg-base-200 p-3 rounded-lg">
             <label class="text-xs text-base-content/60">Fecha</label>
             <p class="font-medium flex items-center gap-1">
-              📅 {{ formatearFecha(p.fecha)}}
+              📅 {{ formatearFecha(patrullajeDetalle.fecha)}}
             </p>
           </div>
 
           <div class="bg-base-200 p-3 rounded-lg">
             <label class="text-xs text-base-content/60">Hora de Inicio</label>
             <p class="font-medium flex items-center gap-1">
-              🕐 {{ formatearHora(p.hora_inicio)}}
+              🕐 {{ formatearHora(patrullajeDetalle.hora_inicio)}}
             </p>
           </div>
 
           <div class="bg-base-200 p-3 rounded-lg">
             <label class="text-xs text-base-content/60">Hora de Fin</label>
             <p class="font-medium flex items-center gap-1">
-              🕘 {{ formatearHora(p.hora_fin) }}
+              🕘 {{ formatearHora(patrullajeDetalle.hora_fin) }}
             </p>
           </div>
         </div>
 
         <div class="bg-base-200 p-3 rounded-lg">
           <label class="text-xs text-base-content/60">Descripción</label>
-          <p class="font-medium">{{ p.descripcion }}</p>
+          <p class="font-medium">{{ patrullajeDetalle.descripcion }}</p>
         </div>
       </div>
 
@@ -94,24 +95,26 @@
               <div class="flex items-center gap-3 mb-3">
 
                 <div>
-                  <p class="font-bold">{{ p.unidad.codigo }}</p>
-                  <p class="text-sm text-base-content/60">{{ p.unidad.tipo }}</p>
+                  <p class="font-bold">{{ patrullajeDetalle.unidad?.codigo }}</p>
+                  <p class="text-sm text-base-content/60">{{ patrullajeDetalle.unidad?.tipo }}</p>
                 </div>
               </div>
 
               <div class="grid grid-cols-2 gap-2 text-sm">
                 <div>
                   <label class="text-xs text-base-content/60">Placa</label>
-                  <p class="font-medium">{{ p.unidad.placa }}</p>
+                  <p class="font-medium">{{ patrullajeDetalle.unidad?.placa }}</p>
                 </div>
                 <div>
                   <label class="text-xs text-base-content/60">Estado</label>
                   <span class="badge badge-sm" [ngClass]="{
-                    'badge-success': p.unidad.estado === 'En patrullaje',
-                    'badge-warning': p.unidad.estado === 'En mantenimiento',
-                    'badge-info': p.unidad.estado === 'Disponible'
+                    'badge-info': patrullajeDetalle.unidad?.estado === 'DISPONIBLE',
+                    'badge-success': patrullajeDetalle.unidad?.estado === 'EN_PATRULLAJE',
+                    'badge-warning': patrullajeDetalle.unidad?.estado === 'MANTENIMIENTO',
+                    'badge-error': patrullajeDetalle.unidad?.estado === 'FUERA_DE_SERVICIO',
+
                   }">
-                    {{ p.unidad.estado}}
+                    {{ patrullajeDetalle.unidad?.estado}}
                   </span>
                 </div>
               </div>
@@ -137,27 +140,27 @@
               <div class="flex items-center gap-3 mb-3">
 
                 <div>
-                  <p class="font-bold">{{ p.zona.nombre }}</p>
-                  <p class="text-sm text-base-content/60">Zona ID: #{{ p.zona.id }}</p>
+                  <p class="font-bold">{{ patrullajeDetalle.zona?.nombre }}</p>
+                  <p class="text-sm text-base-content/60">Zona ID: #{{ patrullajeDetalle.zona?.id }}</p>
                 </div>
               </div>
 
-              <div class="space-y-2">
+              <!-- <div class="space-y-2">
                 <div>
                   <label class="text-xs text-base-content/60">Descripción</label>
-                  <p class="text-sm">{{ p.zona.descripcion }}</p>
+                  <p class="text-sm">{{ patrullajeDetalle.zona?.descripcion }}</p>
                 </div>
                 <div>
                   <label class="text-xs text-base-content/60">Nivel de Riesgo</label>
                   <span class="badge" [ngClass]="{
-                    'badge-error': p.zona.riesgo === 'alto',
-                    'badge-warning': p.zona.riesgo === 'medio',
-                    'badge-info': p.zona.riesgo === 'bajo'
+                    'badge-error': patrullajeDetalle.zona?.riesgo === 'alto',
+                    'badge-warning': patrullajeDetalle.zona?.riesgo === 'medio',
+                    'badge-info': patrullajeDetalle.zona.?.riesgo
                   }">
-                    {{ p.zona.riesgo.toUpperCase() }}
+                    {{ patrullajeDetalle.zona.riesgo.toUpperCase() }}
                   </span>
                 </div>
-              </div>
+              </div> -->
             </div>
           </div>
         </div>
@@ -172,8 +175,8 @@
               d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
           </svg>
           Personal Asignado
-          <span class="badge badge-primary">{{ (p.serenos.length || 0) +
-            (p.policias.length || 0) }} personas</span>
+          <span class="badge badge-primary">{{ (patrullajeDetalle.serenos.length || 0) +
+            (patrullajeDetalle.policias.length || 0) }} personas</span>
         </h4>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -183,11 +186,12 @@
             <div class="card-body p-4">
               <div class="flex items-center gap-2 mb-3">
                 <span class="badge badge-primary">👮 Serenos</span>
-                <span class="text-sm text-base-content/60">{{ p.serenos.length }} asignados</span>
+                <span class="text-sm text-base-content/60">{{ patrullajeDetalle.serenos.length }} asignados</span>
               </div>
 
               <div class="space-y-2 max-h-64 overflow-y-auto">
-                <div *ngFor="let sereno of p.serenos" class="flex items-center gap-3 p-2 bg-base-100 rounded-lg">
+                <div *ngFor="let sereno of patrullajeDetalle.serenos"
+                  class="flex items-center gap-3 p-2 bg-base-100 rounded-lg">
                   <!-- <div class="avatar placeholder">
                     <div class="bg-primary text-primary-content rounded-full w-8">
                       <span class="text-xs">{{ (sereno.nombre?.charAt(0) || 'V') + (sereno.apellidos?.charAt(0) || 'A')
@@ -195,7 +199,7 @@
                     </div>
                   </div> -->
                   <div class="flex-1">
-                    <p class="font-medium text-sm">{{ sereno.nombre }} {{ sereno.apellidos }}</p>
+                    <p class="font-medium text-sm">{{ sereno.nombres }} {{ sereno.apellidos }}</p>
                     <div class="flex flex-wrap gap-1 mt-1">
                       <span *ngFor="let rol of sereno.roles" class="badge badge-xs badge-outline">
                         {{ rol }}
@@ -205,7 +209,7 @@
                   <div class="badge badge-success badge-sm">Activo</div>
                 </div>
 
-                <div *ngIf="!p.serenos.length" class="text-center text-base-content/60 py-4">
+                <div *ngIf="!patrullajeDetalle.serenos.length" class="text-center text-base-content/60 py-4">
                   No hay serenos asignados
                 </div>
               </div>
@@ -217,11 +221,12 @@
             <div class="card-body p-4">
               <div class="flex items-center gap-2 mb-3">
                 <span class="badge badge-secondary">👮‍♂️ Policías</span>
-                <span class="text-sm text-base-content/60">{{ p.policias.length || 1 }} asignados</span>
+                <span class="text-sm text-base-content/60">{{ patrullajeDetalle.policias.length || 1 }} asignados</span>
               </div>
 
               <div class="space-y-2 max-h-64 overflow-y-auto">
-                <div *ngFor="let policia of p.policias" class="flex items-center gap-3 p-2 bg-base-100 rounded-lg">
+                <div *ngFor="let policia of patrullajeDetalle.policias"
+                  class="flex items-center gap-3 p-2 bg-base-100 rounded-lg">
                   <!-- <div class="avatar placeholder">
                     <div class="bg-secondary text-secondary-content rounded-full w-8">
                       <span class="text-xs">{{ (policia.usuario?.nombre?.charAt(0) || 'E') +
@@ -229,7 +234,7 @@
                     </div>
                   </div> -->
                   <div class="flex-1">
-                    <p class="font-medium text-sm">{{ policia.usuario.nombre }} {{ policia.usuario.apellidos }}</p>
+                    <p class="font-medium text-sm">{{ policia.nombres }} {{ policia.apellidos }}</p>
                     <div class="flex flex-wrap gap-1 mt-1">
                       <span class="badge badge-xs badge-outline">{{ policia.grado }}</span>
                       <span class="badge badge-xs badge-outline">{{ policia.comisaria }}</span>
@@ -238,7 +243,7 @@
                   <div class="badge badge-info badge-sm">PNP</div>
                 </div>
 
-                <div *ngIf="!p.policias.length" class="text-center text-base-content/60 py-4">
+                <div *ngIf="!patrullajeDetalle.policias.length" class="text-center text-base-content/60 py-4">
                   No hay policías asignados
                 </div>
               </div>
@@ -261,14 +266,14 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="bg-base-200 p-3 rounded-lg">
             <label class="text-xs text-base-content/60">Creado el</label>
-            <p class="font-medium text-sm">{{ p.createdAt |
+            <p class="font-medium text-sm">{{ patrullajeDetalle.createdAt |
               date:'dd/MM/yyyy
               hh:mm a' }}</p>
           </div>
 
           <div class="bg-base-200 p-3 rounded-lg">
             <label class="text-xs text-base-content/60">Actualizado el</label>
-            <p class="font-medium text-sm">{{ p.updatedAt | date:'dd/MM/yyyy
+            <p class="font-medium text-sm">{{ patrullajeDetalle.updatedAt | date:'dd/MM/yyyy
               hh:mm a' }}</p>
           </div>
         </div>

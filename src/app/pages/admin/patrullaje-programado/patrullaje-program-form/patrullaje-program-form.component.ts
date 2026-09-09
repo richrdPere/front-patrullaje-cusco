@@ -8,10 +8,10 @@ import Swal from 'sweetalert2';
 import { UppercaseDirective } from 'src/app/pages/shared/directives/uppercase.directive';
 
 // Services
-import { UnidadPatrullajeService } from 'src/app/services/unidad-patrullaje.service';
+import { UnidadPatrullajeService } from 'src/app/services/unidad/unidad-patrullaje.service';
 import { ZonaService } from 'src/app/services/zona.service';
 
-import { PatrullajeProgramadoService } from 'src/app/services/patrullaje_programado.service';
+import { PatrullajeProgramadoService } from 'src/app/services/patrullaje/patrullaje_programado.service';
 import { UsuarioService } from 'src/app/services/usuarios/usuarios.service';
 import { PoliciasService } from 'src/app/services/usuarios/policias.service';
 

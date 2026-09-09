@@ -8,7 +8,7 @@ import { PuntoRecorridoPatrullaje, RecorridoPatrullajeData } from 'src/app/inter
 
 // Services
 import { GoogleMapsLoaderService } from 'src/app/services/google-maps-loader.service';
-import { PatrullajeProgramadoService } from 'src/app/services/patrullaje_programado.service';
+import { PatrullajeProgramadoService } from 'src/app/services/patrullaje/patrullaje_programado.service';
 
 
 @Component({
@@ -188,7 +188,7 @@ export class PatrullajeRecorridoComponent
             'No se pudo cargar el recorrido del patrullaje.';
 
           console.error(
-            '❌ Error obteniendo recorrido:',
+            'Error obteniendo recorrido:',
             error
           );
         }

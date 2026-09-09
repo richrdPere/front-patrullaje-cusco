@@ -6,9 +6,9 @@ import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 // Interfaces
-import { ApiResponse } from '../pages/shared/interfaces/api-response';
-import { Vehiculo } from '../interfaces/vehiculo';
-import { PaginadoResponse } from '../pages/shared/interfaces/paginado-response';
+import { ApiResponse } from '../../pages/shared/interfaces/api-response';
+import { Vehiculo } from '../../interfaces/vehiculo';
+import { PaginadoResponse } from '../../pages/shared/interfaces/paginado-response';
 
 export interface UltimoCodigoResponse {
   codigo: string;

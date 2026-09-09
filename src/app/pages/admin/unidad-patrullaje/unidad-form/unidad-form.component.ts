@@ -7,7 +7,7 @@ import Swal from 'sweetalert2';
 import { UppercaseDirective } from 'src/app/pages/shared/directives/uppercase.directive';
 
 // Service
-import { UnidadPatrullajeService } from 'src/app/services/unidad-patrullaje.service';
+import { UnidadPatrullajeService } from 'src/app/services/unidad/unidad-patrullaje.service';
 
 @Component({
   selector: 'unidad-form',

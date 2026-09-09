@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
 
 // Services
-import { UnidadPatrullajeService } from 'src/app/services/unidad-patrullaje.service';
+import { UnidadPatrullajeService } from 'src/app/services/unidad/unidad-patrullaje.service';
 import { UnidadFormComponent } from "./unidad-form/unidad-form.component";
 
 @Component({

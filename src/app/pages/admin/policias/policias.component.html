@@ -200,6 +200,7 @@
               <th class="text-center">Teléfono</th>
               <th>Grado</th>
               <th>Comisaria</th>
+              <!-- <th class="text-center">Estado</th> -->
               <th>Actualización</th>
               <th class="text-center">Acciones</th>
             </tr>
@@ -278,6 +279,29 @@
               <th class="font-sans text-sm">
                 {{poli.comisaria}}
               </th>
+
+              <!-- Estado -->
+              <!-- <td class="text-center">
+                <div class="inline-flex items-center justify-center gap-2">
+
+                  <input type="checkbox" class="toggle toggle-sm
+                               border-error
+                               bg-error/70
+                               checked:border-success
+                               checked:bg-success" [checked]="poli.estado" (change)="cambiarEstado(poli)"
+                    [attr.aria-label]="
+                          poli.estado
+                            ? 'Desactivar policia'
+                            : 'Activar policia'
+                        " />
+
+                  <span class="min-w-14 text-left text-xs font-medium" [class.text-success]="poli.estado"
+                    [class.text-error]="!poli.estado">
+
+                    {{ poli.estado }}
+                  </span>
+                </div>
+              </td> -->
 
               <!-- Actualización -->
               <td class="whitespace-nowrap text-sm">
