@@ -50,68 +50,86 @@
     <!-- FILTROS -->
     <!-- ================================================= -->
 
-    <section class="mb-6 rounded-2xl
-             border border-base-300
-             bg-base-100 p-4
-             shadow-sm sm:p-5">
+    <section class="mb-6 overflow-hidden rounded-2xl
+         border border-base-300
+         bg-base-100 shadow-sm">
 
-      <div class="grid grid-cols-1 gap-4
-               md:grid-cols-2">
+      <div class="grid grid-cols-1
+           lg:grid-cols-[minmax(0,1fr)_170px]">
 
-        <!-- Buscar por descripción -->
-
-        <label class="form-control w-full">
-          <span class="mb-1.5 text-xs font-semibold
+        <!-- =============================================== -->
+        <!-- CAMPOS DE FILTRO -->
+        <!-- =============================================== -->
+        <div class="p-4 sm:p-5">
+          <div class="grid grid-cols-1 gap-4
+               sm:grid-cols-2
+               xl:grid-cols-[minmax(240px,1.4fr)_minmax(180px,1fr)_minmax(190px,1fr)_auto]">
+            <!-- Buscar por descripción -->
+            <label class="form-control w-full">
+              <span class="mb-1.5 text-xs font-semibold
                    uppercase tracking-wide
                    text-base-content/60">
 
-            Descripción
-          </span>
+                Descripción
+              </span>
 
-          <div class="relative">
-            <i class="fa-solid fa-magnifying-glass
+              <div class="relative">
+                <i class="fa-solid fa-magnifying-glass
                      pointer-events-none absolute
                      left-3.5 top-1/2
                      -translate-y-1/2
                      text-base-content/35">
-            </i>
+                </i>
 
-            <input type="text" class="input input-bordered
+                <input type="text" class="input input-bordered
                      h-11 w-full rounded-xl
                      bg-base-100 pl-10 pr-4
                      focus:outline-none
                      focus:ring-2
                      focus:ring-primary/30" placeholder="Buscar por descripción" autocomplete="off"
-              [(ngModel)]="descripcionBusqueda" (ngModelChange)="onSearchChange()" />
-          </div>
-        </label>
+                  [(ngModel)]="descripcionBusqueda" (ngModelChange)="onSearchChange()" appUppercase />
+              </div>
+            </label>
 
-        <!-- Buscar por fecha -->
+            <!-- Buscar por fecha -->
 
-        <label class="form-control w-full">
-          <span class="mb-1.5 text-xs font-semibold
+            <label class="form-control w-full">
+              <span class="mb-1.5 text-xs font-semibold
                    uppercase tracking-wide
                    text-base-content/60">
 
-            Fecha programada
-          </span>
+                Fecha programada
+              </span>
 
-          <div class="relative">
-            <i class="fa-regular fa-calendar
+              <div class="relative">
+                <i class="fa-regular fa-calendar
                      pointer-events-none absolute
                      left-3.5 top-1/2
                      -translate-y-1/2
                      text-base-content/35">
-            </i>
+                </i>
 
-            <input type="date" class="input input-bordered
+                <input type="date" class="input input-bordered
                      h-11 w-full rounded-xl
                      bg-base-100 pl-10 pr-4
                      focus:outline-none
                      focus:ring-2
                      focus:ring-primary/30" [(ngModel)]="fechaBusqueda" (change)="onSearchChange()" />
+              </div>
+            </label>
           </div>
-        </label>
+        </div>
+
+        <!-- =============================================== -->
+        <!-- ILUSTRACIÓN DE BÚSQUEDA -->
+        <!-- =============================================== -->
+        <div class="hidden items-center justify-center border-base-300 px-5 lg:flex">
+
+          <img src="assets/img/search.png" alt="" aria-hidden="true" class="h-32 w-32
+               select-none object-contain
+               opacity-90
+               drop-shadow-sm" draggable="false" />
+        </div>
       </div>
     </section>
 
@@ -323,7 +341,6 @@
               </td>
 
               <!-- Estado -->
-
               <td class="text-center">
                 <span class="badge whitespace-nowrap
                              font-semibold" [ngClass]="
@@ -335,117 +352,192 @@
               </td>
 
               <!-- Actualización -->
-
               <td class="whitespace-nowrap text-sm">
                 {{ patrulla.updatedAt | date: 'dd/MM/yyyy, hh:mm a' }}
               </td>
 
               <!-- ACCIONES PRINCIPALES -->
+              <!-- Acciones -->
               <td>
                 <div class="flex items-center justify-center gap-0.5">
 
-                  <!-- Ver detalles -->
+                  <!-- Ver detalle -->
                   <div class="tooltip tooltip-left" data-tip="Ver detalles">
-                    <button type="button" class="btn btn-ghost btn-circle btn-sm" (click)="verPatrullaje(patrulla)"
-                      aria-label="Ver detalles del operativo">
-
-                      <i class="fa-solid fa-eye"></i>
+                    <button type="button" class="btn btn-ghost btn-circle btn-sm"
+                      aria-label="Ver detalles del patrullaje" (click)="verPatrullaje(patrulla)">
+                      <i class="fa-solid fa-eye text-base-content/70"></i>
                     </button>
                   </div>
 
                   <!-- Ver recorrido -->
-                  @if (
-                  patrulla.estado === 'EN_CURSO' ||
-                  patrulla.estado === 'FINALIZADO'
-                  ) {
                   <div class="tooltip tooltip-left" data-tip="Ver recorrido GPS">
-                    <button type="button" class="btn btn-ghost btn-circle btn-sm" (click)="verRecorrido(patrulla.id)"
-                      aria-label="Ver recorrido GPS">
-
-                      <i class="fa-solid fa-route"></i>
-                    </button>
-                  </div>
-                  }
-
-                  <!-- Finalizar patrullaje -->
-                  <div class="tooltip tooltip-left" data-tip="Finalizar patrullaje">
-                    <button type="button" class="btn btn-ghost btn-circle btn-sm" (click)="finishedPatrullaje(patrulla)"
-                      aria-label="Finalizar patrullaje">
-
-                      <i class="fa-regular fa-circle-check"></i>
+                    <button type="button" class="btn btn-ghost btn-circle btn-sm" aria-label="Ver recorrido GPS"
+                      (click)="verRecorrido(patrulla.id)">
+                      <i class="fa-solid fa-route "></i>
                     </button>
                   </div>
 
-                  <!-- Más opciones -->
-                  <!-- <div class="tooltip tooltip-left" data-tip="Más opciones">
-                    <button class="btn btn-ghost btn-circle btn-md" title="Más opciones"
-                      (click)="toggleDropdown($event, patrulla)">
 
+                  <!-- Más acciones -->
+                  <div class="tooltip tooltip-left" data-tip="Más acciones">
+                    <button type="button" class="btn btn-ghost btn-circle btn-sm" aria-label="Mostrar más acciones"
+                      aria-haspopup="menu" [attr.aria-expanded]="menuActivoId === patrulla.id"
+                      [class.bg-base-200]="menuActivoId === patrulla.id"
+                      (click)="toggleMenuAcciones($event, patrulla.id)">
                       <i class="fa-solid fa-ellipsis-vertical"></i>
                     </button>
-                  </div> -->
+                  </div>
 
-                  <!-- @if (menuActivo?.id === patrulla.id ) {
-                  <div class="fixed bg-base-100 shadow-xl rounded-xl w-auto border border-base-300 z-9999"
-                    [ngStyle]="dropdownStyle">
-                    <ul class="menu menu-md ">
-                      <li class="menu-title text-xs text-base-content/60 text-start">Otras acciones</li>
+                  <!-- ============================================= -->
+                  <!-- MENÚ FLOTANTE -->
+                  <!-- ============================================= -->
+                  @if ( menuActivoId === patrulla.id ) {
+                  <div class="fixed z-9999 w-56
+                    overflow-hidden rounded-xl
+                    border border-base-300
+                    bg-base-100 shadow-2xl" [ngStyle]="dropdownStyle" role="menu" (click)="$event.stopPropagation()">
+                    <!-- Encabezado -->
+                    <div class="border-b border-base-300
+                      bg-base-200/50 px-4 py-3">
+                      <p class="text-xs font-semibold uppercase
+                          tracking-wide
+                          text-base-content/55">
+                        Otras acciones
+                      </p>
 
+                      <p class="mt-0.5 truncate text-sm
+                        font-medium text-base-content">
+                        Patrullaje #{{ patrulla.id }}
+                      </p>
+                    </div>
 
-                      <li>
-                        <button type="button" class="btn btn-ghost btn-circle btn-sm" (click)="verHistorial(patrulla)"
-                          aria-label="Ver historial del operativo">
+                    <ul class="menu w-full gap-1 p-2" role="none">
+                      <!-- Finalizar -->
+                      <li role="none">
+                        <button type="button" class="flex w-full items-center
+                                gap-3 rounded-lg" role="menuitem" [disabled]="
+                            patrulla.estado ===
+                            'FINALIZADO'
+                          " (click)="
+                            cerrarMenuAcciones();
+                            finishedPatrullaje(patrulla)
+                          ">
+                          <span class="flex h-8 w-8 items-center
+                              justify-center rounded-lg
+                              bg-success/10 text-success">
+                            <i class="fa-regular fa-circle-check"></i>
+                          </span>
 
-                          <i class="fa-solid fa-clock-rotate-left"></i>
+                          <span class="min-w-0 flex-1 text-left">
+                            <span class="block text-sm font-medium">
+                              Finalizar patrullaje
+                            </span>
+
+                            <span class="block truncate text-xs
+                             text-base-content/50">
+                              Marcar como finalizado
+                            </span>
+                          </span>
                         </button>
                       </li>
 
+                      <!-- Historial -->
+                      <li role="none">
+                        <button type="button" class="flex w-full items-center
+                              gap-3 rounded-lg" role="menuitem" (click)="
+                          cerrarMenuAcciones();
+                          verHistorial(patrulla)
+                        ">
+                          <span class="flex h-8 w-8 items-center
+                            justify-center rounded-lg
+                            bg-secondary/10 text-secondary">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                          </span>
 
-                      <li>
-                        <button type="button" class="btn btn-ghost btn-circle btn-sm"
-                          (click)="editarPatrullaje(patrulla)" aria-label="Editar operativo">
+                          <span class="min-w-0 flex-1 text-left">
+                            <span class="block text-sm font-medium">
+                              Ver historial
+                            </span>
 
-                          <i class="fa-solid fa-pencil"></i>
+                            <span class="block truncate text-xs
+                              text-base-content/50">
+                              Consultar actividad
+                            </span>
+                          </span>
+                        </button>
                       </li>
 
+                      <!-- Editar -->
+                      <li role="none">
+                        <button type="button" class="flex w-full items-center
+                              gap-3 rounded-lg" role="menuitem" [disabled]="
+                          patrulla.estado ===
+                            'EN_CURSO' ||
+                          patrulla.estado ===
+                            'FINALIZADO'
+                        " (click)="
+                          cerrarMenuAcciones();
+                          editarPatrullaje(
+                            patrulla
+                          )
+                        ">
+                          <span class="flex h-8 w-8 items-center
+                            justify-center rounded-lg
+                            bg-info/10 text-info">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                          </span>
 
-                      <li>
-                        <button type="button" class="btn btn-ghost btn-circle btn-sm"
-                          (click)="eliminarPatrullaje(patrulla)" aria-label="Eliminar operativo">
+                          <span class="min-w-0 flex-1 text-left">
+                            <span class="block text-sm font-medium">
+                              Editar patrullaje
+                            </span>
 
-                          <i class="fa-solid fa-trash"></i>
+                            <span class="block truncate text-xs
+                              text-base-content/50">
+                              Modificar planificación
+                            </span>
+                          </span>
+                        </button>
+                      </li>
+
+                      <li class="my-1 border-t
+                          border-base-300" aria-hidden="true"></li>
+
+                      <!-- Eliminar -->
+                      <li role="none">
+                        <button type="button" class="flex w-full items-center
+                              gap-3 rounded-lg text-error
+                              hover:bg-error/10" role="menuitem" [disabled]="
+                          patrulla.estado ===
+                            'EN_CURSO' ||
+                          patrulla.estado ===
+                            'FINALIZADO'
+                        " (click)="
+                          cerrarMenuAcciones();
+                          eliminarPatrullaje(
+                            patrulla
+                          )
+                        ">
+                          <span class="flex h-8 w-8 items-center
+                            justify-center rounded-lg
+                            bg-error/10 text-error">
+                            <i class="fa-solid fa-trash"></i>
+                          </span>
+
+                          <span class="min-w-0 flex-1 text-left">
+                            <span class="block text-sm font-medium">
+                              Eliminar patrullaje
+                            </span>
+
+                            <span class="block truncate text-xs text-error/70">
+                              Eliminar la planificación
+                            </span>
+                          </span>
                         </button>
                       </li>
                     </ul>
                   </div>
-                  } -->
-
-                  <!-- Historial -->
-                  <div class="tooltip tooltip-left" data-tip="Ver historial">
-                    <button type="button" class="btn btn-ghost btn-circle btn-sm" (click)="verHistorial(patrulla)"
-                      aria-label="Ver historial del operativo">
-
-                      <i class="fa-solid fa-clock-rotate-left"></i>
-                    </button>
-                  </div>
-
-                  <!-- Editar -->
-                  <div class="tooltip tooltip-left" data-tip="Editar operativo">
-                    <button type="button" class="btn btn-ghost btn-circle btn-sm" (click)="editarPatrullaje(patrulla)"
-                      aria-label="Editar operativo">
-
-                      <i class="fa-solid fa-pen-to-square"></i>
-                    </button>
-                  </div>
-
-                  <!-- Eliminar -->
-                  <div class="tooltip tooltip-left" data-tip="Eliminar operativo">
-                    <button type="button" class="btn btn-ghost btn-circle btn-sm" (click)="eliminarPatrullaje(patrulla)"
-                      aria-label="Eliminar operativo">
-
-                      <i class="fa-solid fa-trash"></i>
-                    </button>
-                  </div>
+                  }
                 </div>
               </td>
             </tr>

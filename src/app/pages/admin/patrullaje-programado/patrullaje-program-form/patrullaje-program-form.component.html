@@ -1,257 +1,554 @@
 @if (mostrarModal) {
-<div class="modal modal-open">
-  <div class="modal-box max-w-4xl bg-base-100 text-base-content rounded-2xl shadow-2xl p-8" [ngClass]="modalWidthClass">
+<div class="modal modal-open bg-black/50
+           backdrop-blur-sm" (click)="cerrarModal()">
+  <section class="modal-box flex max-h-[94vh]
+             w-[95vw] flex-col overflow-hidden
+             rounded-2xl bg-base-100 p-0
+             text-base-content shadow-2xl" [ngClass]="modalWidthClass" (click)="$event.stopPropagation()">
+    <!-- ============================================= -->
+    <!-- ENCABEZADO -->
+    <!-- ============================================= -->
+    <header class="flex shrink-0 items-start
+               justify-between gap-4 border-b
+               border-base-300 bg-base-200/50
+               px-5 py-4 sm:px-6">
+      <div class="flex min-w-0 items-center gap-3">
+        <div class="flex h-11 w-11 shrink-0
+                   items-center justify-center
+                   rounded-xl bg-primary/10
+                   text-primary">
+          <i class="fa-solid fa-shield-halved
+                     text-lg"></i>
+        </div>
 
-    <!-- Header -->
-    <div class="flex justify-between items-center border-b border-base-300 pb-1 mb-2">
-      <h3 class="text-2xl font-semibold">
-        {{ modoEdicion ? 'Editar Patrullaje Programado' : 'Nuevo Patrullaje Programado' }}
-      </h3>
-      <button type="button" (click)="cerrarModal()" class="btn btn-sm btn-circle btn-ghost text-xl">✕</button>
-    </div>
+        <div class="min-w-0">
+          <div class="flex flex-wrap items-center gap-2">
+            <h2 class="truncate text-lg font-bold
+                       sm:text-xl">
+              {{
+              modoEdicion
+              ? 'Editar patrullaje programado'
+              : 'Nuevo patrullaje programado'
+              }}
+            </h2>
 
-
-    <!-- Formulario -->
-    <form [formGroup]="formPatrullaje" (ngSubmit)="crearOEditarPatrullaje()" class="space-y-4">
-
-      <!-- Sección: Información General -->
-      <div class="">
-        <h3 class="text-lg font-semibold flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24"
-            stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-          </svg>
-          Información General
-        </h3>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-          <!-- UNIDAD -->
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Unidad</span>
-              <span *ngIf="esRequerido('unidad_id')" class="text-red-500 font-bold">*</span>
-            </label>
-            <select formControlName="unidad_id" class="select select-bordered w-full ">
-              <option [ngValue]="null">Seleccione unidad</option>
-              <option *ngFor="let unidad of unidades" [ngValue]="unidad.id">
-                {{ unidad.codigo }} - {{ unidad.tipo }} ({{ unidad.placa }})
-              </option>
-            </select>
-
-            <span class="text-error text-sm mt-1"
-              *ngIf="formPatrullaje.get('unidad_id')?.touched && formPatrullaje.get('unidad_id')?.invalid">
-              La unidad es obligatoria
+            @if (modoEdicion) {
+            <span class="badge badge-info">
+              Edición
             </span>
+            }
           </div>
 
-          <!-- ZONAS -->
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Zona</span>
-              <span *ngIf="esRequerido('zona_id')" class="text-red-500 font-bold">*</span>
+          <p class="mt-0.5 text-sm
+                     text-base-content/60">
+            Configure la modalidad, personal, zona y
+            horario del patrullaje.
+          </p>
+        </div>
+      </div>
+
+      <button type="button" class="btn btn-ghost btn-circle btn-sm" aria-label="Cerrar" [disabled]="isSaving"
+        (click)="cerrarModal()">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+    </header>
+
+    <!-- ============================================= -->
+    <!-- CONTENIDO -->
+    <!-- ============================================= -->
+    <form class="min-h-0 flex-1 overflow-y-auto" [formGroup]="formPatrullaje" (ngSubmit)="crearOEditarPatrullaje()">
+      <fieldset class="space-y-6 p-5 sm:p-6" [disabled]="isLoadingCatalogs || isSaving">
+        <!-- Cargando selectores -->
+        @if (isLoadingCatalogs) {
+        <div class="flex items-center justify-center
+                     gap-3 rounded-xl border
+                     border-info/20 bg-info/5 p-4">
+          <span class="loading loading-spinner
+                       loading-sm text-info"></span>
+
+          <span class="text-sm">
+            Cargando zonas, unidades y personal...
+          </span>
+        </div>
+        }
+
+        <!-- ========================================= -->
+        <!-- TIPO DE PATRULLAJE -->
+        <!-- ========================================= -->
+        <section>
+          <div class="mb-3">
+            <h3 class="font-bold">
+              Tipo de patrullaje
+              <span class="text-error">*</span>
+            </h3>
+
+            <p class="mt-1 text-sm text-base-content/55">
+              Seleccione cómo se desplazará el personal
+              durante el patrullaje.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            @for (
+            tipo of tiposPatrullaje;
+            track tipo.value
+            ) {
+            <label class="flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition" [ngClass]="
+              tipoPatrullaje === tipo.value
+                ? [
+                    'border-primary',
+                    'bg-primary/5'
+                  ]
+                : [
+                    'border-base-300'
+                  ]
+            ">
+              <input type="radio" class="radio radio-primary mt-1" formControlName="tipo_patrullaje"
+                [value]="tipo.value" />
+
+              <span class="flex h-9 w-9 shrink-0
+                items-center justify-center
+                rounded-lg bg-primary/10
+                text-primary">
+                <i class="fa-solid" [ngClass]="tipo.icon"></i>
+              </span>
+
+              <span>
+                <span class="block font-semibold">
+                  {{ tipo.label }}
+                </span>
+
+                <span class="mt-1 block text-xs
+             leading-relaxed
+             text-base-content/55">
+                  {{ tipo.descripcion }}
+                </span>
+              </span>
+            </label>
+            }
+          </div>
+        </section>
+
+        <!-- ========================================= -->
+        <!-- MODALIDAD -->
+        <!-- ========================================= -->
+        <section>
+          <div class="mb-3">
+            <h3 class="font-bold">
+              Modalidad del patrullaje
+              <span class="text-error">*</span>
+            </h3>
+
+            <p class="mt-1 text-sm text-base-content/55">
+              Determine si participará solamente
+              Serenazgo o si habrá apoyo policial.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            @for (
+            modalidad of modalidadesPatrullaje;
+            track modalidad.value
+            ) {
+            <label class="flex cursor-pointer items-start gap-3
+         rounded-xl border p-4 transition" [ngClass]="
+    modalidadPatrullaje === modalidad.value
+      ? [
+          'border-secondary',
+          'bg-secondary/5'
+        ]
+      : [
+          'border-base-300'
+        ]
+  ">
+              <input type="radio" class="radio radio-secondary mt-1" formControlName="modalidad_patrullaje"
+                [value]="modalidad.value" />
+
+              <span class="flex h-9 w-9 shrink-0
+           items-center justify-center
+           rounded-lg bg-secondary/10
+           text-secondary">
+                <i class="fa-solid" [ngClass]="modalidad.icon"></i>
+              </span>
+
+              <span>
+                <span class="block font-semibold">
+                  {{ modalidad.label }}
+                </span>
+
+                <span class="mt-1 block text-xs
+             leading-relaxed
+             text-base-content/55">
+                  {{ modalidad.descripcion }}
+                </span>
+              </span>
+            </label>
+            }
+          </div>
+        </section>
+
+        <!-- ========================================= -->
+        <!-- DATOS OPERATIVOS -->
+        <!-- ========================================= -->
+        <section class="rounded-2xl border border-base-300
+                   bg-base-200/25 p-4 sm:p-5">
+          <div class="mb-4">
+            <h3 class="flex items-center gap-2 font-bold">
+              <i class="fa-solid fa-map-location-dot
+                         text-primary"></i>
+              Información operativa
+            </h3>
+          </div>
+
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <!-- Unidad: solo motorizado -->
+            @if (
+            tipoPatrullaje === 'MOTORIZADO'
+            ) {
+            <label class="form-control w-full">
+              <span class="mb-1.5 text-sm font-semibold">
+                Unidad de patrullaje
+                <span class="text-error">*</span>
+              </span>
+
+              <select class="select select-bordered w-full" formControlName="unidad_id">
+                <option [ngValue]="null">
+                  Seleccione una unidad
+                </option>
+
+                @for (
+                unidad of unidades;
+                track unidad.value
+                ) {
+                <option [ngValue]="unidad.value" [disabled]="!unidad.disponible">
+                  {{ unidad.label }}
+                </option>
+                }
+              </select>
+
+              @if (
+              formPatrullaje
+              .get('unidad_id')
+              ?.touched &&
+              formPatrullaje
+              .get('unidad_id')
+              ?.invalid
+              ) {
+              <span class="mt-1.5 text-xs text-error">
+                Seleccione una unidad disponible.
+              </span>
+              }
+            </label>
+            }
+
+            <!-- Zona -->
+            <label class="form-control w-full">
+              <span class="mb-1.5 text-sm font-semibold">
+                Zona
+                <span class="text-error">*</span>
+              </span>
+
+              <select class="select select-bordered w-full" formControlName="zona_id">
+                <option [ngValue]="null">
+                  Seleccione una zona
+                </option>
+
+                @for (
+                zona of zonas;
+                track zona.value
+                ) {
+                <option [ngValue]="zona.value">
+                  {{ zona.label }}
+                </option>
+                }
+              </select>
+
+              @if (
+              formPatrullaje.get('zona_id')?.touched &&
+              formPatrullaje.get('zona_id')?.invalid
+              ) {
+              <span class="mt-1.5 text-xs text-error">
+                Seleccione una zona.
+              </span>
+              }
             </label>
 
-            <select formControlName="zona_id" class="select select-bordered w-full ">
-              <option [ngValue]="null">Seleccione zona</option>
-              <option *ngFor="let zona of zonas" [ngValue]="zona.id">
-                {{ zona.nombre }} - (Riesgo: {{ zona.riesgo }})
-              </option>
-            </select>
-          </div>
+            <!-- Detalle -->
+            <label class="form-control w-full" [class.md:col-span-2]="
+                  tipoPatrullaje !== 'MOTORIZADO'
+                ">
+              <span class="mb-1.5 flex items-center
+                         justify-between text-sm font-semibold">
+                Detalle del tipo de patrullaje
 
-          <!-- FECHA -->
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Fecha</span>
-              <span *ngIf="esRequerido('fecha')" class="text-red-500 font-bold">*</span>
+                <span class="text-xs font-normal
+                           text-base-content/45">
+                  Opcional
+                </span>
+              </span>
+
+              <input type="text" class="input input-bordered w-full" formControlName="detalle_tipo_patrullaje"
+                maxlength="150" placeholder="Ej. Patrullaje preventivo con apoyo policial" appUppercase/>
+
+              <span class="mt-1 text-right text-xs
+                         text-base-content/45">
+                {{
+                formPatrullaje
+                .get('detalle_tipo_patrullaje')
+                ?.value?.length || 0
+                }}/150
+              </span>
             </label>
-            <input type="date" class="input input-bordered w-full" formControlName="fecha" />
+          </div>
+        </section>
 
-            <span class="text-error text-sm mt-1"
-              *ngIf="formPatrullaje.get('fecha')?.touched && formPatrullaje.get('fecha')?.invalid">
-              La fecha es obligatoria
-            </span>
+        <!-- ========================================= -->
+        <!-- FECHA Y HORARIO -->
+        <!-- ========================================= -->
+        <section class="rounded-2xl border border-base-300
+                   bg-base-200/25 p-4 sm:p-5">
+          <div class="mb-4">
+            <h3 class="flex items-center gap-2 font-bold">
+              <i class="fa-regular fa-calendar
+                         text-primary"></i>
+              Fecha y horario
+            </h3>
           </div>
 
-          <!-- HORA -->
-          <div class="grid grid-cols-2 gap-4">
-            <!-- HORA INICIO -->
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text">Hora Inicio</span>
-                <span *ngIf="esRequerido('hora_inicio')" class="text-red-500 font-bold">*</span>
-              </label>
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <label class="form-control">
+              <span class="mb-1.5 text-sm font-semibold">
+                Fecha
+                <span class="text-error">*</span>
+              </span>
+
+              <input type="date" class="input input-bordered w-full" formControlName="fecha" [min]="fechaMinima" />
+            </label>
+
+            <label class="form-control">
+              <span class="mb-1.5 text-sm font-semibold">
+                Hora de inicio
+                <span class="text-error">*</span>
+              </span>
+
               <input type="time" class="input input-bordered w-full" formControlName="hora_inicio" />
+            </label>
 
-              <span class="text-error text-sm mt-1"
-                *ngIf="formPatrullaje.get('hora_inicio')?.touched && formPatrullaje.get('hora_inicio')?.invalid">
-                Hora inicio obligatoria
+            <label class="form-control">
+              <span class="mb-1.5 text-sm font-semibold">
+                Hora de finalización
+                <span class="text-error">*</span>
               </span>
-            </div>
 
-            <!-- HORA FIN -->
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text">Hora Fin</span>
-                <span *ngIf="esRequerido('hora_fin')" class="text-red-500 font-bold">*</span>
-              </label>
               <input type="time" class="input input-bordered w-full" formControlName="hora_fin" />
+            </label>
+          </div>
 
-              <span class="text-error text-sm mt-1"
-                *ngIf="formPatrullaje.get('hora_fin')?.touched && formPatrullaje.get('hora_fin')?.invalid">
-                Hora fin obligatoria
+          @if (invalidTimeRange) {
+          <div class="mt-3 flex items-center gap-2
+                       rounded-lg bg-error/10 px-3 py-2
+                       text-sm text-error">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            La hora de finalización debe ser posterior
+            a la hora de inicio.
+          </div>
+          }
+        </section>
+
+        <!-- ========================================= -->
+        <!-- PERSONAL -->
+        <!-- ========================================= -->
+        <section class="rounded-2xl border border-base-300
+                   bg-base-200/25 p-4 sm:p-5">
+          <div class="mb-4">
+            <h3 class="flex items-center gap-2 font-bold">
+              <i class="fa-solid fa-people-group
+                         text-primary"></i>
+              Personal asignado
+            </h3>
+          </div>
+
+          <div class="grid grid-cols-1 gap-4" [class.lg:grid-cols-2]="
+                modalidadPatrullaje === 'INTEGRADO'
+              ">
+            <!-- Serenos -->
+            <div>
+              <div class="mb-2 flex items-center
+                         justify-between gap-2">
+                <span class="text-sm font-semibold">
+                  Serenos
+                  <span class="text-error">*</span>
+                </span>
+
+                <span class="badge badge-primary">
+                  {{ selectedSerenosCount }}
+                  seleccionados
+                </span>
+              </div>
+
+              <div class="max-h-60 overflow-y-auto
+                         rounded-xl border border-base-300
+                         bg-base-100 p-2">
+                @for (
+                sereno of serenos;
+                track getSerenoId(sereno)
+                ) {
+                @let serenoId =
+                getSerenoId(sereno);
+
+                <label class="flex cursor-pointer items-center
+                             gap-3 rounded-lg p-3
+                             hover:bg-base-200">
+                  <input type="checkbox" class="checkbox checkbox-primary
+                               checkbox-sm" [checked]="
+                          isSerenoSelected(serenoId)
+                        " (change)="
+                          toggleSereno(
+                            serenoId,
+                            $event
+                          )
+                        " />
+
+                  <span class="min-w-0 flex-1">
+                    <span class="block truncate
+                                 text-sm font-medium">
+                      {{ getSerenoLabel(sereno) }}
+                    </span>
+
+                    <span class="block truncate text-xs
+                                 text-base-content/50">
+                      {{ getSerenoRoles(sereno) }}
+                    </span>
+                  </span>
+                </label>
+                } @empty {
+                <p class="px-3 py-6 text-center text-sm text-base-content/50">
+                  No hay serenos disponibles.
+                </p>
+                }
+              </div>
+
+              @if ( formPatrullaje.get('serenos')?.touched && formPatrullaje.get('serenos')?.invalid ) {
+              <span class="mt-1.5 block text-xs text-error">
+                Seleccione por lo menos un sereno.
               </span>
+              }
             </div>
-          </div>
 
-        </div>
-      </div>
-
-
-      <!-- Sección: Información Policial -->
-      <div>
-        <h3 class="text-lg font-semibold flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24"
-            stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-          </svg>
-          Información Policial
-        </h3>
-
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- SERENOS -->
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Serenos</span>
-              <span *ngIf="esRequerido('serenos')" class="text-red-500 font-bold">*</span>
-            </label>
-
-            <div class="dropdown w-full">
-              <label tabindex="0" class="btn btn-outline w-full justify-between">
-                Seleccionar serenos
-                <span class="text-xs opacity-70">
-                  ({{ formPatrullaje.get('serenos')?.value?.length || 0 }} seleccionados)
+            <!-- Policías: solo integrado -->
+            @if ( modalidadPatrullaje === 'INTEGRADO' ) {
+            <div>
+              <div class="mb-2 flex items-center
+                           justify-between gap-2">
+                <span class="text-sm font-semibold">
+                  Policías
+                  <span class="text-error">*</span>
                 </span>
-              </label>
 
-              <ul tabindex="0"
-                class="dropdown-content menu p-3 shadow bg-base-100 rounded-box w-full max-h-60 overflow-y-auto z-1">
+                <span class="badge badge-secondary">
+                  {{ selectedPoliciasCount }}
+                  seleccionados
+                </span>
+              </div>
 
-                <li *ngFor="let sereno of serenos">
-                  <label class="flex items-center gap-2 cursor-pointer">
+              <div class="max-h-60 overflow-y-auto
+                           rounded-xl border border-base-300
+                           bg-base-100 p-2">
+                @for (
+                policia of policias;
+                track policia.value
+                ) {
+                <label class="flex cursor-pointer items-center
+                               gap-3 rounded-lg p-3
+                               hover:bg-base-200">
+                  <input type="checkbox" class="checkbox checkbox-secondary
+                                 checkbox-sm" [checked]="
+                            isPoliciaSelected(policia.value)
+                          " (change)="
+                            togglePolicia(
+                              policia.value,
+                              $event
+                            )
+                          " />
 
-                    <input type="checkbox" [checked]="formPatrullaje.get('serenos')?.value?.includes(sereno.id)"
-                      (change)="toggleSereno(sereno.id, $event)" />
-
-                    <span>
-                      {{ sereno.persona.nombres }} {{ sereno.persona.apellidos }}
+                  <span class="min-w-0 flex-1">
+                    <span class="block truncate text-sm font-medium">
+                      {{ policia.label }}
                     </span>
 
-                    <!-- Roles como badge -->
-                    <span class="badge badge-outline text-xs ml-auto">
-                      {{ sereno.roles.join(', ') }}
+                    <span class="block truncate text-xs text-base-content/50">
+                      {{ policia.descripcion }}
                     </span>
+                  </span>
+                </label>
+                } @empty {
+                <p class="px-3 py-6 text-center
+                               text-sm text-base-content/50">
+                  No hay policías disponibles.
+                </p>
+                }
+              </div>
 
-                  </label>
-                </li>
-
-              </ul>
+              @if (
+              formPatrullaje.get('policias')?.touched &&
+              formPatrullaje.get('policias')?.invalid
+              ) {
+              <span class="mt-1.5 block text-xs text-error">
+                El patrullaje integrado requiere al
+                menos un policía.
+              </span>
+              }
             </div>
-
-
-            <span class="text-error text-sm mt-1"
-              *ngIf="formPatrullaje.get('serenos')?.touched && formPatrullaje.get('serenos')?.invalid">
-              Debe seleccionar al menos un sereno
-            </span>
+            }
           </div>
+        </section>
 
-          <!-- POLICIAS -->
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Policías</span>
-              <span *ngIf="esRequerido('policias')" class="text-red-500 font-bold">*</span>
-            </label>
+        <!-- Descripción -->
+        <label class="form-control w-full">
+          <span class="mb-1.5 text-sm font-semibold">
+            Descripción del patrullaje
+            <span class="text-error">*</span>
+          </span>
 
-            <div class="dropdown w-full">
-              <label tabindex="0" class="btn btn-outline w-full justify-between">
-                Seleccionar policías
-                <span class="text-xs opacity-70">
-                  ({{ formPatrullaje.get('policias')?.value?.length || 0 }} seleccionados)
-                </span>
-              </label>
+          <textarea class="textarea textarea-bordered
+                     min-h-28 w-full resize-y" rows="4" maxlength="1000" formControlName="descripcion"
+            placeholder="Ingrese las indicaciones operativas del patrullaje" appUppercase></textarea>
 
-              <ul tabindex="0"
-                class="dropdown-content menu p-3 shadow bg-base-100 rounded-box w-full max-h-60 overflow-y-auto z-1">
+          @if (
+          formPatrullaje.get('descripcion')?.touched &&
+          formPatrullaje.get('descripcion')?.invalid
+          ) {
+          <span class="mt-1.5 text-xs text-error">
+            Ingrese una descripción válida.
+          </span>
+          }
+        </label>
+      </fieldset>
 
-                <li *ngFor="let policia of policias">
-                  <label class="flex items-center gap-2 cursor-pointer">
-
-                    <input type="checkbox" [checked]="formPatrullaje.get('policias')?.value?.includes(policia.id)"
-                      (change)="togglePolicia(policia.id, $event)" />
-
-                    <div class="flex flex-col">
-
-                      <!-- Nombre completo -->
-                      <span>
-                        {{ policia.label }}
-                      </span>
-
-                      <!-- Info adicional -->
-                      <span class="text-xs text-gray-500">
-                        {{ policia.grado }} - {{ policia.comisaria }}
-                      </span>
-
-                    </div>
-
-                  </label>
-                </li>
-
-              </ul>
-            </div>
-
-
-            <span class="text-error text-sm mt-1"
-              *ngIf="formPatrullaje.get('policias')?.touched && formPatrullaje.get('policias')?.invalid">
-              Debe seleccionar al menos un policía
-            </span>
-          </div>
-
-          <!-- DESCRIPCIÓN -->
-          <div class="md:col-span-2">
-            <label class="label">
-              <span class="label-text">Descripción</span>
-              <span *ngIf="esRequerido('descripcion')" class="text-red-500 font-bold">*</span>
-            </label>
-
-            <textarea class="textarea textarea-bordered w-full" rows="3" formControlName="descripcion"
-              placeholder="Ingrese descripción" appUppercase>
-          </textarea>
-
-            <span class="text-error text-sm mt-1"
-              *ngIf="formPatrullaje.get('descripcion')?.touched && formPatrullaje.get('descripcion')?.invalid">
-              La descripción es obligatoria
-            </span>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- BOTONES -->
-      <div class="modal-action justify-center items-center gap-5">
-        <button type="button" class="btn btn-ghost" (click)="cerrarModal()">
+      <!-- =========================================== -->
+      <!-- ACCIONES -->
+      <!-- =========================================== -->
+      <footer class="sticky bottom-0 flex flex-col-reverse
+                 gap-2 border-t border-base-300
+                 bg-base-100 px-5 py-4
+                 sm:flex-row sm:justify-end sm:px-6">
+        <button type="button" class="btn btn-ghost" [disabled]="isSaving" (click)="cerrarModal()">
           Cancelar
         </button>
 
-        <button type="submit" class="btn btn-primary" [disabled]="formPatrullaje.invalid">
-          {{ modoEdicion ? 'Actualizar' : 'Programar' }}
-        </button>
-      </div>
+        <button type="submit" class="btn btn-primary min-w-40 gap-2" [disabled]="isSaving || isLoadingCatalogs">
+          @if (isSaving) {
+          <span class="loading loading-spinner loading-sm"></span>
 
+          Guardando...
+          } @else {
+          <i class="fa-solid" [class.fa-calendar-plus]="!modoEdicion" [class.fa-check]="modoEdicion"></i>
+
+          {{ modoEdicion ? 'Actualizar patrullaje' : 'Programar patrullaje' }}
+          }
+        </button>
+      </footer>
     </form>
-  </div>
+  </section>
 </div>
 }
