@@ -211,8 +211,7 @@ export class PoliciasService {
   // *********************************************************
   private getJsonHeaders(): HttpHeaders {
     return HttpServiceHelper.getHeaders({
-      token:
-        this.authStorage.getAccessToken(),
+      token: this.authStorage.getAccessToken(),
     });
   }
 }

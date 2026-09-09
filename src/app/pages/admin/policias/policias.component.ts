@@ -57,7 +57,6 @@ export class PoliciasComponent implements OnInit {
   constructor(private policiasService: PoliciasService
   ) { }
 
-
   ngOnInit(): void {
     this.getPoliciasPaginated();
   }

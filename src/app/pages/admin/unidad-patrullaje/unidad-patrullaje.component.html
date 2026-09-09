@@ -85,7 +85,7 @@
                      focus:outline-none
                      focus:ring-2
                      focus:ring-primary/30" placeholder="Buscar por placa" autocomplete="off"
-                  [(ngModel)]="placaBusqueda" (ngModelChange)="onSearchChange()" />
+                  [(ngModel)]="placaBusqueda" (ngModelChange)="onSearchChange()" appUppercase/>
               </div>
             </label>
 
@@ -113,7 +113,7 @@
                      focus:outline-none
                      focus:ring-2
                      focus:ring-primary/30" placeholder="Buscar por descripción" autocomplete="off"
-                  [(ngModel)]="descripcionBusqueda" (ngModelChange)="onSearchChange()" />
+                  [(ngModel)]="descripcionBusqueda" (ngModelChange)="onSearchChange()" appUppercase/>
               </div>
             </label>
 
@@ -136,12 +136,14 @@
     <!-- ================================================= -->
     <!-- MODALES -->
     <!-- ================================================= -->
-
     <unidad-form [mostrarModal]="mostrarModal" [modoEdicion]="modoEdicion" [unidadSeleccionado]="unidadSeleccionado"
-      (modalCerrado)="cerrarModal()" (unidadCreado)="getUnidadesPaginado()">
+      (modalCerrado)="cerrarModal()" (unidadCreado)="getUnidadesPaginated()">
     </unidad-form>
 
-    <!-- Agrega aquí unidad-info cuando esté implementado. -->
+    <!-- Modal Ver Usuario -->
+    <unidad-info [mostrarModal]="mostrarModalInfo" [unidad_id]="unidad_id"
+      (modalCerrado)="cerrarModalInfo()"></unidad-info>
+
 
     <!-- ================================================= -->
     <!-- TABLA -->

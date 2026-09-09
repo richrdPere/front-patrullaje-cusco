@@ -151,7 +151,7 @@ export class UnidadFormComponent implements OnInit, OnChanges {
     // ============================
     if (this.modoEdicion && unidad.id) {
 
-      this.unidadService.updateUnidad(unidad.id, unidad).subscribe({
+      this.unidadService.updateUnidadPatrullaje(unidad.id, unidad).subscribe({
         next: () => {
           Swal.fire({ icon: 'success', title: 'Unidad actualizado correctamente' });
           this.unidadCreado.emit(); // refrescar tabla
@@ -171,7 +171,7 @@ export class UnidadFormComponent implements OnInit, OnChanges {
     // ============================
     // MODO CREACIÓN
     // ============================
-    this.unidadService.newUnidad(unidad).subscribe({
+    this.unidadService.newUnidadPatrullaje(unidad).subscribe({
       next: () => {
         Swal.fire({
           icon: 'success',

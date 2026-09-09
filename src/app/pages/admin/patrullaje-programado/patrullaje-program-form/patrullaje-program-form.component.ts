@@ -10,7 +10,6 @@ import { UppercaseDirective } from 'src/app/pages/shared/directives/uppercase.di
 // Services
 import { UnidadPatrullajeService } from 'src/app/services/unidad/unidad-patrullaje.service';
 import { ZonaService } from 'src/app/services/zona.service';
-
 import { PatrullajeProgramadoService } from 'src/app/services/patrullaje/patrullaje_programado.service';
 import { UsuarioService } from 'src/app/services/usuarios/usuarios.service';
 import { PoliciasService } from 'src/app/services/usuarios/policias.service';
@@ -165,7 +164,7 @@ export class PatrullajeProgramFormComponent implements OnInit, OnChanges {
   getAllData() {
     forkJoin({
       zonas: this.zonaService.obtenerZonas(),
-      unidades: this.unidadService.getAllUnidades(),
+      unidades: this.unidadService.getUnidadesSelect(),
       serenos: this.usuarioService.getSerenosAndConductores(),
       policias: this.policiaService.getPoliciasSelect()
     }).subscribe({
@@ -189,7 +188,7 @@ export class PatrullajeProgramFormComponent implements OnInit, OnChanges {
 
     const unidadId = event.target.value;
 
-    this.unidadService.getUnidadByID(unidadId)
+    this.unidadService.getUnidadById(unidadId)
       .subscribe({
         next: (resp: any) => {
 

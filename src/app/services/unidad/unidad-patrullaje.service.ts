@@ -1,18 +1,23 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { catchError, Observable } from 'rxjs';
 
 // Environment
 import { environment } from 'src/environments/environment';
 
-// Interfaces
-import { ApiResponse } from '../../pages/shared/interfaces/api-response';
-import { Vehiculo } from '../../interfaces/vehiculo';
-import { PaginadoResponse } from '../../pages/shared/interfaces/paginado-response';
+// Helpers
+import { HttpServiceHelper } from 'src/app/pages/shared/services/http-service.helper';
 
-export interface UltimoCodigoResponse {
-  codigo: string;
-}
+// Services
+import { AuthStorageService } from 'src/app/pages/shared/services/auth-storage.service';
+
+// Interfaces
+import { GetUnidadesPaginatedParams, GetUnidadesPaginatedResponse, UltimoCodigoResponse } from 'src/app/interfaces/unidad-patrullaje/get-unidades-paginated.model';
+import { GetUnidadByIdResponse } from 'src/app/interfaces/unidad-patrullaje/get-unidad-by-id.model';
+import { CreateUnidadPatrullajeRequest, CreateUnidadPatrullajeResponse } from 'src/app/interfaces/unidad-patrullaje/create-unidad-patrullaje.model';
+import { UpdateUnidadPatrullajeRequest, UpdateUnidadPatrullajeResponse } from 'src/app/interfaces/unidad-patrullaje/update-unidad-patrullaje.model';
+import { DeleteUnidadPatrullajeResponse } from 'src/app/interfaces/unidad-patrullaje/delete-unidad-patrullaje.model';
+import { GetUnidadesSelectResponse } from 'src/app/interfaces/unidad-patrullaje/get-unidades-select.model';
 
 
 @Injectable({
@@ -20,102 +25,194 @@ export interface UltimoCodigoResponse {
 })
 export class UnidadPatrullajeService {
 
-  // 1. Environment
-  envs = environment;
+  // *********************************************************
+  // ENDPOINTS
+  // *********************************************************
+  private readonly API_BASE = environment.main_url + 'unidad-patrullaje';
 
-  // 2. Variables globales
-  API_BASE = this.envs.main_url + 'unidad-patrullaje';
+  private readonly API_CREATE_UNIDAD: string = this.API_BASE + '/crear';
+  private readonly API_GET_ULTIMO_CODIGO: string = this.API_BASE + '/codigo';
+  private readonly API_GET_UNIDADES_PAGINATED: string = this.API_BASE + '/paginado';
+  private readonly API_GET_UNIDAD_BY_ID: string = this.API_BASE + '/detalle/';
+  private readonly API_UPDATE_UNIDAD: string = this.API_BASE + '/editar/';
+  private readonly API_DELETE_UNIDAD: string = this.API_BASE + '/eliminar/';
+  private readonly API_GET_UNIDADES_SELECT: string = this.API_BASE + '/select';
 
-  API_LISTAR_UNIDADES: string = this.API_BASE + '/paginado';
-  API_GET_UNIDADES: string = this.API_BASE + 'todos';
-  API_CREAR_UNIDAD: string = this.API_BASE + '/crear';
-  API_ACTUALIZAR_UNIDAD: string = this.API_BASE + '/editar/';
-  API_OBTENER_UNIDAD_POR_ID: string = this.API_BASE + '/detalle/';
-  API_ELIMINAR_UNIDAD: string = this.API_BASE + '/eliminar/';
-  API_GET_ULTIMO_CODIGO: string = this.API_BASE + '/codigo';
-  API_ALL_UNIDADES: string = this.API_BASE + '/todos';
+  constructor(
+    private readonly http: HttpClient,
+    private readonly authStorage: AuthStorageService,
+  ) { }
 
-  constructor(private http: HttpClient) { }
 
-  // ======= HEADER CON TOKEN =======
-  private getAuthHeaders(): { headers: HttpHeaders } {
-    const token = localStorage.getItem('token'); // o sessionStorage según tu login
-    let headers = new HttpHeaders({
-      'Content-Type': 'application/json',
+  // *********************************************************
+  // 1. OBTENER UNIDADES PAGINADAS
+  // *********************************************************
+  getUnidadesPaginated(filters: GetUnidadesPaginatedParams = {}): Observable<GetUnidadesPaginatedResponse> {
+    const params = HttpServiceHelper.buildParams({
+      page: filters.page,
+      limit: filters.limit,
+      search: filters.search,
+      codigo: filters.codigo,
+      tipo: filters.tipo,
+      placa: filters.placa,
+      estado: filters.estado,
+      descripcion: filters.descripcion,
     });
 
-    if (token) {
-      headers = headers.set('Authorization', `Bearer ${token}`);
-    }
-
-    return { headers };
+    return this.http.get<GetUnidadesPaginatedResponse>(
+      this.API_GET_UNIDADES_PAGINATED,
+      {
+        headers: this.getJsonHeaders(),
+        params,
+      },
+    )
+      .pipe(
+        catchError((error) =>
+          HttpServiceHelper.handleError(
+            error,
+            'No se pudieron obtener las unidades de patrullaje.',
+          ),
+        ),
+      );
   }
 
-  // ===========================================================
-  // 1.- Obtener todas las unidades (PAGINADO)
-  // ===========================================================
-  getUnidadesPaginado(filters: {
-    page?: number;
-    limit?: number;
-    placa?: string;
-    descripcion?: string;
+  // *********************************************************
+  // 2. OBTENER UNIDAD POR ID
+  // *********************************************************
+  getUnidadById(id: number): Observable<GetUnidadByIdResponse> {
+    return this.http.get<GetUnidadByIdResponse>(
+      `${this.API_GET_UNIDAD_BY_ID}${id}`,
+      {
+        headers: this.getJsonHeaders(),
+      },
+    )
+      .pipe(
+        catchError((error) => HttpServiceHelper
+          .handleError(
+            error,
+            'No se pudo obtener la unidad de patrullaje.',
+          ),
+        ),
+      );
   }
 
-  ): Observable<ApiResponse<PaginadoResponse<Vehiculo>>> {
+  // *********************************************************
+  // 3. CREAR UNIDAD DE PATRULLAJE
+  // *********************************************************
+  newUnidadPatrullaje(data: CreateUnidadPatrullajeRequest): Observable<CreateUnidadPatrullajeResponse> {
+    return this.http
+      .post<CreateUnidadPatrullajeResponse>(
+        this.API_CREATE_UNIDAD,
+        data,
+        {
+          headers: this.getJsonHeaders(),
+        },
+      )
+      .pipe(
+        catchError((error) => HttpServiceHelper
+          .handleError(
+            error,
+            'No se pudo registrar la unidad de patrullaje.',
+          ),
+        ),
+      );
+  }
 
-    let params = new HttpParams();
+  // *********************************************************
+  // 4. ACTUALIZAR UNIDAD DE PATRULLAJE
+  // *********************************************************
+  updateUnidadPatrullaje(
+    id: number,
+    data: UpdateUnidadPatrullajeRequest,
+  ): Observable<UpdateUnidadPatrullajeResponse> {
+    return this.http
+      .put<UpdateUnidadPatrullajeResponse>(
+        `${this.API_UPDATE_UNIDAD}${id}`,
+        data,
+        {
+          headers: this.getJsonHeaders(),
+        },
+      )
+      .pipe(
+        catchError((error) => HttpServiceHelper
+          .handleError(
+            error,
+            'No se pudo actualizar la unidad de patrullaje.',
+          ),
+        ),
+      );
+  }
 
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value !== null && value !== undefined && value !== '') {
-        params = params.set(key, value.toString());
-      }
+  // *********************************************************
+  // 5. ELIMINAR UNIDAD DE PATRULLAJE
+  // *********************************************************
+  deleteUnidadPatrullaje(id: number): Observable<DeleteUnidadPatrullajeResponse> {
+    return this.http
+      .delete<DeleteUnidadPatrullajeResponse>(
+        `${this.API_DELETE_UNIDAD}${id}`,
+        {
+          headers: this.getJsonHeaders(),
+        },
+      )
+      .pipe(
+        catchError((error) =>
+          HttpServiceHelper.handleError(
+            error,
+            'No se pudo eliminar la unidad de patrullaje.',
+          ),
+        ),
+      );
+  }
+
+  // *********************************************************
+  // 6. OBTENER ULTIMO CODIGO
+  // *********************************************************
+  getUltimoCodigo(): Observable<UltimoCodigoResponse> {
+    return this.http
+      .get<UltimoCodigoResponse>(
+        this.API_GET_ULTIMO_CODIGO,
+        {
+          headers: this.getJsonHeaders(),
+        },
+      ).pipe(
+        catchError((error) =>
+          HttpServiceHelper.handleError(
+            error,
+            'No se pudo obtener el codigo.',
+          ),
+        ),
+      );
+  }
+
+  // *********************************************************
+  // 7. OBTENER UNIDADES PARA SELECT
+  // *********************************************************
+  getUnidadesSelect(): Observable<GetUnidadesSelectResponse> {
+    return this.http
+      .get<GetUnidadesSelectResponse>(
+        this.API_GET_UNIDADES_SELECT,
+        {
+          headers: this.getJsonHeaders(),
+        },
+      )
+      .pipe(
+        catchError((error) =>
+          HttpServiceHelper.handleError(
+            error,
+            'No se pudieron obtener las unidades disponibles.',
+          ),
+        ),
+      );
+  }
+
+
+  // *********************************************************
+  // HEADERS JSON
+  // *********************************************************
+  private getJsonHeaders(): HttpHeaders {
+    return HttpServiceHelper.getHeaders({
+      token: this.authStorage.getAccessToken(),
     });
-
-    const headers = this.getAuthHeaders().headers;
-
-    return this.http.get<ApiResponse<PaginadoResponse<Vehiculo>>>(this.API_LISTAR_UNIDADES, { params, headers });
-  }
-
-  // ===========================================================
-  // 2.- Obtener una unidad por ID
-  // ===========================================================
-  getUnidadByID(id: string): Observable<any> {
-    return this.http.get<any>(`${this.API_OBTENER_UNIDAD_POR_ID}${id}`);
-  }
-
-  // ===========================================================
-  // 3.- Crear nueva unidad
-  // ===========================================================
-  newUnidad(data: any): Observable<any> {
-    return this.http.post<any>(this.API_CREAR_UNIDAD, data);
-  }
-
-  // ===========================================================
-  // 4.- Actualizar unidad
-  // ===========================================================
-  updateUnidad(id: string, data: Partial<any>): Observable<any> {
-    return this.http.put<any>(`${this.API_ACTUALIZAR_UNIDAD}${id}`, data);
-  }
-
-  // ===========================================================
-  // 5.- Eliminar unidad
-  // ===========================================================
-  deleteUnidad(id: string): Observable<any> {
-    return this.http.delete(`${this.API_ELIMINAR_UNIDAD}${id}`);
-  }
-
-  // ===========================================================
-  // 6.- Obtener ultimo codigo
-  // ===========================================================
-  getUltimoCodigo() {
-    return this.http.get<ApiResponse<UltimoCodigoResponse>>(this.API_GET_ULTIMO_CODIGO);
-  }
-
-  // ===========================================================
-  // 7.- Obtener todas las unidades
-  // ===========================================================
-  getAllUnidades(): Observable<ApiResponse<any>>  {
-    return this.http.get<ApiResponse<any>>(`${this.API_ALL_UNIDADES}`);
   }
 
 }

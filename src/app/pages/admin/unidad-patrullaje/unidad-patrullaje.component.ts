@@ -1,15 +1,26 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { finalize } from 'rxjs';
 import Swal from 'sweetalert2';
+
+// Directives
+import { UppercaseDirective } from 'src/app/pages/shared/directives/uppercase.directive';
+
 
 // Services
 import { UnidadPatrullajeService } from 'src/app/services/unidad/unidad-patrullaje.service';
+
+// Interface
+import { GetUnidadesPaginatedParams } from 'src/app/interfaces/unidad-patrullaje/get-unidades-paginated.model';
+
+// Componentes
 import { UnidadFormComponent } from "./unidad-form/unidad-form.component";
+import { UnidadInfoComponent } from "./unidad-info/unidad-info.component";
 
 @Component({
   selector: 'app-unidad-patrullaje',
-  imports: [DatePipe, FormsModule, UnidadFormComponent, CommonModule],
+  imports: [DatePipe, FormsModule, UnidadFormComponent, CommonModule, UnidadInfoComponent, UppercaseDirective],
   templateUrl: './unidad-patrullaje.component.html',
   styles: ``
 })
@@ -17,9 +28,11 @@ export class UnidadPatrullajeComponent implements OnInit {
 
   // Unidad patrullaje
   unidades: any[] = [];
+  unidad_id: number | null = null;
   isLoading = true;
 
   mostrarModal = false;
+  mostrarModalInfo = false;
   modoEdicion = false;
   unidadSeleccionado: any = null;
 
@@ -41,41 +54,55 @@ export class UnidadPatrullajeComponent implements OnInit {
   constructor(private unidadService: UnidadPatrullajeService
   ) { }
 
-
-
   ngOnInit(): void {
-    this.getUnidadesPaginado();
+    this.getUnidadesPaginated();
 
   }
 
   // ================================
   // Methods
   // ================================
-  getUnidadesPaginado() {
-    this.isLoading = true;
-
-    this.unidadService.getUnidadesPaginado({
+  getUnidadesPaginated() {
+    const params: GetUnidadesPaginatedParams = {
       page: this.page,
       limit: this.limit,
       placa: this.placaBusqueda,
       descripcion: this.descripcionBusqueda
-    }).subscribe({
-      next: (res) => {
+    };
 
-        console.log("UNIDADES: ", res);
-        this.unidades = res.data.rows;
-        this.totalItems = res.data.total;
-        this.currentPage = res.data.page;
-        this.totalPages = res.data.totalPages; // Math.ceil(res.total / res.limit);
-        this.isLoading = false;
-      },
-      error: (err) => {
-        console.error(err);
-        this.isLoading = false;
-      }
-    });
+    this.isLoading = true;
+
+    this.unidadService.getUnidadesPaginated(params)
+      .pipe(
+        finalize(() => {
+          this.isLoading = false;
+        }),
+      )
+      .subscribe({
+        next: (res) => {
+
+          const paginacion = res.data;
+
+          this.unidades = paginacion.items;
+          this.totalItems = paginacion.total;
+          this.currentPage = paginacion.page;
+
+          this.page = paginacion.page;
+          this.limit = paginacion.limit;
+          this.totalPages = paginacion.totalPages;
+        },
+        error: (err) => {
+          console.error(err);
+          this.isLoading = false;
+
+          this.unidades = [];
+          this.totalItems = 0;
+          this.totalPages = 0;
+        }
+      });
   }
 
+  // - Eliminar unidad
   eliminarUnidad(unidad: any) {
     Swal.fire({
       title: '¿Eliminar unidad?',
@@ -90,7 +117,7 @@ export class UnidadPatrullajeComponent implements OnInit {
 
       if (result.isConfirmed) {
 
-        this.unidadService.deleteUnidad(unidad.id)
+        this.unidadService.deleteUnidadPatrullaje(unidad.id)
           .subscribe({
             next: () => {
 
@@ -102,7 +129,7 @@ export class UnidadPatrullajeComponent implements OnInit {
                 showConfirmButton: false
               });
 
-              this.getUnidadesPaginado();
+              this.getUnidadesPaginated();
             },
             error: (err) => {
 
@@ -116,25 +143,23 @@ export class UnidadPatrullajeComponent implements OnInit {
 
             }
           });
-
       }
-
     });
   }
+
+  // Editar unidad
   editarUnidad(unidad: any) {
     this.modoEdicion = true;
     this.unidadSeleccionado = { ...unidad };
     this.mostrarModal = true;
   }
-  verUnidad(_t52: any) {
-    throw new Error('Method not implemented.');
+
+  // Ver unidad
+  verUnidad(unidad: any) {
+    this.unidad_id = unidad.id;
+    this.mostrarModalInfo = true;
   }
 
-  abrirModal() {
-    this.modoEdicion = false;
-    this.unidadSeleccionado = null;
-    this.mostrarModal = true;
-  }
 
   getIconoUnidad(
     tipo: string | null | undefined,
@@ -154,9 +179,13 @@ export class UnidadPatrullajeComponent implements OnInit {
   // ================================
   // Helpers methods
   // ================================
-
   onSearchChange() {
-    throw new Error('Method not implemented.');
+    clearTimeout(this.searchTimeout);
+
+    this.searchTimeout = setTimeout(() => {
+      this.page = 1;
+      this.getUnidadesPaginated();
+    }, 300);
   }
 
   onPageSizeChange() {
@@ -165,23 +194,19 @@ export class UnidadPatrullajeComponent implements OnInit {
 
   onFiltroChange() {
     this.page = 1;
-    this.getUnidadesPaginado();
+    this.getUnidadesPaginated();
   }
 
   cambiarPagina(nuevaPagina: number) {
     if (nuevaPagina < 1 || nuevaPagina > this.totalPages) return;
     this.page = nuevaPagina;
-    this.getUnidadesPaginado();
+    this.getUnidadesPaginated();
   }
 
   cambiarLimite() {
     this.limit = Number(this.limit);
     this.page = 1;
-    this.getUnidadesPaginado();
-  }
-
-  cerrarModal() {
-    this.mostrarModal = false;
+    this.getUnidadesPaginated();
   }
 
   getEstadoInfo(estado: string) {
@@ -208,5 +233,23 @@ export class UnidadPatrullajeComponent implements OnInit {
       label: estado,
       class: 'badge-neutral'
     };
+  }
+
+  // ================================
+  // Modales methods
+  // ================================
+  abrirModal() {
+    this.modoEdicion = false;
+    this.unidadSeleccionado = null;
+    this.mostrarModal = true;
+  }
+
+  cerrarModal() {
+    this.mostrarModal = false;
+  }
+
+  cerrarModalInfo() {
+    this.mostrarModalInfo = false;
+    this.unidad_id = null;
   }
 }
