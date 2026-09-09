@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
 // Interfaces
-import { Departamento, Distrito, Provincia } from '../interfaces/ubigeo';
+import { Departamento, Distrito, Provincia } from '../../interfaces/ubigeo';
 import { catchError, tap } from 'rxjs';
 
 

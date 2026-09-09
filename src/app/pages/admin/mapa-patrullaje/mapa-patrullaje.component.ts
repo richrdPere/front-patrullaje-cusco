@@ -16,7 +16,7 @@ import { TrackingPayload } from 'src/app/interfaces/tracking.interface';
 
 // Services
 import { GoogleMapsLoaderService } from 'src/app/services/google-maps-loader.service';
-import { ZonaService } from 'src/app/services/zona.service';
+import { ZonaService } from 'src/app/services/zona/zona.service';
 import { TrackingService } from 'src/app/services/mapa-tracking/tracking.service';
 import { MapaTrackingService } from 'src/app/services/mapa-tracking/mapa-tracking.service';
 import { TrackingStoreService } from 'src/app/services/mapa-tracking/tracking-store.service';
@@ -622,10 +622,8 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
   // =====================================================
   // ZONAS
   // =====================================================
-
   loadZonas(): void {
-    this.zonaService
-      .obtenerZonas()
+    this.zonaService.getZonasPaginated({})
       .pipe(
         takeUntil(this.destroy$)
       )

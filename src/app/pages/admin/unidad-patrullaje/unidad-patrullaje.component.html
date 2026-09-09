@@ -85,7 +85,7 @@
                      focus:outline-none
                      focus:ring-2
                      focus:ring-primary/30" placeholder="Buscar por placa" autocomplete="off"
-                  [(ngModel)]="placaBusqueda" (ngModelChange)="onSearchChange()" appUppercase/>
+                  [(ngModel)]="placaBusqueda" (ngModelChange)="onSearchChange()" appUppercase />
               </div>
             </label>
 
@@ -113,7 +113,7 @@
                      focus:outline-none
                      focus:ring-2
                      focus:ring-primary/30" placeholder="Buscar por descripción" autocomplete="off"
-                  [(ngModel)]="descripcionBusqueda" (ngModelChange)="onSearchChange()" appUppercase/>
+                  [(ngModel)]="descripcionBusqueda" (ngModelChange)="onSearchChange()" appUppercase />
               </div>
             </label>
 
@@ -212,7 +212,6 @@
       </div>
 
       <!-- Tabla con scroll horizontal -->
-
       <div class="w-full overflow-x-auto">
         <table class="table min-w-262.5 w-full">
 
@@ -238,7 +237,6 @@
           <tbody>
 
             <!-- Loading -->
-
             @if (isLoading) {
             <tr>
               <td colspan="8" class="py-14 text-center">
@@ -262,13 +260,8 @@
             }
 
             <!-- Registros -->
-
             @if (!isLoading) {
-            @for (
-            unidad of unidades;
-            track unidad.id;
-            let i = $index
-            ) {
+            @for ( unidad of unidades; track unidad.id; let i = $index ) {
             <tr class="border-base-200
                          transition-colors
                          hover:bg-base-200/50">
@@ -357,7 +350,7 @@
                   <div class="tooltip tooltip-left" data-tip="Editar unidad">
                     <button type="button" class="btn btn-ghost btn-circle btn-sm" (click)="editarUnidad(unidad)"
                       aria-label="Editar unidad">
-                      <i class="fa-solid fa-pencil"></i>
+                      <i class="fa-solid fa-pen-to-square"></i>
                     </button>
                   </div>
 

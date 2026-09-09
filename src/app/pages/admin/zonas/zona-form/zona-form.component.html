@@ -1,1 +1,433 @@
-<p>zona-form works!</p>
+@if (mostrarModal) {
+
+<div class="modal modal-open">
+
+  <!-- ================================================= -->
+  <!-- FONDO DEL MODAL -->
+  <!-- ================================================= -->
+  <div class="fixed inset-0 z-50 flex items-center
+           justify-center bg-black/55 p-3
+           backdrop-blur-sm sm:p-5" role="dialog" aria-modal="true" aria-labelledby="zona-form-title"
+    (click)="cerrarModal()">
+    <!-- =============================================== -->
+    <!-- CONTENEDOR -->
+    <!-- =============================================== -->
+    <section class="flex max-h-[95vh] w-full flex-col
+             overflow-hidden rounded-2xl
+             border border-base-300 bg-base-100
+             shadow-2xl" [ngClass]="modalWidthClass" (click)="$event.stopPropagation()">
+      <!-- ============================================= -->
+      <!-- ENCABEZADO -->
+      <!-- ============================================= -->
+      <header class="flex shrink-0 items-start
+               justify-between gap-4 border-b
+               border-base-300 bg-base-200/50
+               px-5 py-4 sm:px-6">
+        <div class="flex min-w-0 items-center gap-3">
+          <div class="flex h-11 w-11 shrink-0
+                   items-center justify-center
+                   rounded-xl bg-primary/10
+                   text-primary">
+            <i class="fa-solid fa-map-location-dot
+                     text-lg"></i>
+          </div>
+
+          <div class="min-w-0">
+            <div class="flex flex-wrap items-center gap-2">
+              <h2 id="zona-form-title" class="truncate text-lg font-bold
+                       text-base-content sm:text-xl">
+                {{
+                modoEdicion
+                ? 'Editar zona'
+                : 'Registrar nueva zona'
+                }}
+              </h2>
+
+              @if (modoEdicion) {
+              <span class="badge badge-info">
+                Edición
+              </span>
+              }
+            </div>
+
+            <p class="mt-0.5 text-sm
+                     text-base-content/60">
+              {{
+              modoEdicion
+              ? 'Modifique los datos y el perímetro geográfico.'
+              : 'Complete los datos y dibuje el perímetro en el mapa.'
+              }}
+            </p>
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-ghost btn-circle btn-sm
+                 shrink-0" aria-label="Cerrar formulario" title="Cerrar" [disabled]="isLoading"
+          (click)="cerrarModal()">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </header>
+
+      <!-- ============================================= -->
+      <!-- CONTENIDO -->
+      <!-- ============================================= -->
+      <div class="min-h-0 flex-1 overflow-y-auto
+               p-4 sm:p-5">
+        <div class="grid grid-cols-1 gap-5
+                 xl:grid-cols-[350px_minmax(0,1fr)]">
+          <!-- ========================================= -->
+          <!-- FORMULARIO -->
+          <!-- ========================================= -->
+          <form class="flex flex-col rounded-2xl
+                   border border-base-300
+                   bg-base-200/30 p-5" [formGroup]="zonaForm" (ngSubmit)="guardarZona()">
+            <div class="mb-5">
+              <h3 class="text-base font-bold
+                       text-base-content">
+                Datos de la zona
+              </h3>
+
+              <p class="mt-1 text-xs leading-relaxed
+                       text-base-content/55">
+                Los campos marcados con asterisco son
+                obligatorios.
+              </p>
+            </div>
+
+            <div class="flex-1 space-y-5">
+              <!-- Nombre -->
+              <label class="form-control w-full">
+                <span class="mb-1.5 flex items-center gap-1
+                         text-sm font-semibold">
+                  Nombre de la zona
+
+                  <span class="text-error">
+                    *
+                  </span>
+                </span>
+
+                <div class="relative">
+                  <i class="fa-solid fa-location-dot
+                           pointer-events-none absolute
+                           left-3.5 top-1/2
+                           -translate-y-1/2
+                           text-base-content/35"></i>
+
+                  <input type="text" class="input input-bordered
+                           w-full pl-10" placeholder="Ej. Centro Histórico" formControlName="nombre" maxlength="100"
+                    autocomplete="off" appUppercase />
+                </div>
+
+                @if (
+                zonaForm.get('nombre')?.touched &&
+                zonaForm.get('nombre')?.invalid
+                ) {
+                <span class="mt-1.5 text-xs text-error">
+                  @if (
+                  zonaForm
+                  .get('nombre')
+                  ?.hasError('required')
+                  ) {
+                  El nombre de la zona es obligatorio.
+                  } @else if (
+                  zonaForm
+                  .get('nombre')
+                  ?.hasError('minlength')
+                  ) {
+                  El nombre debe contener al menos
+                  3 caracteres.
+                  } @else {
+                  El nombre no puede superar los
+                  100 caracteres.
+                  }
+                </span>
+                }
+              </label>
+
+              <!-- Descripción -->
+              <label class="form-control w-full">
+                <span class="mb-1.5 flex items-center
+                         justify-between gap-2
+                         text-sm font-semibold">
+                  Descripción
+
+                  <span class="text-xs font-normal
+                           text-base-content/45">
+                    Opcional
+                  </span>
+                </span>
+
+                <textarea class="textarea textarea-bordered
+                         min-h-28 w-full resize-y" placeholder="Describa las características de la zona"
+                  formControlName="descripcion" maxlength="255" rows="4"></textarea>
+
+                <div class="mt-1 flex items-center
+                         justify-between gap-2">
+                  @if (
+                  zonaForm.get('descripcion')?.touched &&
+                  zonaForm.get('descripcion')?.invalid
+                  ) {
+                  <span class="text-xs text-error">
+                    La descripción no puede superar
+                    los 255 caracteres.
+                  </span>
+                  } @else {
+                  <span></span>
+                  }
+
+                  <span class="text-xs text-base-content/45">
+                    {{
+                    zonaForm
+                    .get('descripcion')
+                    ?.value?.length || 0
+                    }}/255
+                  </span>
+                </div>
+              </label>
+
+              <!-- Nivel de riesgo -->
+              <label class="form-control w-full">
+                <span class="mb-1.5 flex items-center gap-1
+                         text-sm font-semibold">
+                  Nivel de riesgo
+
+                  <span class="text-error">
+                    *
+                  </span>
+                </span>
+
+                <select class="select select-bordered w-full" formControlName="riesgo">
+                  @for (
+                  riesgo of nivelesRiesgo;
+                  track riesgo.id
+                  ) {
+                  <option [value]="riesgo.id">
+                    {{ riesgo.nombre }}
+                  </option>
+                  }
+                </select>
+
+                @if (
+                zonaForm.get('riesgo')?.touched &&
+                zonaForm.get('riesgo')?.invalid
+                ) {
+                <span class="mt-1.5 text-xs text-error">
+                  Seleccione un nivel de riesgo.
+                </span>
+                }
+              </label>
+
+              <!-- Estado del perímetro -->
+              <div class="rounded-xl border p-4" [ngClass]="
+                  totalVertices >= 3
+                    ? [
+                        'border-success',
+                        'bg-success/5'
+                      ]
+                    : [
+                        'border-warning/40',
+                        'bg-warning/5'
+                      ]
+                ">
+                <div class="flex items-start gap-3">
+                  <div class="flex h-9 w-9 shrink-0
+                           items-center justify-center
+                           rounded-lg" [ngClass]="
+                      totalVertices >= 3
+                        ? [
+                            'bg-success/15',
+                            'text-success'
+                          ]
+                        : [
+                            'bg-warning/15',
+                            'text-warning'
+                          ]
+                    ">
+                    <i class="fa-solid fa-draw-polygon"></i>
+                  </div>
+
+                  <div>
+                    <p class="text-sm font-semibold">
+                      @if (totalVertices >= 3) {
+                      Perímetro definido
+                      } @else {
+                      Perímetro pendiente
+                      }
+                    </p>
+
+                    <p class="mt-1 text-xs leading-relaxed
+                             text-base-content/60">
+                      @if (drawing) {
+                      Haga clic sobre el mapa para agregar
+                      los vértices del polígono.
+                      } @else if (totalVertices >= 3) {
+                      Puede arrastrar los puntos para
+                      ajustar el perímetro.
+                      } @else {
+                      Presione “Iniciar dibujo” y marque
+                      por lo menos tres puntos.
+                      }
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Acciones -->
+            <div class="mt-6 space-y-2">
+              <button type="submit" class="btn btn-primary w-full gap-2" [disabled]="isLoading || drawing">
+                @if (isLoading) {
+                <span class="loading loading-spinner
+                           loading-sm"></span>
+
+                Guardando...
+                } @else {
+                <i class="fa-solid" [class.fa-floppy-disk]="!modoEdicion" [class.fa-check]="modoEdicion"></i>
+
+                {{
+                modoEdicion
+                ? 'Actualizar zona'
+                : 'Registrar zona'
+                }}
+                }
+              </button>
+
+              <button type="button" class="btn btn-ghost w-full" [disabled]="isLoading" (click)="cerrarModal()">
+                Cancelar
+              </button>
+            </div>
+          </form>
+
+          <!-- ========================================= -->
+          <!-- MAPA -->
+          <!-- ========================================= -->
+          <div class="flex min-h-135 min-w-0
+                   flex-col overflow-hidden
+                   rounded-2xl border border-base-300
+                   bg-base-100">
+            <!-- Herramientas -->
+            <div class="flex flex-col gap-3 border-b
+                     border-base-300 bg-base-200/40
+                     p-4 lg:flex-row lg:items-center
+                     lg:justify-between">
+              <div class="flex flex-wrap items-center gap-2">
+                <button type="button" class="btn btn-primary btn-sm gap-2" [disabled]="drawing || isLoading"
+                  (click)="initDraw()">
+                  <i class="fa-solid fa-draw-polygon"></i>
+
+                  {{
+                  totalVertices >= 3
+                  ? 'Dibujar nuevamente'
+                  : 'Iniciar dibujo'
+                  }}
+                </button>
+
+                <button type="button" class="btn btn-success btn-sm gap-2" [disabled]="!drawing || isLoading"
+                  (click)="finishedDraw()">
+                  <i class="fa-solid fa-check"></i>
+                  Finalizar
+                </button>
+
+                <button type="button" class="btn btn-error btn-outline
+                         btn-sm gap-2" [disabled]="
+                    (
+                      !drawing &&
+                      totalVertices === 0
+                    ) ||
+                    isLoading
+                  " (click)="cancelDraw()">
+                  <i class="fa-solid fa-trash-can"></i>
+                  Limpiar
+                </button>
+              </div>
+
+              <div class="flex flex-wrap items-center gap-2">
+                @if (drawing) {
+                <span class="badge badge-warning badge-lg
+                           gap-2 whitespace-nowrap">
+                  <span class="h-2 w-2 animate-pulse
+                             rounded-full bg-current"></span>
+
+                  Dibujando
+                </span>
+                }
+
+                <span class="badge badge-info badge-lg
+                         gap-2 whitespace-nowrap">
+                  <i class="fa-solid fa-circle-nodes"></i>
+
+                  Vértices: {{ totalVertices }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Instrucciones -->
+            <div class="border-b border-base-300
+                     bg-info/5 px-4 py-3">
+              <div class="flex items-start gap-2
+                       text-xs text-base-content/65">
+                <i class="fa-solid fa-circle-info
+                         mt-0.5 text-info"></i>
+
+                <p>
+                  @if (drawing) {
+                  Marque los puntos sobre el mapa. Cuando
+                  tenga al menos tres vértices, presione
+                  “Finalizar”.
+                  } @else if (totalVertices >= 3) {
+                  El perímetro está listo. Puede mover sus
+                  vértices antes de guardar.
+                  } @else {
+                  Inicie el dibujo para definir el área
+                  geográfica de la zona.
+                  }
+                </p>
+              </div>
+            </div>
+
+            <!-- Leyenda -->
+            <div class="flex flex-wrap items-center gap-x-4
+                     gap-y-2 border-b border-base-300
+                     px-4 py-2.5 text-xs
+                     text-base-content/60">
+              <span class="font-semibold">
+                Riesgo:
+              </span>
+
+              <span class="inline-flex items-center gap-1.5">
+                <span class="h-2.5 w-2.5 rounded-full
+                         bg-green-600"></span>
+                Bajo
+              </span>
+
+              <span class="inline-flex items-center gap-1.5">
+                <span class="h-2.5 w-2.5 rounded-full
+                         bg-amber-500"></span>
+                Medio
+              </span>
+
+              <span class="inline-flex items-center gap-1.5">
+                <span class="h-2.5 w-2.5 rounded-full
+                         bg-red-600"></span>
+                Alto
+              </span>
+
+              <span class="inline-flex items-center gap-1.5">
+                <span class="h-2.5 w-2.5 rounded-full
+                         bg-red-900"></span>
+                Crítico
+              </span>
+            </div>
+
+            <!-- Google Maps -->
+            <div #mapContainer class="min-h-105 w-full flex-1
+                     bg-base-200 lg:min-h-125" aria-label="Mapa para dibujar la zona"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+</div>
+
+}

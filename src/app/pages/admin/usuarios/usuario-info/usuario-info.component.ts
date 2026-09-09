@@ -10,7 +10,7 @@ import { ApiErrorData } from 'src/app/pages/shared/interfaces/api-error-data.mod
 
 // Services
 import { UsuarioService } from 'src/app/services/usuarios/usuarios.service';
-import { UbigeoService } from 'src/app/services/ubigeo.service';
+import { UbigeoService } from 'src/app/services/zona/ubigeo.service';
 
 @Component({
   selector: 'usuario-info',

@@ -1,178 +1,502 @@
-<div
-  class="min-h-full min-w-0 bg-base-300 px-4 py-5 text-base-content transition-colors duration-300 sm:px-6 sm:py-6 lg:px-8">
-
-  <!-- CONTENEDOR DEL DASHBOARD -->
-  <div class="mx-auto w-full max-w-500">
-
-
-    <!-- Titulo -->
-    <!-- <h1 class="text-2xl font-bold mb-5 text-base-content ">Gestión de Zonas</h1> -->
-
+<div class="min-h-full min-w-0 bg-base-300
+         px-4 py-5 text-base-content
+         transition-colors duration-300
+         sm:px-6 sm:py-6 lg:px-8">
+  <div class="mx-auto w-full max-w-450
+           space-y-6">
     <!-- ================================================= -->
     <!-- ENCABEZADO -->
     <!-- ================================================= -->
-    <header class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-
-      <!-- ÍCONO + INFORMACIÓN -->
+    <header class="flex flex-col gap-4
+             sm:flex-row sm:items-center
+             sm:justify-between">
       <div class="flex min-w-0 items-center gap-3">
-        <div
-          class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary sm:h-12 sm:w-12">
-          <i class="fa-solid fa-location-dot text-xl sm:text-2xl"></i>
+        <div class="flex h-11 w-11 shrink-0 items-center
+                 justify-center rounded-2xl
+                 bg-primary/10 text-primary
+                 sm:h-12 sm:w-12">
+          <i class="fa-solid fa-location-dot
+                   text-xl sm:text-2xl"></i>
         </div>
 
         <div class="min-w-0">
-          <h1 class="truncate text-xl font-bold leading-tight text-base-content sm:text-2xl">
-            Gestión de Zonas
+          <h1 class="truncate text-xl font-bold
+                   leading-tight text-base-content
+                   sm:text-2xl">
+            Gestión de zonas
           </h1>
 
           <p class="mt-1 text-sm leading-relaxed
                    text-base-content/60">
-
-            Dibuje las zonas respectivas para el personal de Serenazgo.
+            Defina y administre las zonas geográficas
+            utilizadas en la planificación de patrullajes.
           </p>
         </div>
       </div>
     </header>
 
     <!-- ================================================= -->
-    <!-- FORMULARIO -->
+    <!-- FILTROS -->
     <!-- ================================================= -->
-    <div class="p-4 mb-7 card bg-base-100 shadow-md">
-      <form [formGroup]="zonaForm">
+    <section class="mb-6 overflow-hidden rounded-2xl
+         border border-base-300
+         bg-base-100 shadow-sm">
 
-        <div class="flex flex-col lg:flex-row gap-6">
+      <div class="grid grid-cols-1
+           lg:grid-cols-[minmax(0,1fr)_170px]">
 
-          <!-- Formulario: lado izquierdo -->
-          <div class="lg:w-1/3 w-full space-y-6">
-            <!-- Form - Zonas -->
-            <div class="card bg-base-300 rounded-box p-6 space-y-4 shadow-md">
-              <!-- Nombre -->
-              <input type="text" placeholder="Nombre" formControlName="nombre" class="input input-bordered w-full "
-                appUppercase />
-              <!-- Descripción -->
-              <textarea placeholder="Descripción" formControlName="descripcion"
-                class="textarea textarea-bordered w-full " rows="4"></textarea>
+        <!-- =============================================== -->
+        <!-- CAMPOS DE FILTRO -->
+        <!-- =============================================== -->
+        <div class="p-4 sm:p-5">
 
-              <!-- Riesgo -->
-              <select formControlName="riesgo" class="select select-bordered w-full ">
-                <option [ngValue]="null">Seleccionar nivel de riesgo</option>
-                <option *ngFor="let g of nivel_riesgo" [value]="g.id">
-                  {{ g.nombre }}
-                </option>
-              </select>
+          <div class="grid grid-cols-1 gap-4
+               sm:grid-cols-2
+               xl:grid-cols-[minmax(240px,1.4fr)_minmax(180px,1fr)_minmax(190px,1fr)_auto]">
 
-              <!-- Botón -->
-              <button class="btn btn-primary w-full mt-2" type="button" (click)="guardarZona()">
-                Guardar Zona
-              </button>
-            </div>
+            <!-- Búsqueda -->
+            <label class="form-control w-full">
+              <span class="mb-1.5 text-xs font-semibold
+                   uppercase tracking-wide
+                   text-base-content/60">
 
-            <!-- Tabla - Zonas -->
-            <div class="card bg-base-300 rounded-xl p-6 space-y-4 shadow-md ">
-              <div class="overflow-x-auto">
+                Nombre o descripción
+              </span>
 
-                @if (zonas.length != 0) {
-                <table class="table table-zebra">
-                  <!-- head -->
-                  <thead>
-                    <tr>
-                      <th>Check</th>
-                      <th>Zona</th>
-                      <th>Riesgo</th>
-                      <th>Opciones</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+              <div class="relative">
+                <i class="fa-solid fa-magnifying-glass
+                     pointer-events-none absolute
+                     left-3.5 top-1/2
+                     -translate-y-1/2
+                     text-base-content/35">
+                </i>
 
-                    <!-- row 1 -->
-                    @for (zona of zonas; track $index) {
-                    <tr>
-                      <td>
-                        <label>
-                          <input type="checkbox" [checked]="zonasVisibles[zona.id]" (change)="toggleZona(zona)"
-                            class="checkbox checkbox-sm" />
-                        </label>
-                      </td>
+                <!-- <i class="fa-solid fa-magnifying-glass
+                     text-base-content/40"></i> -->
 
-                      <td>{{ zona.nombre }}</td>
+                <input type="text" class="input input-bordered
+                     h-11 w-full rounded-xl
+                     bg-base-100 pl-10 pr-4
+                     focus:outline-none
+                     focus:ring-2
+                     focus:ring-primary/30" placeholder="Buscar por nombre o descripción" utocomplete="off"
+                  [(ngModel)]="nombreBusqueda" (ngModelChange)="onSearchChange()" appUppercase />
 
-                      <td>{{ zona.riesgo }}</td>
-
-                      <td class="flex justify-center items-center">
-                        <button class="btn btn-xs btn-error" (click)="eliminarZona(zona.id)"> <img
-                            src="assets/icons/crud/delete.svg" alt="Icon Eliminar" class="w-5 h-5 "></button>
-
-                      </td>
-                    </tr>
-                    }
-                  </tbody>
-
-                </table>
-                }
-                @else {
-                <p>No hay Zonas Registradas</p>
-                }
-
-
+                <!-- @if (nombreBusqueda) {
+                <button type="button" class="btn btn-ghost btn-circle btn-xs" aria-label="Limpiar búsqueda"
+                  title="Limpiar búsqueda" (click)="limpiarBusqueda()">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+                } -->
               </div>
-            </div>
-          </div>
 
-          <!-- Mapa: lado derecho -->
-          <div class="lg:w-2/3 w-full">
-            <div class="card bg-base-300 rounded-xl p-4 shadow-md h-full">
-
-              <!-- Barra de herramientas -->
-              <div class="flex justify-between items-center mb-3 flex-wrap gap-3">
-
-                <!-- Botones -->
-                <div class="flex flex-wrap gap-2">
-
-                  <button type="button" class="btn btn-primary btn-sm inline-flex items-center gap-2"
-                    (click)="initDraw()" [disabled]="drawing">
-
-                    <i class="fa-solid fa-map"></i>
-                    <span>Iniciar dibujo</span>
-
-                  </button>
-
-                  <button type="button" class="btn btn-success btn-sm inline-flex items-center gap-2"
-                    (click)="finishedDraw()" [disabled]="!drawing">
-
-                    <i class="fa-solid fa-check"></i>
-                    <span>Finalizar</span>
-
-                  </button>
-
-                  <button type="button" class="btn btn-error btn-sm inline-flex items-center gap-2"
-                    (click)="cancelDraw()" [disabled]="!drawing">
-
-                    <i class="fa-solid fa-xmark"></i>
-                    <span>Cancelar</span>
-
-                  </button>
-
-                </div>
-
-                <!-- Badge -->
-                <div class="badge badge-info badge-lg whitespace-nowrap">
-
-                  Vértices: {{ coordenadas.length }}
-
-                </div>
-
-              </div>
-              <div #mapContainer id="map" class="w-full flex-1  rounded border">
-              </div>
-            </div>
-
-
+            </label>
           </div>
         </div>
 
-      </form>
-    </div>
+        <!-- =============================================== -->
+        <!-- ILUSTRACIÓN DE BÚSQUEDA -->
+        <!-- =============================================== -->
+        <div class="hidden items-center justify-center border-base-300 px-5 lg:flex">
 
+          <img src="assets/img/search.png" alt="" aria-hidden="true" class="h-32 w-32
+               select-none object-contain
+               opacity-90
+               drop-shadow-sm" draggable="false" />
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================= -->
+    <!-- EDITOR DE ZONA - MODALES -->
+    <!-- ================================================= -->
+    <zona-form [mostrarModal]="mostrarModal" [modoEdicion]="modoEdicion" [zonaSeleccionada]="zonaSeleccionado"
+      (modalCerrado)="cerrarFormularioZona()" (zonaCreado)="onZonaGuardada()"></zona-form>
+
+    <!-- =============================================== -->
+    <!-- TABLA -->
+    <!-- =============================================== -->
+    <section class="overflow-hidden rounded-2xl
+             border border-base-300 bg-base-100
+             shadow-sm">
+
+      <!-- Encabezado del listado -->
+      <div class="flex flex-col gap-4
+         border-b border-base-300
+         px-4 py-4
+         sm:flex-row
+         sm:items-center
+         sm:justify-between
+         sm:px-5">
+        <!-- <div>
+          <div class="flex flex-wrap items-center gap-2">
+            <h2 class="text-lg font-bold text-base-content">
+              Zonas registradas
+            </h2>
+
+            <span class="badge badge-neutral">
+              {{ total }}
+            </span>
+          </div>
+
+          <p class="mt-1 text-sm text-base-content/60">
+            Consulte, visualice, edite o elimine las zonas
+            registradas.
+          </p>
+        </div> -->
+
+
+        <!-- Selector de cantidad -->
+        <div class="flex w-full items-center
+           justify-between gap-3
+           text-sm text-base-content/70
+           sm:w-auto sm:justify-start">
+
+          <label for="usuarios-page-size" class="whitespace-nowrap">
+            Mostrar
+          </label>
+
+          <select id="usuarios-page-size" class="select select-bordered select-sm w-auto" [(ngModel)]="limit"
+            (change)="cambiarLimite()">
+            <option *ngFor="let size of pageSizeOptions" [ngValue]="size">
+              {{ size }}
+            </option>
+          </select>
+
+          <span class="whitespace-nowrap">
+            items por página
+          </span>
+        </div>
+
+
+        <!-- Botónes -->
+        <div class="flex w-full items-center justify-end sm:w-auto">
+          <button type="button" class="btn btn-primary
+              min-h-10 w-full gap-2
+              rounded-xl border-none
+             hover:text-white bg-info hover:bg-primary
+              sm:w-auto sm:min-w-36" (click)="abrirCrearZona()">
+            <i class="fa-solid fa-plus"></i>
+            Zona
+          </button>
+        </div>
+      </div>
+
+      <!-- =============================================== -->
+      <!-- CARGANDO -->
+      <!-- =============================================== -->
+      <!-- @if (isLoading) {
+      <div class="space-y-3 p-5">
+        @for (
+        item of [1, 2, 3, 4, 5];
+        track item
+        ) {
+        <div class="grid grid-cols-[40px_1fr_100px_100px]
+                     items-center gap-4 rounded-xl
+                     border border-base-300 p-4">
+          <div class="skeleton h-5 w-5"></div>
+          <div class="skeleton h-5 w-full"></div>
+          <div class="skeleton h-6 w-20"></div>
+          <div class="skeleton h-8 w-24"></div>
+        </div>
+        }
+      </div>
+      } -->
+
+      <!-- Contenedor de scroll exclusivo para tabla -->
+      <div class="w-full overflow-x-auto">
+        <table class="table min-w-295 w-full">
+
+          <thead class="bg-base-300/90">
+            <tr class="text-xs uppercase tracking-wide text-base-content/600">
+              <th class="w-16 text-center">N.°</th>
+              <th> Zona </th>
+              <th> Riesgo </th>
+              <th> Estado </th>
+              <th> Actualización </th>
+              <th class="text-center"> Acciones </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <!-- Loading -->
+            @if (isLoading) {
+            <tr>
+              <td colspan="9" class="py-14 text-center">
+
+                <div class="flex flex-col items-center justify-center gap-3">
+                  <span class="loading loading-spinner loading-md text-primary">
+                  </span>
+
+                  <span class="text-sm text-base-content/60">
+                    Cargando zonas...
+                  </span>
+                </div>
+              </td>
+            </tr>
+            }
+
+            <!-- Zonas -->
+            @if (!isLoading){
+            @for ( zona of zonas; track zona.id; let i = $index ) {
+            <tr class="hover">
+
+              <!-- Numeración paginada -->
+              <td class="text-center text-base-content/60">
+                {{ ((page - 1) * limit) + i + 1 }}
+              </td>
+
+              <!-- Zona -->
+              <td>
+                <div class="flex min-w-56 items-center gap-3">
+                  <div class="flex h-10 w-10 shrink-0
+                               items-center justify-center
+                               rounded-xl bg-primary/10
+                               text-primary">
+                    <i class="fa-solid fa-map-location-dot"></i>
+                  </div>
+
+                  <div class="min-w-0">
+                    <p class="font-semibold text-base-content">
+                      {{ zona.nombre }}
+                    </p>
+
+                    <p class="mt-0.5 max-w-md truncate
+                                 text-xs text-base-content/55" [title]="zona.descripcion || ''">
+                      {{
+                      zona.descripcion ||
+                      'Sin descripción registrada'
+                      }}
+                    </p>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Riesgo -->
+              <!-- Riesgo -->
+              <td>
+                @let riesgoBadge =
+                getRiesgoBadge(zona.riesgo);
+
+                <span class="badge whitespace-nowrap font-medium" [ngClass]="riesgoBadge.classes">
+                  {{ riesgoBadge.label }}
+                </span>
+              </td>
+
+              <!-- Estado -->
+              <td>
+                @if (zona.estado) {
+                <span class="inline-flex items-center
+                               gap-2 text-sm font-medium
+                               text-success">
+                  <span class="h-2 w-2 rounded-full
+                                 bg-success"></span>
+
+                  Activa
+                </span>
+                } @else {
+                <span class="inline-flex items-center
+                               gap-2 text-sm font-medium
+                               text-error">
+                  <span class="h-2 w-2 rounded-full
+                                 bg-error"></span>
+
+                  Inactiva
+                </span>
+                }
+              </td>
+
+              <!-- Fecha -->
+              <td>
+                <div class="min-w-36">
+                  <p class="text-sm font-medium">
+                    {{ zona.updatedAt | date: 'dd/MM/yyyy' }}
+                  </p>
+
+                  <p class="text-xs text-base-content/50">
+                    {{ zona.updatedAt | date: 'hh:mm a' }}
+                  </p>
+                </div>
+              </td>
+
+              <!-- Acciones -->
+              <td>
+                <div class="flex items-center justify-center gap-1">
+
+                  <!-- Editar -->
+                  <div class="tooltip tooltip-left" data-tip="Editar zona">
+                    <button type="button" class="btn btn-ghost btn-circle btn-sm" title="Editar zona"
+                      aria-label="Editar zona" (click)="editarZona(zona)">
+                      <i class="fa-solid fa-pen-to-square"></i>
+                    </button>
+                  </div>
+
+                  <!-- Eliminar -->
+                  <div class="tooltip tooltip-left" data-tip="Eliminar zona">
+                    <button type="button" class="btn btn-ghost btn-circle btn-sm" title="Eliminar zona"
+                      aria-label="Eliminar zona" (click)="eliminarZona(zona)">
+                      <i class="fa-solid fa-trash"></i>
+                    </button>
+                  </div>
+
+                </div>
+              </td>
+            </tr>
+            }
+
+            <!-- @if (zonas.length === 0){
+            <tr>
+              <td colspan="8" class="py-12 text-center">
+
+                <div class="mx-auto flex max-w-md
+                             flex-col items-center
+                             justify-center">
+
+                  <img src="assets/img/empty-folder.png" alt="" class="mb-5 h-32 w-32
+                               object-contain opacity-70" />
+
+                  <h3 class="text-lg font-semibold
+                               text-base-content">
+
+                    No hay zonas registradas
+                  </h3>
+
+                  <p class="mt-1 text-sm
+                               text-base-content/55">
+
+                    Cuando se registren nuevas zonas,
+                    aparecerán aquí automáticamente.
+                  </p>
+                </div>
+              </td>
+            </tr>
+            }-->
+            }
+
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginación -->
+      <footer class="flex flex-col gap-4
+               border-t border-base-300
+               bg-base-200/50
+               px-4 py-4
+               sm:flex-row
+               sm:items-center
+               sm:justify-between
+               sm:px-5">
+
+        <!-- Resumen -->
+        <div class="text-center sm:text-left">
+          <h2 class="font-semibold text-base-content">
+            Unidades registradas
+          </h2>
+
+          <p class="mt-0.5 text-sm
+                   text-base-content/55">
+
+            {{ total }}
+            {{ total === 1 ? 'zona' : 'zonas' }}
+            encontradas
+          </p>
+        </div>
+
+        <!-- Controles -->
+        <div class="flex w-full flex-col
+                 items-center gap-3
+                 text-sm text-base-content/70
+                 sm:w-auto sm:flex-row">
+
+          <span class="whitespace-nowrap">
+            @if (totalPages > 0) {
+            Página
+
+            <strong class="text-base-content">
+              {{ page }}
+            </strong>
+
+            de
+
+            <strong class="text-base-content">
+              {{ totalPages }}
+            </strong>
+            } @else {
+            Sin páginas disponibles
+            }
+          </span>
+
+          <div class="grid w-full grid-cols-2
+                   gap-2 sm:flex sm:w-auto">
+
+            <button type="button" class="btn btn-sm w-full
+                     gap-2 rounded-lg
+                     sm:w-auto" [disabled]="
+                isLoading ||
+                page <= 1
+              " (click)="cambiarPagina(page - 1)">
+
+              <i class="fa-solid fa-chevron-left"></i>
+
+              Anterior
+            </button>
+
+            <button type="button" class="btn btn-sm w-full
+                     gap-2 rounded-lg
+                     sm:w-auto" [disabled]="
+                isLoading ||
+                totalPages === 0 ||
+                page >= totalPages
+              " (click)="cambiarPagina(page + 1)">
+
+              Siguiente
+
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </footer>
+
+      <!-- =============================================== -->
+      <!-- EMPTY -->
+      <!-- =============================================== -->
+      @if (!isLoading && zonas.length === 0) {
+      <div class="flex min-h-72 flex-col items-center
+                 justify-center px-5 py-10 text-center">
+        <div class="flex h-16 w-16 items-center
+                   justify-center rounded-full
+                   bg-base-200 text-base-content/35">
+          <i class="fa-solid fa-map-location-dot
+                     text-2xl"></i>
+        </div>
+
+        <h3 class="mt-4 text-lg font-semibold
+                   text-base-content">
+          @if (nombreBusqueda) {
+          No se encontraron resultados
+          } @else {
+          No hay zonas registradas
+          }
+        </h3>
+
+        <p class="mt-1 max-w-md text-sm
+                   leading-relaxed text-base-content/60">
+          @if (nombreBusqueda) {
+          Intente utilizar otro nombre o limpie
+          el criterio de búsqueda.
+          } @else {
+          Complete el formulario y dibuje el
+          perímetro para registrar la primera zona.
+          }
+        </p>
+
+        @if (nombreBusqueda) {
+        <button type="button" class="btn btn-ghost btn-sm mt-4" (click)="limpiarBusqueda()">
+          Limpiar búsqueda
+        </button>
+        }
+      </div>
+      }
+    </section>
   </div>
-
 </div>

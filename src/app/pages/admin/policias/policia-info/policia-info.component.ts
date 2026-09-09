@@ -10,7 +10,7 @@ import { ApiErrorData } from 'src/app/pages/shared/interfaces/api-error-data.mod
 
 // Service
 import { PoliciasService } from 'src/app/services/usuarios/policias.service';
-import { UbigeoService } from 'src/app/services/ubigeo.service';
+import { UbigeoService } from 'src/app/services/zona/ubigeo.service';
 
 @Component({
   selector: 'policia-info',

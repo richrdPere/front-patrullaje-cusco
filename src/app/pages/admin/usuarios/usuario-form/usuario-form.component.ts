@@ -8,7 +8,7 @@ import { UppercaseDirective } from 'src/app/pages/shared/directives/uppercase.di
 
 // Services
 import { UsuarioService } from '../../../../services/usuarios/usuarios.service';
-import { UbigeoService } from 'src/app/services/ubigeo.service';
+import { UbigeoService } from 'src/app/services/zona/ubigeo.service';
 
 // Interface
 import { UsuarioData } from 'src/app/interfaces/usuarios/get-usuarios-paginated.model';

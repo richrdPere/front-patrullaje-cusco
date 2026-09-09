@@ -11,7 +11,7 @@ import { PoliciaData } from 'src/app/interfaces/policia/get-policia-paginated.mo
 
 // Services
 import { PoliciasService } from 'src/app/services/usuarios/policias.service';
-import { UbigeoService } from 'src/app/services/ubigeo.service';
+import { UbigeoService } from 'src/app/services/zona/ubigeo.service';
 import { updateUsuarioRequest } from 'src/app/interfaces/usuarios/update-usuario.model';
 import { UpdatePoliciaRequest, UpdatePoliciaResponse } from 'src/app/interfaces/policia/update-policia.model';
 import { CreartePoliciaRequest, CreatePoliciaResponse } from '../../../../interfaces/policia/create-policia.model';
