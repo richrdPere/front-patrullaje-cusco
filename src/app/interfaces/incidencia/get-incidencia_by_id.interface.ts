@@ -1,5 +1,7 @@
 // src/app/interfaces/incidencias/incidencia-detalle.interface.ts
 
+import { ApiResponse } from "../alertas.interface";
+
 export interface IncidenciaDetalleResponse {
   success: boolean;
   message: string;
@@ -105,3 +107,8 @@ export type EstadoPatrullaje =
   | 'ACEPTADO'
   | 'EN_CURSO'
   | 'FINALIZADO';
+
+// ============================================================
+// RESPONSE
+// ============================================================
+export type GetIncidenciaByIdResponse = ApiResponse<IncidenciaDetalle>;

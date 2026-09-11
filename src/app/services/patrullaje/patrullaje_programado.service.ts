@@ -21,8 +21,6 @@ import { DeletePatrullajeProgramadoResponse } from 'src/app/interfaces/patrullaj
 import { GetRecorridoPatrullajeResponse } from 'src/app/interfaces/patrullaje_programado/get-recorrido-patrullaje.model';
 import { FinishPatrullajeProgramadoResponse } from 'src/app/interfaces/patrullaje_programado/finish-patrullaje-programado.model';
 
-
-
 @Injectable({ providedIn: 'root' })
 export class PatrullajeProgramadoService {
 
@@ -247,9 +245,9 @@ export class PatrullajeProgramadoService {
       );
   }
 
-  // ==========================================================
-  // HEADERS
-  // ==========================================================
+  // *********************************************************
+  // HEADERS JSON
+  // *********************************************************
   private getJsonHeaders(): HttpHeaders {
     return HttpServiceHelper.getHeaders({
       token: this.authStorage.getAccessToken(),

@@ -133,14 +133,7 @@ export class UnidadPatrullajeService {
           headers: this.getJsonHeaders(),
         },
       )
-      .pipe(
-        catchError((error) => HttpServiceHelper
-          .handleError(
-            error,
-            'No se pudo actualizar la unidad de patrullaje.',
-          ),
-        ),
-      );
+
   }
 
   // *********************************************************
@@ -154,14 +147,7 @@ export class UnidadPatrullajeService {
           headers: this.getJsonHeaders(),
         },
       )
-      .pipe(
-        catchError((error) =>
-          HttpServiceHelper.handleError(
-            error,
-            'No se pudo eliminar la unidad de patrullaje.',
-          ),
-        ),
-      );
+
   }
 
   // *********************************************************

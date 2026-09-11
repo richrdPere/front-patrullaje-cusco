@@ -1,0 +1,430 @@
+<div
+  class="min-h-full min-w-0 bg-base-300 px-4 py-5 text-base-content transition-colors duration-300 sm:px-6 sm:py-6 lg:px-8">
+
+  <!-- CONTENEDOR DEL DASHBOARD -->
+  <div class="mx-auto w-full max-w-500">
+
+    <!-- ================================================= -->
+    <!-- ENCABEZADO -->
+    <!-- ================================================= -->
+    <header class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+      <!-- ÍCONO + INFORMACIÓN -->
+      <div class="flex min-w-0 items-center gap-3">
+        <div
+          class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary sm:h-12 sm:w-12">
+          <!-- <i class="fa-solid fa-person-burst text-xl sm:text-2xl"></i> -->
+          <i class="fa-solid fa-binoculars text-xl sm:text-2xl"></i>
+        </div>
+
+        <div class="min-w-0">
+          <h1 class="truncate text-xl font-bold leading-tight text-base-content sm:text-2xl">
+
+            Incidentes por serenos
+          </h1>
+
+          <p class="mt-1 text-sm leading-relaxed
+                   text-base-content/60">
+
+            Seleccione el expediente de un sereno para consultar las
+            incidencias que ha registrado.
+          </p>
+        </div>
+      </div>
+
+      @if (!isLoading) {
+      <div class="stats border border-base-300 bg-base-100 shadow-sm">
+        <div class="stat px-5 py-3">
+          <div class="stat-title text-xs">
+            Serenos encontrados
+          </div>
+
+          <div class="stat-value text-2xl text-primary">
+            {{ totalItems }}
+          </div>
+        </div>
+      </div>
+      }
+    </header>
+
+    <!-- ================================================= -->
+    <!-- FILTROS -->
+    <!-- ================================================= -->
+    <section class="mb-6 overflow-hidden rounded-2xl
+         border border-base-300
+         bg-base-100 shadow-sm">
+
+      <div class="grid grid-cols-1
+           lg:grid-cols-[minmax(0,1fr)_170px]">
+
+        <!-- =============================================== -->
+        <!-- CAMPOS DE FILTRO -->
+        <!-- =============================================== -->
+        <div class="p-4 sm:p-5">
+
+          <div class="grid grid-cols-1 gap-4
+               sm:grid-cols-2
+               xl:grid-cols-[minmax(240px,1.4fr)_minmax(180px,1fr)_minmax(190px,1fr)_auto]">
+
+            <!-- Buscar por nombre -->
+
+            <label class="form-control w-full">
+              <span class="mb-1.5 text-xs font-semibold
+                   uppercase tracking-wide
+                   text-base-content/60">
+
+                Nombres o apellidos
+              </span>
+
+              <div class="relative">
+                <i class="fa-solid fa-magnifying-glass
+                     pointer-events-none absolute
+                     left-3.5 top-1/2
+                     -translate-y-1/2
+                     text-base-content/35">
+                </i>
+
+                <input type="text" class="input input-bordered
+                     h-11 w-full rounded-xl
+                     bg-base-100 pl-10 pr-4
+                     focus:outline-none
+                     focus:ring-2
+                     focus:ring-primary/30" placeholder="Buscar usuario" autocomplete="off"
+                  [(ngModel)]="nombreBusqueda" (ngModelChange)="onSearchChange()" appUppercase />
+              </div>
+            </label>
+
+            <!-- Buscar por DNI -->
+
+            <label class="form-control w-full">
+              <span class="mb-1.5 text-xs font-semibold
+                   uppercase tracking-wide
+                   text-base-content/60">
+
+                Documento
+              </span>
+
+              <div class="relative">
+                <i class="fa-regular fa-id-card
+                     pointer-events-none absolute
+                     left-3.5 top-1/2
+                     -translate-y-1/2
+                     text-base-content/35">
+                </i>
+
+                <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="8" class="input input-bordered
+                     h-11 w-full rounded-xl
+                     bg-base-100 pl-10 pr-4
+                     focus:outline-none
+                     focus:ring-2
+                     focus:ring-primary/30" placeholder="Número de DNI" autocomplete="off" [(ngModel)]="dniBusqueda"
+                  (ngModelChange)="onSearchChange()" />
+              </div>
+            </label>
+
+            <!-- Limpiar filtros -->
+            <div class="flex items-end
+                 sm:col-span-2
+                 xl:col-span-1">
+
+              <button type="button" class="btn btn-outline
+                   h-11 min-h-11 w-full
+                   gap-2 rounded-xl
+                   xl:w-auto xl:min-w-28" [disabled]="
+              !nombreBusqueda &&
+              !dniBusqueda &&
+              !rolesBusqueda
+            " (click)="limpiarFiltros()">
+
+                <i class="fa-solid
+                     fa-filter-circle-xmark">
+                </i>
+
+                Limpiar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- =============================================== -->
+        <!-- ILUSTRACIÓN DE BÚSQUEDA -->
+        <!-- =============================================== -->
+        <div class="hidden items-center justify-center border-base-300 px-5 lg:flex">
+
+          <img src="assets/img/search.png" alt="" aria-hidden="true" class="h-32 w-32
+               select-none object-contain
+               opacity-90
+               drop-shadow-sm" draggable="false" />
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================== -->
+    <!-- CARGANDO -->
+    <!-- ===================================================== -->
+    @if (isLoading) {
+    <section class="grid grid-cols-1 gap-5
+               sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4" aria-label="Cargando expedientes">
+      @for (item of [1, 2, 3, 4, 5, 6, 7, 8]; track item) {
+      <article class="overflow-hidden rounded-2xl border
+                   border-base-300 bg-base-100 shadow-sm">
+        <div class="h-2 bg-base-300"></div>
+
+        <div class="space-y-4 p-5">
+          <div class="flex items-center gap-3">
+            <div class="skeleton h-14 w-14 rounded-2xl"></div>
+
+            <div class="flex-1 space-y-2">
+              <div class="skeleton h-4 w-3/4"></div>
+              <div class="skeleton h-3 w-1/2"></div>
+            </div>
+          </div>
+
+          <div class="skeleton h-16 w-full"></div>
+          <div class="skeleton h-10 w-full"></div>
+        </div>
+      </article>
+      }
+    </section>
+    }
+
+    <!-- ===================================================== -->
+    <!-- EXPEDIENTES DE SERENOS -->
+    <!-- ===================================================== -->
+
+    @if (!isLoading && usuarios.length > 0) {
+    <section class="grid grid-cols-1 gap-5
+           sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4" aria-label="Expedientes de incidencias por sereno">
+      @for (usuario of usuarios; track usuario.id) {
+      <article class="group relative flex h-full flex-col
+               overflow-hidden rounded-2xl
+               border border-base-300 bg-base-100
+               shadow-sm transition-all duration-200
+               hover:-translate-y-1
+               hover:border-primary/40
+               hover:shadow-lg">
+        <!-- Franja superior -->
+
+        <div class="h-1.5 bg-primary"></div>
+
+        <!-- Pestaña de expediente -->
+
+        <div class="absolute right-5 top-1.5
+                 h-3 w-16 rounded-b-lg bg-primary/15"></div>
+
+        <div class="flex flex-1 flex-col p-5">
+          <!-- ================================================= -->
+          <!-- SERENO -->
+          <!-- ================================================= -->
+
+          <div class="flex min-w-0 items-center gap-3">
+            <!-- Fotografía -->
+
+            <div class="avatar shrink-0">
+              @if (usuario.persona.foto_perfil) {
+              <div class="h-13 w-13 overflow-hidden
+                         rounded-2xl border border-base-300
+                         bg-base-200">
+                <img [src]="usuario.persona.foto_perfil" [alt]="
+                      'Fotografía de ' +
+                      usuario.persona.nombres +
+                      ' ' +
+                      usuario.persona.apellidos
+                    " class="h-full w-full object-cover" />
+              </div>
+              } @else {
+              <div class="flex h-13 w-13 items-center
+                         justify-center rounded-2xl
+                         bg-primary/10 text-primary">
+                <i class="fa-solid fa-user-shield text-xl"></i>
+              </div>
+              }
+            </div>
+
+            <!-- Nombre -->
+
+            <div class="min-w-0 flex-1">
+              <div class="flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                  <h2 class="line-clamp-2 font-bold leading-snug
+                           text-base-content">
+                    {{ usuario.persona.nombres }}
+                    {{ usuario.persona.apellidos }}
+                  </h2>
+
+                  <p class="mt-1 truncate text-xs
+                           text-base-content/50">
+                    &#64;{{ usuario.username || 'sin usuario' }}
+                  </p>
+                </div>
+
+                <!-- Estado reducido a indicador -->
+
+                <div class="tooltip tooltip-left shrink-0" [attr.data-tip]="
+                    usuario.estado
+                      ? 'Sereno activo'
+                      : 'Sereno inactivo'
+                  ">
+                  <span class="block h-2.5 w-2.5 rounded-full" [ngClass]="
+                      usuario.estado
+                        ? 'bg-success'
+                        : 'bg-error'
+                    "></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================================================= -->
+          <!-- TOTAL DE INCIDENCIAS -->
+          <!-- ================================================= -->
+
+          <div class="my-4 flex items-center justify-between
+                   rounded-xl border border-base-300
+                   bg-base-200/40 px-4 py-3">
+            <div class="flex items-center gap-3">
+              <span class="flex h-9 w-9 shrink-0
+                       items-center justify-center
+                       rounded-lg" [ngClass]="
+                  usuario.total_incidencias > 0
+                    ? 'bg-success/15 text-success'
+                    : 'bg-base-200 text-base-content/40'
+                ">
+                <i class="fa-solid fa-file-circle-exclamation"></i>
+              </span>
+
+              <div>
+                <p class="text-xs text-base-content/50">
+                  Incidencias registradas
+                </p>
+
+                <p class="text-sm font-semibold">
+                  {{
+                  usuario.total_incidencias === 0
+                  ? 'Sin reportes'
+                  : 'Expediente disponible'
+                  }}
+                </p>
+              </div>
+            </div>
+
+            <span class="text-2xl font-bold" [ngClass]="
+                usuario.total_incidencias > 0
+                  ? 'text-success'
+                  : 'text-base-content/30'
+              ">
+              {{ usuario.total_incidencias }}
+            </span>
+          </div>
+
+          <!-- ================================================= -->
+          <!-- ACCIÓN -->
+          <!-- ================================================= -->
+
+          <button type="button" class="btn mt-auto w-full" [ngClass]="
+              usuario.total_incidencias > 0
+                ? 'btn-success'
+                : 'btn-outline'
+            " [disabled]="!usuario.estado" (click)="verIncidenciasSereno(usuario)">
+            <i class="fa-solid" [ngClass]="
+                usuario.total_incidencias > 0
+                  ? 'fa-folder-open'
+                  : 'fa-folder'
+              "></i>
+
+            {{
+            usuario.total_incidencias > 0
+            ? 'Ver incidencias'
+            : 'Abrir expediente'
+            }}
+
+            <i class="fa-solid fa-chevron-right
+                     ml-auto text-xs"></i>
+          </button>
+        </div>
+      </article>
+      }
+    </section>
+    }
+
+    <!-- ===================================================== -->
+    <!-- SIN RESULTADOS -->
+    <!-- ===================================================== -->
+
+    @if (!isLoading && usuarios.length === 0) {
+    <section class="rounded-2xl border border-dashed border-base-300
+               bg-base-100 px-6 py-16 text-center shadow-sm">
+      <div class="mx-auto flex h-20 w-20 items-center justify-center
+                 rounded-full bg-base-200 text-base-content/35">
+        <i class="fa-solid fa-folder-open text-3xl"></i>
+      </div>
+
+      <h2 class="mt-5 text-lg font-bold">
+        No se encontraron serenos
+      </h2>
+
+      <p class="mx-auto mt-2 max-w-md text-sm text-base-content/55">
+        No existen expedientes que coincidan con los criterios
+        de búsqueda ingresados.
+      </p>
+
+      @if (nombreBusqueda.trim() || dniBusqueda.trim()) {
+      <button type="button" class="btn btn-primary btn-sm mt-5" (click)="limpiarFiltros()">
+        <i class="fa-solid fa-filter-circle-xmark"></i>
+        Limpiar filtros
+      </button>
+      }
+    </section>
+    }
+
+    <!-- ===================================================== -->
+    <!-- PAGINACIÓN -->
+    <!-- ===================================================== -->
+
+    @if (!isLoading && totalItems > 0) {
+    <footer class="mt-6 flex flex-col gap-4 rounded-2xl
+               border border-base-300 bg-base-100
+               px-4 py-4 shadow-sm
+               sm:flex-row sm:items-center sm:justify-between">
+      <div class="text-center text-sm text-base-content/60 sm:text-left">
+        Mostrando
+        <span class="font-semibold text-base-content">
+          {{ ((page - 1) * limit) + 1 }}
+        </span>
+        a
+        <span class="font-semibold text-base-content">
+          {{ page * limit > totalItems ? totalItems : page * limit }}
+        </span>
+        de
+        <span class="font-semibold text-base-content">
+          {{ totalItems }}
+        </span>
+        serenos
+      </div>
+
+      <div class="flex items-center justify-center gap-2">
+        <button type="button" class="btn btn-outline btn-sm" [disabled]="page <= 1" (click)="cambiarPagina(page - 1)"
+          aria-label="Página anterior">
+          <i class="fa-solid fa-chevron-left"></i>
+          <span class="hidden sm:inline">Anterior</span>
+        </button>
+
+        <div class="rounded-lg bg-base-200 px-4 py-2 text-sm">
+          Página
+          <span class="font-bold">{{ page }}</span>
+          de
+          <span class="font-bold">{{ totalPages }}</span>
+        </div>
+
+        <button type="button" class="btn btn-outline btn-sm" [disabled]="page >= totalPages"
+          (click)="cambiarPagina(page + 1)" aria-label="Página siguiente">
+          <span class="hidden sm:inline">Siguiente</span>
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+      </div>
+    </footer>
+    }
+
+
+  </div>
+</div>

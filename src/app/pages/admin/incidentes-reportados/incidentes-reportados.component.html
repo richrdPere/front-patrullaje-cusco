@@ -1,47 +1,35 @@
-<div class="min-h-full min-w-0 bg-base-300
-         px-4 py-5 text-base-content
-         transition-colors duration-300
-         sm:px-6 sm:py-6 lg:px-8">
+<div
+  class="min-h-full min-w-0 bg-base-300 px-4 py-5 text-base-content transition-colors duration-300 sm:px-6 sm:py-6 lg:px-8">
 
   <!-- ================================================= -->
   <!-- CONTENEDOR DEL DASHBOARD -->
   <!-- ================================================= -->
-
   <div class="mx-auto w-full max-w-500">
 
     <!-- ================================================= -->
     <!-- ENCABEZADO -->
     <!-- ================================================= -->
-
     <header class="mb-5 flex flex-col gap-4
              sm:flex-row sm:items-center
              sm:justify-between">
 
-      <!-- Título -->
-
+      <!-- ÍCONO + INFORMACIÓN -->
       <div class="flex min-w-0 items-center gap-3">
 
-        <div class="flex h-12 w-12 shrink-0
-                 items-center justify-center
-                 rounded-2xl bg-error/10
-                 text-error" aria-hidden="true">
+        <div
+          class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary sm:h-12 sm:w-12"
+          aria-hidden="true">
 
-          <i class="fa-solid fa-triangle-exclamation
-                   text-2xl">
-          </i>
+          <i class="fa-solid fa-triangle-exclamation text-xl sm:text-2xl"> </i>
         </div>
 
         <div class="min-w-0">
-          <h1 class="text-2xl font-bold
-                   leading-tight text-base-content">
-
+          <h1 class="truncate text-xl font-bold leading-tight text-base-content sm:text-2xl">
             Incidentes reportados
           </h1>
 
-          <p class="mt-1 max-w-2xl
-                   text-sm leading-relaxed
+          <p class="mt-1 text-sm leading-relaxed
                    text-base-content/60">
-
             Consulte y supervise los incidentes registrados
             por el personal de Serenazgo.
           </p>
@@ -49,8 +37,7 @@
       </div>
 
       <!-- Actualizar -->
-
-      <button type="button" class="btn btn-outline
+      <!-- <button type="button" class="btn btn-outline
                min-h-10 w-full gap-2
                rounded-xl
                sm:w-auto sm:min-w-32" [disabled]="isLoading" (click)="recargarIncidencias()">
@@ -59,97 +46,130 @@
         </i>
 
         Actualizar
-      </button>
+      </button> -->
     </header>
+
 
     <!-- ================================================= -->
     <!-- FILTROS -->
     <!-- ================================================= -->
+    <section class="mb-6 overflow-hidden rounded-2xl
+         border border-base-300
+         bg-base-100 shadow-sm">
+      <div class="grid grid-cols-1
+           lg:grid-cols-[minmax(0,1fr)_170px]">
 
-    <section class="mb-6 rounded-2xl
-             border border-base-300
-             bg-base-100 p-4
-             shadow-sm sm:p-5">
-
-      <div class="grid grid-cols-1 gap-4
+        <!-- =============================================== -->
+        <!-- CAMPOS DE FILTRO -->
+        <!-- =============================================== -->
+        <div class="p-4 sm:p-5">
+          <div class="grid grid-cols-1 gap-4
                sm:grid-cols-2
-               xl:grid-cols-[minmax(250px,1fr)_minmax(220px,320px)_auto]">
+               xl:grid-cols-4">
 
-        <!-- Buscar por descripción -->
-
-        <label class="form-control w-full">
-          <span class="mb-1.5 text-xs font-semibold
+            <!-- Tipo de incidencia -->
+            <label class="form-control w-full">
+              <span class="mb-1.5 text-xs font-semibold
                    uppercase tracking-wide
                    text-base-content/60">
+                Tipo
+              </span>
 
-            Descripción
-          </span>
+              <select class="select select-bordered
+                   h-11 w-full rounded-xl" [(ngModel)]="tipoBusqueda" (ngModelChange)="onFiltroChange()">
+                <option value="">
+                  Todos los tipos
+                </option>
 
-          <div class="relative">
-            <i class="fa-solid fa-magnifying-glass
+                @for (
+                tipo of tiposIncidencia;
+                track tipo.value
+                ) {
+                <option [value]="tipo.value">
+                  {{ tipo.label }}
+                </option>
+                }
+              </select>
+            </label>
+
+            <!-- Estado -->
+            <label class="form-control w-full">
+              <span class="mb-1.5 text-xs font-semibold
+                   uppercase tracking-wide
+                   text-base-content/60">
+                Estado
+              </span>
+
+              <select class="select select-bordered
+                   h-11 w-full rounded-xl" [(ngModel)]="estadoBusqueda" (ngModelChange)="onFiltroChange()">
+                <option value="">
+                  Todos los estados
+                </option>
+
+                @for (
+                estado of estadosIncidencia;
+                track estado.value
+                ) {
+                <option [value]="estado.value">
+                  {{ estado.label }}
+                </option>
+                }
+              </select>
+            </label>
+
+            <!-- Fecha inicial -->
+            <label class="form-control w-full">
+              <span class="mb-1.5 text-xs font-semibold
+                   uppercase tracking-wide
+                   text-base-content/60">
+                Fecha inicial
+              </span>
+
+              <div class="relative">
+                <i class="fa-regular fa-calendar
                      pointer-events-none absolute
                      left-3.5 top-1/2
                      -translate-y-1/2
-                     text-base-content/35">
-            </i>
+                     text-base-content/35"></i>
 
-            <input type="text" class="input input-bordered
+                <input type="date" class="input input-bordered
                      h-11 w-full rounded-xl
-                     bg-base-100 pl-10 pr-4
-                     focus:outline-none
-                     focus:ring-2
-                     focus:ring-primary/30" placeholder="Buscar por descripción" autocomplete="off"
-              [(ngModel)]="descripcionBusqueda" (ngModelChange)="onSearchChange()" />
-          </div>
-        </label>
+                     bg-base-100 pl-10 pr-4" [(ngModel)]="fechaInicioBusqueda" (change)="aplicarFiltros()" />
+              </div>
+            </label>
 
-        <!-- Buscar por fecha -->
-
-        <label class="form-control w-full">
-          <span class="mb-1.5 text-xs font-semibold
+            <!-- Fecha final -->
+            <label class="form-control w-full">
+              <span class="mb-1.5 text-xs font-semibold
                    uppercase tracking-wide
                    text-base-content/60">
+                Fecha final
+              </span>
 
-            Fecha
-          </span>
-
-          <div class="relative">
-            <i class="fa-regular fa-calendar
+              <div class="relative">
+                <i class="fa-regular fa-calendar-check
                      pointer-events-none absolute
                      left-3.5 top-1/2
                      -translate-y-1/2
-                     text-base-content/35">
-            </i>
+                     text-base-content/35"></i>
 
-            <input type="date" class="input input-bordered
+                <input type="date" class="input input-bordered
                      h-11 w-full rounded-xl
-                     bg-base-100 pl-10 pr-4
-                     focus:outline-none
-                     focus:ring-2
-                     focus:ring-primary/30" [(ngModel)]="fechaBusqueda" (change)="onFiltroChange()" />
+                     bg-base-100 pl-10 pr-4" [min]="fechaInicioBusqueda || null" [(ngModel)]="fechaFinBusqueda"
+                  (change)="aplicarFiltros()" />
+              </div>
+            </label>
           </div>
-        </label>
+        </div>
 
-        <!-- Limpiar filtros -->
+        <!-- =============================================== -->
+        <!-- ILUSTRACIÓN -->
+        <!-- =============================================== -->
 
-        <div class="flex items-end
-                 sm:col-span-2
-                 xl:col-span-1">
-
-          <button type="button" class="btn btn-outline
-                   h-11 min-h-11 w-full
-                   gap-2 rounded-xl
-                   xl:w-auto" [disabled]="
-              !descripcionBusqueda &&
-              !fechaBusqueda
-            " (click)="limpiarFiltros()">
-
-            <i class="fa-solid
-                     fa-filter-circle-xmark">
-            </i>
-
-            Limpiar
-          </button>
+        <div class="hidden items-center justify-center border-base-300 px-5 lg:flex">
+          <img src="assets/img/search.png" alt="" aria-hidden="true" class="h-32 w-32 select-none
+               object-contain opacity-90
+               drop-shadow-sm" draggable="false" />
         </div>
       </div>
     </section>
@@ -159,7 +179,6 @@
     <!-- ================================================= -->
 
     <!-- Detalle -->
-
     <incidencia-detalle [visible]="mostrarModalDetalle" [incidenciaId]="incidenciaDetalleId"
       (cerrar)="cerrarDetalleIncidencia()" (incidenciaCargada)="
         onIncidenciaDetalleCargada($event)
@@ -167,18 +186,15 @@
     </incidencia-detalle>
 
     <!-- Mapa -->
-
     <incidencia-mapa [visible]="mostrarModalMapa" [incidencia]="incidenciaSeleccionada"
       (cerrar)="cerrarMapaIncidencia()">
     </incidencia-mapa>
 
     <!-- Archivos -->
-
     <incidencia-archivos [visible]="mostrarArchivos" [incidenciaId]="incidenciaArchivoId" (cerrar)="cerrarArchivos()">
     </incidencia-archivos>
 
     <!-- Actualizar estado -->
-
     <incidencia-estado-form [visible]="mostrarEstadoForm" [incidencia]="incidenciaEstadoSeleccionada"
       (cerrar)="cerrarEstadoForm()" (estadoActualizado)="
         onEstadoActualizado($event)
@@ -188,13 +204,11 @@
     <!-- ================================================= -->
     <!-- TABLA -->
     <!-- ================================================= -->
-
     <section class="overflow-hidden rounded-2xl
              border border-base-300
              bg-base-100 shadow-sm">
 
       <!-- Cabecera de tabla -->
-
       <div class="flex flex-col gap-4
                border-b border-base-300
                px-4 py-4
@@ -203,8 +217,7 @@
                sm:justify-between
                sm:px-5">
 
-        <!-- Cantidad por página -->
-
+        <!-- Selector de cantidad -->
         <div class="flex w-full items-center
                  justify-between gap-3
                  text-sm text-base-content/70
@@ -218,10 +231,7 @@
           <select id="incidentes-page-size" class="select select-bordered
                    select-sm w-auto" [(ngModel)]="limit" (change)="cambiarLimite()">
 
-            @for (
-            size of pageSizeOptions;
-            track size
-            ) {
+            @for ( size of pageSizeOptions; track size ) {
             <option [ngValue]="size">
               {{ size }}
             </option>
@@ -234,8 +244,7 @@
         </div>
 
         <!-- Total -->
-
-        <div class="flex w-full items-center
+        <!-- <div class="flex w-full items-center
                  justify-center gap-2
                  rounded-xl bg-base-200
                  px-4 py-2 text-sm
@@ -259,11 +268,10 @@
             : 'incidentes'
             }}
           </span>
-        </div>
+        </div> -->
       </div>
 
-      <!-- Tabla con scroll horizontal -->
-
+      <!-- Contenedor de scroll exclusivo para tabla -->
       <div class="w-full overflow-x-auto">
         <table class="table min-w-337.5 w-full">
 
@@ -272,10 +280,7 @@
                      tracking-wide
                      text-base-content/60">
 
-              <th class="w-16 text-center">
-                N.°
-              </th>
-
+              <th class="w-16 text-center"> N.°</th>
               <th>Fecha y hora</th>
               <th>Sereno</th>
               <th>Tipo</th>
@@ -290,7 +295,6 @@
           <tbody>
 
             <!-- Loading -->
-
             @if (isLoading) {
             <tr>
               <td colspan="9" class="py-14 text-center">
@@ -299,12 +303,10 @@
                            items-center justify-center
                            gap-3">
 
-                  <span class="loading loading-spinner
-                             loading-md text-primary">
+                  <span class="loading loading-spinner loading-md text-primary">
                   </span>
 
-                  <span class="text-sm
-                             text-base-content/60">
+                  <span class="text-sm text-base-content/60">
 
                     Cargando incidentes...
                   </span>
@@ -314,7 +316,6 @@
             }
 
             <!-- Error -->
-
             @if (!isLoading && errorMessage) {
             <tr>
               <td colspan="9" class="px-4 py-8">
@@ -340,85 +341,49 @@
             }
 
             <!-- Incidentes -->
-
             @if (!isLoading && !errorMessage) {
-            @for (
-            incidente of incidentes;
-            track incidente.id;
-            let i = $index
-            ) {
+            @for ( incidente of incidentes; track incidente.id; let i = $index ) {
             <tr class="border-base-200
                          transition-colors
                          hover:bg-base-200/50">
 
               <!-- Numeración paginada -->
 
-              <td class="text-center
-                           text-base-content/60">
-
-                {{
-                ((currentPage - 1) * limit) +
-                i +
-                1
-                }}
+              <td class="text-center text-base-content/60">
+                {{ ((currentPage - 1) * limit) + i + 1 }}
               </td>
 
               <!-- Fecha y hora -->
-
               <td class="whitespace-nowrap">
                 <div class="flex flex-col">
                   <span class="font-medium">
-                    {{
-                    incidente.fecha_hora |
-                    date: 'dd/MM/yyyy'
-                    }}
+                    {{ incidente.fecha_hora | date: 'dd/MM/yyyy' }}
                   </span>
 
-                  <span class="text-xs
-                               text-base-content/55">
-
-                    {{
-                    incidente.fecha_hora |
-                    date: 'hh:mm a'
-                    }}
+                  <span class="text-xs text-base-content/55">
+                    {{ incidente.fecha_hora | date: 'hh:mm a' }}
                   </span>
                 </div>
               </td>
 
               <!-- Sereno -->
-
               <td>
                 <div class="flex min-w-44 flex-col">
                   <span class="font-medium">
-                    {{
-                    incidente.usuario
-                    ?.persona?.nombres ||
-                    'Sin nombres'
-                    }}
+                    {{ incidente.usuario ?.persona?.nombres || 'Sin nombres' }}
 
-                    {{
-                    incidente.usuario
-                    ?.persona?.apellidos ||
-                    ''
-                    }}
+                    {{ incidente.usuario ?.persona?.apellidos || '' }}
                   </span>
 
-                  <span class="text-xs
-                               text-base-content/55">
-
-                    &#64;{{
-                    incidente.usuario?.username ||
-                    'sin usuario'
-                    }}
+                  <span class="text-xs text-base-content/55">
+                    &#64;{{ incidente.usuario?.username || 'sin usuario' }}
                   </span>
                 </div>
               </td>
 
               <!-- Tipo -->
-
               <td>
-                <span class="badge badge-outline
-                             whitespace-nowrap" [ngClass]="{
+                <span class="badge badge-outline whitespace-nowrap" [ngClass]="{
                         'badge-error':
                           incidente.tipo === 'ROBO' ||
                           incidente.tipo === 'VIOLENCIA',
@@ -444,45 +409,29 @@
               </td>
 
               <!-- Descripción -->
-
               <td>
                 <p class="max-w-75 truncate" [title]="incidente.descripcion">
-
-                  {{
-                  incidente.descripcion ||
-                  'Sin descripción'
-                  }}
+                  {{ incidente.descripcion || 'Sin descripción' }}
                 </p>
               </td>
 
               <!-- Zona -->
-
               <td>
-                <div class="flex max-w-55
-                             items-center gap-2">
+                <div class="flex max-w-55 items-center gap-2">
 
-                  <i class="fa-solid fa-location-dot
-                               shrink-0 text-primary">
-                  </i>
-
+                  <i class="fa-solid fa-map-location-dot shrink-0 text-primary"></i>
                   <span class="truncate">
-                    {{
-                    incidente.zona?.nombre ||
-                    'Sin zona'
-                    }}
+                    {{ incidente.zona?.nombre || 'Sin zona' }}
                   </span>
                 </div>
               </td>
 
               <!-- Evidencias -->
-
               <td class="text-center">
                 <button type="button" class="btn btn-ghost btn-sm gap-2" [disabled]="!incidente.id"
                   (click)="abrirArchivos(incidente.id)">
 
-                  <i class="fa-solid fa-paperclip
-                               text-base-content/45">
-                  </i>
+                  <i class="fa-solid fa-paperclip text-base-content/45"></i>
 
                   <span class="font-medium">
                     {{ incidente.total_evidencias }}
@@ -491,7 +440,6 @@
               </td>
 
               <!-- Estado -->
-
               <td class="text-center">
                 <span class="badge badge-soft
                              whitespace-nowrap
@@ -519,70 +467,38 @@
               </td>
 
               <!-- Acciones -->
-
               <td>
-                <div class="flex items-center
-                             justify-center gap-0.5">
+                <div class="flex items-center justify-center gap-0.5">
 
                   <!-- Detalle -->
-
                   <div class="tooltip tooltip-left" data-tip="Ver detalle">
-
-                    <button type="button" class="btn btn-ghost
-                                 btn-circle btn-sm
-                                 text-info" (click)="
-                            abrirDetalleIncidencia(
-                              incidente.id
-                            )
-                          " aria-label="Ver detalle del incidente">
-
+                    <button type="button" class="btn btn-ghost btn-circle btn-sm"
+                      (click)="abrirDetalleIncidencia( incidente.id)" aria-label="Ver detalle del incidente">
                       <i class="fa-solid fa-eye"></i>
                     </button>
                   </div>
 
                   <!-- Ubicación -->
-
                   <div class="tooltip tooltip-left" data-tip="Ver ubicación">
-
-                    <button type="button" class="btn btn-ghost
-                                 btn-circle btn-sm
-                                 text-success" (click)="
-                            abrirMapaIncidencia(incidente)
-                          " aria-label="Ver ubicación del incidente">
-
-                      <i class="fa-solid
-                                   fa-map-location-dot">
-                      </i>
+                    <button type="button" class="btn btn-ghost btn-circle btn-sm"
+                      (click)="abrirMapaIncidencia(incidente)" aria-label="Ver ubicación del incidente">
+                      <i class="fa-solid fa-map-location-dot"></i>
                     </button>
                   </div>
 
                   <!-- Archivos -->
-
                   <div class="tooltip tooltip-left" data-tip="Ver evidencias">
-
-                    <button type="button" class="btn btn-ghost
-                                 btn-circle btn-sm
-                                 text-secondary" [disabled]="!incidente.id" (click)="
-                            abrirArchivos(incidente.id)
-                          " aria-label="Ver evidencias del incidente">
-
+                    <button type="button" class="btn btn-ghost btn-circle btn-sm" [disabled]="!incidente.id"
+                      (click)="abrirArchivos(incidente.id)" aria-label="Ver evidencias del incidente">
                       <i class="fa-solid fa-paperclip"></i>
                     </button>
                   </div>
 
                   <!-- Estado -->
-
                   <div class="tooltip tooltip-left" data-tip="Actualizar estado">
-
-                    <button type="button" class="btn btn-ghost
-                                 btn-circle btn-sm
-                                 text-primary" (click)="
-                            abrirEstadoForm(incidente)
-                          " aria-label="Actualizar estado del incidente">
-
-                      <i class="fa-solid
-                                   fa-arrows-rotate">
-                      </i>
+                    <button type="button" class="btn btn-ghost btn-circle btn-sm" (click)="abrirEstadoForm(incidente)"
+                      aria-label="Actualizar estado del incidente">
+                      <i class="fa-solid fa-arrows-rotate"></i>
                     </button>
                   </div>
                 </div>
@@ -616,10 +532,7 @@
                     coincidan con los filtros seleccionados.
                   </p>
 
-                  @if (
-                  descripcionBusqueda ||
-                  fechaBusqueda
-                  ) {
+                  @if ( hayFiltrosActivos ) {
                   <button type="button" class="btn btn-ghost btn-sm
                                  mt-4 gap-2" (click)="limpiarFiltros()">
 
@@ -642,12 +555,7 @@
       <!-- ================================================= -->
       <!-- PAGINACIÓN -->
       <!-- ================================================= -->
-
-      @if (
-      !isLoading &&
-      !errorMessage &&
-      totalItems > 0
-      ) {
+      @if ( !isLoading && !errorMessage && totalItems > 0 ) {
       <footer class="flex flex-col gap-4
                  border-t border-base-300
                  bg-base-200/50
@@ -657,85 +565,60 @@
                  lg:justify-between
                  sm:px-5">
 
-        <!-- Resumen -->
+        <!-- Resumen de incidentes -->
+        <div class="text-center sm:text-left">
+          <h2 class="font-semibold text-base-content">
+            Incidentes registrados
+          </h2>
 
-        <p class="text-center text-sm
-                   text-base-content/70
-                   lg:text-left">
-
-          Mostrando
-
-          <strong class="text-base-content">
-            {{ desdeRegistro }}
-          </strong>
-
-          a
-
-          <strong class="text-base-content">
-            {{ hastaRegistro }}
-          </strong>
-
-          de
-
-          <strong class="text-base-content">
+          <p class="mt-0.5 text-sm text-base-content/55">
             {{ totalItems }}
-          </strong>
+            {{ totalItems === 1 ? 'incidente' : 'incidentes' }}
+            encontrados
+          </p>
+        </div>
 
-          registros
-        </p>
+        <!-- Controles de paginación -->
+        <div class="flex w-full flex-col
+           items-center gap-3
+           text-sm text-base-content/70
+           sm:w-auto sm:flex-row">
 
-        <!-- Controles -->
+          <!-- Página actual -->
+          <span class="whitespace-nowrap">
+            @if (totalPages > 0) {
+            Página
+            <strong class="text-base-content">
+              {{ page }}
+            </strong>
+            de
+            <strong class="text-base-content">
+              {{ totalPages }}
+            </strong>
+            } @else {
+            Sin páginas disponibles
+            }
+          </span>
 
-        <div class="flex w-full justify-center
-                   overflow-x-auto pb-1
-                   lg:w-auto lg:justify-end">
-
-          <div class="join whitespace-nowrap">
-
-            <!-- Anterior -->
-
-            <button type="button" class="btn join-item btn-sm" [disabled]="
-                  currentPage <= 1 ||
-                  isLoading
-                " (click)="
-                  cambiarPagina(currentPage - 1)
-                ">
-
+          <!-- Botones -->
+          <div class="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
+            <button type="button" class="btn btn-sm w-full
+               gap-2 rounded-lg
+               sm:w-auto" [disabled]="isLoading || page <= 1" (click)="cambiarPagina(page - 1)">
               <i class="fa-solid fa-chevron-left"></i>
 
-              <span class="hidden sm:inline">
-                Anterior
-              </span>
+              Anterior
             </button>
 
-            <!-- Páginas visibles -->
+            <button type="button" class="btn btn-sm w-full
+              gap-2 rounded-lg
+              sm:w-auto" [disabled]="
+                  isLoading ||
+                  totalPages === 0 ||
+                  page >= totalPages
+                " (click)="cambiarPagina(page + 1)">
 
-            @for (
-            numeroPagina of paginasVisibles;
-            track numeroPagina
-            ) {
-            <button type="button" class="btn join-item btn-sm" [class.btn-primary]="
-                    numeroPagina === currentPage
-                  " [disabled]="isLoading" (click)="
-                    cambiarPagina(numeroPagina)
-                  ">
-
-              {{ numeroPagina }}
-            </button>
-            }
-
-            <!-- Siguiente -->
-
-            <button type="button" class="btn join-item btn-sm" [disabled]="
-                  currentPage >= totalPages ||
-                  isLoading
-                " (click)="
-                  cambiarPagina(currentPage + 1)
-                ">
-
-              <span class="hidden sm:inline">
-                Siguiente
-              </span>
+              Siguiente
 
               <i class="fa-solid fa-chevron-right"></i>
             </button>

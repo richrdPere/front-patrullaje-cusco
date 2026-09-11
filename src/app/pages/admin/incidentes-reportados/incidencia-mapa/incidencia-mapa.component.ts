@@ -16,11 +16,13 @@ import {
 import { GoogleMapsLoaderService } from 'src/app/services/google-maps-loader.service';
 
 // Interfaces
-import { IncidenciaPaginada } from 'src/app/interfaces/incidencia/incidencias.interface';
+import { IncidenciaPaginada } from 'src/app/interfaces/incidencia/get-incidencias-paginated.interface';
 
 @Component({
   selector: 'incidencia-mapa',
-  imports: [],
+  imports: [
+    CommonModule,
+  ],
   templateUrl: './incidencia-mapa.component.html',
   styles: ``
 })
@@ -82,6 +84,22 @@ export class IncidenciaMapaComponent implements AfterViewInit, OnChanges, OnDest
     lng: -71.96746,
   };
 
+
+  modalWidthClass = 'max-w-4xl'; // default
+
+  setModalWidth(size: 'sm' | 'md' | 'lg' | 'xl' | 'full') {
+    const map = {
+      sm: 'max-w-md',
+      md: 'max-w-xl',
+      lg: 'max-w-4xl',
+      xl: 'max-w-6xl',
+      full: 'max-w-full w-[95vw]'
+    };
+
+    this.modalWidthClass = map[size];
+  }
+
+
   constructor(
     private googleMapsLoaderService: GoogleMapsLoaderService,
   ) { }
@@ -134,6 +152,8 @@ export class IncidenciaMapaComponent implements AfterViewInit, OnChanges, OnDest
        */
       this.map = null;
     }
+
+    this.setModalWidth('xl');
   }
 
   ngOnDestroy(): void {

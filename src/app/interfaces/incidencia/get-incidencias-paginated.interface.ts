@@ -129,3 +129,14 @@ export interface IncidenciasPaginadasFilters {
 
   mode?: 'web' | 'app';
 }
+
+// ============================================================
+// RESPONSE
+// ============================================================
+export type GetIncidentesPaginatedResponse = ApiResponse<IncidenciasPaginadasData>;
+
+
+
+
+
+

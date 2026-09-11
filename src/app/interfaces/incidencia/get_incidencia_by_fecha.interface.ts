@@ -1,7 +1,8 @@
 // src/app/interfaces/incidencias/incidencia-fecha.interface.ts
 
-import { IncidenciaUsuario, IncidenciaZona } from "./incidencia_detalle.interface";
-import { EstadoIncidencia, IncidenciaArchivo, OrigenIncidencia, TipoIncidencia } from "./incidencias.interface";
+import { ApiResponse } from "../alertas.interface";
+import { IncidenciaUsuario, IncidenciaZona } from "./get-incidencia_by_id.interface";
+import { EstadoIncidencia, IncidenciaArchivo, OrigenIncidencia, TipoIncidencia } from "./get-incidencias-paginated.interface";
 
 /*
 |--------------------------------------------------------------------------
@@ -78,3 +79,9 @@ export interface IncidenciasByFechaFilters {
   incluirArchivos?: boolean;
   mode?: 'web' | 'app';
 }
+
+// ============================================================
+// RESPONSE
+// ============================================================
+export type GetIncidentesByFechaResponse = ApiResponse<IncidenciasByFechaData>;
+

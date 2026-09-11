@@ -1,26 +1,10 @@
 import { CommonModule } from '@angular/common';
-import {
-  Component,
-  EventEmitter,
-  HostListener,
-  Input,
-  OnChanges,
-  Output,
-  SimpleChanges,
-} from '@angular/core';
-import {
-  DomSanitizer,
-  SafeResourceUrl,
-} from '@angular/platform-browser';
+import { Component, EventEmitter, HostListener, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 // Interfaces
-import {
-  IncidenciaArchivoDetalle,
-} from 'src/app/interfaces/incidencia/archivos_incidencia.interface';
-
-import {
-  TipoArchivoIncidencia,
-} from 'src/app/interfaces/incidencia/incidencias.interface';
+import { IncidenciaArchivoDetalle } from 'src/app/interfaces/incidencia/archivos_incidencia.interface';
+import { TipoArchivoIncidencia } from 'src/app/interfaces/incidencia/get-incidencias-paginated.interface';
 
 @Component({
   selector: 'app-incidencia-archivo-preview',
@@ -38,21 +22,15 @@ export class IncidenciaArchivoPreviewComponent implements OnChanges {
   // =========================================================
 
   @Input() visible = false;
-
-  @Input() archivo:
-    IncidenciaArchivoDetalle | null = null;
-
-  @Input() archivos:
-    IncidenciaArchivoDetalle[] = [];
+  @Input() archivo: IncidenciaArchivoDetalle | null = null;
+  @Input() archivos: IncidenciaArchivoDetalle[] = [];
 
   // =========================================================
   // OUTPUTS
   // =========================================================
 
   @Output() cerrar = new EventEmitter<void>();
-
-  @Output() archivoChange =
-    new EventEmitter<IncidenciaArchivoDetalle>();
+  @Output() archivoChange = new EventEmitter<IncidenciaArchivoDetalle>();
 
   // =========================================================
   // ESTADO
@@ -64,6 +42,20 @@ export class IncidenciaArchivoPreviewComponent implements OnChanges {
   safePdfUrl: SafeResourceUrl | null = null;
 
   private currentIndex = -1;
+
+  modalWidthClass = 'max-w-4xl'; // default
+
+  setModalWidth(size: 'sm' | 'md' | 'lg' | 'xl' | 'full') {
+    const map = {
+      sm: 'max-w-md',
+      md: 'max-w-xl',
+      lg: 'max-w-4xl',
+      xl: 'max-w-6xl',
+      full: 'max-w-full w-[95vw]'
+    };
+
+    this.modalWidthClass = map[size];
+  }
 
   constructor(
     private sanitizer: DomSanitizer,
@@ -92,6 +84,8 @@ export class IncidenciaArchivoPreviewComponent implements OnChanges {
       this.mediaError = false;
       this.isLoading = false;
     }
+
+    this.setModalWidth('xl');
   }
 
   // =========================================================
@@ -131,9 +125,7 @@ export class IncidenciaArchivoPreviewComponent implements OnChanges {
   // =========================================================
   // NAVEGACIÓN
   // =========================================================
-
   get puedeAnterior(): boolean {
-
     return (
       this.currentIndex > 0 &&
       this.archivos.length > 1
@@ -141,7 +133,6 @@ export class IncidenciaArchivoPreviewComponent implements OnChanges {
   }
 
   get puedeSiguiente(): boolean {
-
     return (
       this.currentIndex >= 0 &&
       this.currentIndex < this.archivos.length - 1
@@ -149,7 +140,6 @@ export class IncidenciaArchivoPreviewComponent implements OnChanges {
   }
 
   get posicionActual(): number {
-
     if (this.currentIndex < 0) {
       return 0;
     }
@@ -158,7 +148,6 @@ export class IncidenciaArchivoPreviewComponent implements OnChanges {
   }
 
   anterior(): void {
-
     if (!this.puedeAnterior) {
       return;
     }
@@ -172,7 +161,6 @@ export class IncidenciaArchivoPreviewComponent implements OnChanges {
   }
 
   siguiente(): void {
-
     if (!this.puedeSiguiente) {
       return;
     }
@@ -218,8 +206,7 @@ export class IncidenciaArchivoPreviewComponent implements OnChanges {
   // TIPOS DE ARCHIVO
   // =========================================================
 
-  get categoriaArchivo():
-    TipoArchivoIncidencia {
+  get categoriaArchivo(): TipoArchivoIncidencia {
 
     if (this.archivo?.tipo_archivo) {
       return this.archivo.tipo_archivo;
@@ -269,7 +256,6 @@ export class IncidenciaArchivoPreviewComponent implements OnChanges {
   // =========================================================
   // NOMBRE Y EXTENSIÓN
   // =========================================================
-
   get nombreArchivo(): string {
 
     if (!this.archivo) {
@@ -313,22 +299,15 @@ export class IncidenciaArchivoPreviewComponent implements OnChanges {
       'application/pdf': 'pdf',
     };
 
-    const extensionMime =
-      extensionesPorMime[mime];
+    const extensionMime = extensionesPorMime[mime];
 
     if (extensionMime) {
       return extensionMime;
     }
 
     try {
-
-      const pathname =
-        new URL(
-          this.archivo.url_archivo,
-        ).pathname;
-
-      const ultimoSegmento =
-        pathname.split('/').pop() ?? '';
+      const pathname = new URL(this.archivo.url_archivo).pathname;
+      const ultimoSegmento = pathname.split('/').pop() ?? '';
 
       if (!ultimoSegmento.includes('.')) {
         return '';
@@ -349,7 +328,6 @@ export class IncidenciaArchivoPreviewComponent implements OnChanges {
   // =========================================================
   // PDF SEGURO
   // =========================================================
-
   private updateSafePdfUrl(): void {
 
     if (
@@ -371,7 +349,6 @@ export class IncidenciaArchivoPreviewComponent implements OnChanges {
   // =========================================================
   // ESTADO DEL RECURSO
   // =========================================================
-
   onMediaLoad(): void {
     this.isLoading = false;
     this.mediaError = false;
@@ -400,7 +377,6 @@ export class IncidenciaArchivoPreviewComponent implements OnChanges {
   // =========================================================
   // ACCIONES
   // =========================================================
-
   cerrarPreview(): void {
     this.cerrar.emit();
   }
@@ -442,7 +418,6 @@ export class IncidenciaArchivoPreviewComponent implements OnChanges {
   // =========================================================
   // INFORMACIÓN DEL ARCHIVO
   // =========================================================
-
   getMimeTypeVideo(): string {
 
     return (

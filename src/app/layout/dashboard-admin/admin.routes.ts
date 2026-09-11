@@ -86,6 +86,24 @@ export const adminRoutes: Routes = [
         data: { roles: ['ADMIN', 'OPERADOR', 'GERENTE_SERENAZGO', 'SUPERVISOR_SERENAZGO'] }
       },
 
+      // Incidentes serenos
+      {
+        path: 'incidentes-serenos',
+        loadComponent: () => import('../../pages/admin/incidencias-serenos/incidencias-serenos.component').then(m => m.IncidenciasSerenosComponent),
+        data: { roles: ['ADMIN', 'OPERADOR', 'GERENTE_SERENAZGO', 'SUPERVISOR_SERENAZGO'] }
+      },
+
+      // Detalle del Incidentes serenos
+      {
+        path: 'incidentes-serenos/:usuarioId',
+        loadComponent: () =>
+          import('../../pages/admin/incidencias-serenos/incidencias-listado/incidencias-listado.component')
+            .then(m => m.IncidenciasListadoComponent),
+        data: {
+          roles: ['ADMIN', 'OPERADOR', 'GERENTE_SERENAZGO', 'SUPERVISOR_SERENAZGO']
+        }
+      },
+
       // Historial patrullaje
       {
         path: 'historial-patrullaje',

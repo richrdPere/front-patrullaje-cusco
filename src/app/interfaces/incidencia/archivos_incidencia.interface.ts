@@ -1,12 +1,13 @@
 // src/app/interfaces/incidencias/archivos-incidencia.interface.ts
 
-import { TipoArchivoIncidencia } from "./incidencias.interface";
+import { ApiResponse } from "../alertas.interface";
+import { TipoArchivoIncidencia } from "./get-incidencias-paginated.interface";
 
 export interface ArchivosIncidenciaData {
   incidencia_id: number;
   total: number;
   total_evidencias: number;
-  data: IncidenciaArchivoDetalle[];
+  items: IncidenciaArchivoDetalle[];
 }
 
 export interface IncidenciaArchivoDetalle {
@@ -26,3 +27,10 @@ export type EstadoArchivoIncidencia =
   | 'ACTIVO'
   | 'INACTIVO'
   | 'ELIMINADO';
+
+// ============================================================
+// RESPONSE
+// ============================================================
+export type GetArchivosIncidenciaResponse = ApiResponse<ArchivosIncidenciaData>;
+
+

@@ -1,6 +1,7 @@
 // src/app/interfaces/incidencias/incidencias-by-patrullaje.interface.ts
 
-import { EstadoIncidencia, OrigenIncidencia, TipoArchivoIncidencia, TipoIncidencia } from "./incidencias.interface";
+import { ApiResponse } from "../alertas.interface";
+import { EstadoIncidencia, OrigenIncidencia, TipoArchivoIncidencia, TipoIncidencia } from "./get-incidencias-paginated.interface";
 
 /*
 |--------------------------------------------------------------------------
@@ -108,3 +109,8 @@ export interface IncidenciasByPatrullajeFilters {
 
   incluirArchivos?: boolean;
 }
+
+// ============================================================
+// RESPONSE
+// ============================================================
+export type GetIncidenciasByPatrullajeIdResponse = ApiResponse<IncidenciasByPatrullajeData>;

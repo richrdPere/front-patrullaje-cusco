@@ -1,6 +1,7 @@
 // src/app/interfaces/incidencias/incidencias-by-usuario.interface.ts
 
-import { EstadoIncidencia, OrigenIncidencia, TipoIncidencia } from "./incidencias.interface";
+import { ApiResponse } from "../alertas.interface";
+import { EstadoIncidencia, OrigenIncidencia, TipoIncidencia } from "./get-incidencias-paginated.interface";
 
 /*
 |--------------------------------------------------------------------------
@@ -92,3 +93,9 @@ export interface IncidenciasByUsuarioFilters {
   origen?: OrigenIncidencia;
   incluirArchivos?: boolean;
 }
+
+// ============================================================
+// RESPONSE
+// ============================================================
+export type GetIncidenciasByUsuarioIdResponse = ApiResponse<IncidenciasByUsuarioData>;
+

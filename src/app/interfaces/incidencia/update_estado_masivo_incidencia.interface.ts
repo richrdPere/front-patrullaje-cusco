@@ -1,6 +1,7 @@
 // src/app/interfaces/incidencias/incidencia-estado-masivo.interface.ts
 
-import { EstadoIncidencia } from "./incidencias.interface";
+import { ApiResponse } from "../alertas.interface";
+import { EstadoIncidencia } from "./get-incidencias-paginated.interface";
 
 /*
 |--------------------------------------------------------------------------
@@ -46,3 +47,9 @@ export interface IncidenciaEstadoActualizado {
   id: number;
   estado: EstadoIncidencia;
 }
+
+// ============================================================
+// RESPONSE
+// ============================================================
+export type UpdateIncidentesResponse = ApiResponse<UpdateEstadoMasivoData>;
+

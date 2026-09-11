@@ -1,6 +1,7 @@
 // src/app/interfaces/incidencias/incidencias-by-zona.interface.ts
 
-import { EstadoIncidencia, OrigenIncidencia, TipoArchivoIncidencia, TipoIncidencia } from "./incidencias.interface";
+import { ApiResponse } from "../alertas.interface";
+import { EstadoIncidencia, OrigenIncidencia, TipoArchivoIncidencia, TipoIncidencia } from "./get-incidencias-paginated.interface";
 
 
 /*
@@ -113,3 +114,8 @@ export interface IncidenciasByZonaFilters {
   usuarioId?: number;
   incluirArchivos?: boolean;
 }
+
+// ============================================================
+// RESPONSE
+// ============================================================
+export type GetIncidenciasByZonasIdResponse = ApiResponse<IncidenciasByZonaData>;

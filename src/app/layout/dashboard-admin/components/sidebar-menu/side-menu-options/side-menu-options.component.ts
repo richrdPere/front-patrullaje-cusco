@@ -109,6 +109,10 @@ export class SideMenuOptionsComponent implements OnInit {
               path: '/admin/incidentes-reportados',
             },
             {
+              name: 'Incidentes serenos',
+              path: '/admin/incidentes-serenos',
+            },
+            {
               name: 'Historial de patrullajes',
               path: '/admin/historial-patrullaje',
             },

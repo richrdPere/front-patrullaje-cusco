@@ -10,17 +10,19 @@ import {
 import { finalize } from 'rxjs';
 
 // Service
-import { IncidenciasService } from 'src/app/services/incidencias.service';
+import { IncidenciasService } from 'src/app/services/incidencia/incidencias.service';
 
 // Interfaces
-import { IncidenciaDetalle } from 'src/app/interfaces/incidencia/incidencia_detalle.interface';
+import { IncidenciaDetalle } from 'src/app/interfaces/incidencia/get-incidencia_by_id.interface';
 
 
 @Component({
   selector: 'incidencia-detalle',
   standalone: true,
-  imports: [CommonModule,
-    DatePipe,],
+  imports: [
+    CommonModule,
+    DatePipe,
+  ],
   templateUrl: './incidencia-detalle.component.html',
   styles: ``
 })
@@ -41,6 +43,20 @@ export class IncidenciaDetalleComponent implements OnChanges {
 
   isLoading = false;
   errorMessage = '';
+
+  modalWidthClass = 'max-w-4xl'; // default
+
+  setModalWidth(size: 'sm' | 'md' | 'lg' | 'xl' | 'full') {
+    const map = {
+      sm: 'max-w-md',
+      md: 'max-w-xl',
+      lg: 'max-w-4xl',
+      xl: 'max-w-6xl',
+      full: 'max-w-full w-[95vw]'
+    };
+
+    this.modalWidthClass = map[size];
+  }
 
   constructor(
     private incidenciasService: IncidenciasService,
@@ -71,6 +87,8 @@ export class IncidenciaDetalleComponent implements OnChanges {
     ) {
       this.limpiarDetalle();
     }
+
+    this.setModalWidth('xl');
   }
 
   // =========================================================

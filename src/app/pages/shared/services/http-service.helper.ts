@@ -73,6 +73,30 @@ export class HttpServiceHelper {
   // *********************************************************
   // 3. CONSTRUIR QUERY PARAMS
   // *********************************************************
+  static buildHttpParams<T extends object>(filters: T): HttpParams {
+
+    let params = new HttpParams();
+
+    Object.entries(filters)
+      .forEach(([key, value]) => {
+
+        if (
+          value === null ||
+          value === undefined ||
+          value === ''
+        ) {
+          return;
+        }
+
+        params = params.set(
+          key,
+          String(value)
+        );
+      });
+
+    return params;
+  }
+
   static buildParams(
     values: HttpQueryParams = {},
   ): HttpParams {

@@ -181,14 +181,10 @@ export class UsuariosComponent implements OnInit {
     });
   }
 
-  // RESETEAR  USUARIO
   // ========================================================
   // RESETEAR CONTRASEÑA DEL USUARIO
   // ========================================================
-
-  resetPassword(
-    id: number,
-  ): void {
+  resetPassword(id: number): void {
     Swal.fire({
       icon: 'warning',
       title: '¿Restablecer contraseña?',

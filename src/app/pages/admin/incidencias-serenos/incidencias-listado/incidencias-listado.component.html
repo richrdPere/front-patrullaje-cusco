@@ -1,0 +1,555 @@
+<div
+  class="min-h-full min-w-0 bg-base-300 px-4 py-5 text-base-content transition-colors duration-300 sm:px-6 sm:py-6 lg:px-8">
+
+  <!-- ================================================= -->
+  <!-- CONTENEDOR DEL DASHBOARD -->
+  <!-- ================================================= -->
+  <div class="mx-auto w-full max-w-500">
+
+    <!-- ===================================================== -->
+    <!-- ENCABEZADO -->
+    <!-- ===================================================== -->
+    <header class="mb-6 flex flex-col gap-4
+             lg:flex-row lg:items-center lg:justify-between">
+      <div class="flex min-w-0 items-start gap-3">
+        <button type="button" class="btn btn-outline shrink-0" aria-label="Volver a las cards de serenos"
+          (click)="volverAlListado()">
+          <i class="fa-solid fa-arrow-left"></i>
+
+        </button>
+
+        <div class="flex h-12 w-12 shrink-0 items-center
+                 justify-center rounded-2xl
+                 bg-primary/10 text-primary">
+          <i class="fa-solid fa-folder-open text-xl"></i>
+        </div>
+
+        <div class="min-w-0">
+          <p class="text-xs font-semibold uppercase
+                   tracking-wide text-primary">
+            Expediente de incidencias
+          </p>
+
+          <h1 class="mt-1 text-xl font-bold sm:text-2xl">
+            @if (sereno) {
+            {{ sereno.persona?.nombres }}
+            {{ sereno.persona?.apellidos }}
+            } @else {
+            Sereno #{{ usuarioId }}
+            }
+          </h1>
+
+          <p class="mt-1 text-sm text-base-content/60">
+            Incidencias reportadas por el personal de serenazgo.
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 rounded-2xl
+               border border-base-300 bg-base-100
+               px-5 py-3 shadow-sm">
+        <span class="flex h-10 w-10 items-center justify-center
+                 rounded-xl bg-primary/10 text-primary">
+          <i class="fa-solid fa-file-circle-exclamation"></i>
+        </span>
+
+        <div>
+          <p class="text-xs text-base-content/55">
+            Total de incidencias
+          </p>
+
+          <p class="text-2xl font-bold text-primary">
+            {{ totalItems }}
+          </p>
+        </div>
+      </div>
+    </header>
+
+    <!-- ===================================================== -->
+    <!-- FILTROS -->
+    <!-- ===================================================== -->
+    <section class="mb-6 overflow-hidden rounded-2xl
+         border border-base-300
+         bg-base-100 shadow-sm">
+      <div class="grid grid-cols-1
+           lg:grid-cols-[minmax(0,1fr)_170px]">
+
+        <!-- =============================================== -->
+        <!-- CAMPOS DE FILTRO -->
+        <!-- =============================================== -->
+        <div class="p-4 sm:p-5">
+          <div class="grid grid-cols-1 gap-4
+               sm:grid-cols-2
+               xl:grid-cols-4">
+
+
+            <label class="form-control">
+              <span class="mb-1.5 text-xs font-semibold">
+                Tipo
+              </span>
+
+              <select class="select select-bordered w-full" [(ngModel)]="tipoFiltro">
+                <option value="">Todos los tipos</option>
+
+                @for (tipo of tipos; track tipo.value) {
+                <option [value]="tipo.value">
+                  {{ tipo.label }}
+                </option>
+                }
+              </select>
+            </label>
+
+            <label class="form-control">
+              <span class="mb-1.5 text-xs font-semibold">
+                Estado
+              </span>
+
+              <select class="select select-bordered w-full" [(ngModel)]="estadoFiltro">
+                <option value="">Todos los estados</option>
+
+                @for (estado of estados; track estado.value) {
+                <option [value]="estado.value">
+                  {{ estado.label }}
+                </option>
+                }
+              </select>
+            </label>
+
+            <label class="form-control">
+              <span class="mb-1.5 text-xs font-semibold">
+                Desde
+              </span>
+
+              <input type="date" class="input input-bordered w-full" [(ngModel)]="fechaInicio" />
+            </label>
+
+            <label class="form-control">
+              <span class="mb-1.5 text-xs font-semibold">
+                Hasta
+              </span>
+
+              <input type="date" class="input input-bordered w-full" [(ngModel)]="fechaFin" />
+            </label>
+
+            <!-- <div class="flex items-end">
+              <button type="button" class="btn btn-primary w-full" [disabled]="isLoading" (click)="aplicarFiltros()">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                Buscar
+              </button>
+            </div>
+
+            <div class="flex items-end">
+              <button type="button" class="btn btn-outline w-full" [disabled]="isLoading" (click)="limpiarFiltros()">
+                <i class="fa-solid fa-filter-circle-xmark"></i>
+                Limpiar
+              </button>
+            </div> -->
+          </div>
+        </div>
+
+        <!-- =============================================== -->
+        <!-- ILUSTRACIÓN -->
+        <!-- =============================================== -->
+        <div class="hidden items-center justify-center border-base-300 px-5 lg:flex">
+          <img src="assets/img/search.png" alt="" aria-hidden="true" class="h-32 w-32 select-none
+               object-contain opacity-90
+               drop-shadow-sm" draggable="false" />
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================================================= -->
+    <!-- MODALES -->
+    <!-- ================================================= -->
+    <!-- Mapa -->
+    <incidencia-mapa [visible]="mostrarModalMapa" [incidencia]="incidenciaSeleccionada"
+      (cerrar)="cerrarMapaIncidencia()">
+    </incidencia-mapa>
+
+    <!-- Archivos -->
+    <incidencia-archivos [visible]="mostrarArchivos" [incidenciaId]="incidenciaArchivoId" (cerrar)="cerrarArchivos()">
+    </incidencia-archivos>
+
+
+    <!-- ===================================================== -->
+    <!-- TABLA DE INCIDENCIAS -->
+    <!-- ===================================================== -->
+    @if (isLoading || incidencias.length > 0) {
+    <section class="overflow-hidden rounded-2xl
+           border border-base-300
+           bg-base-100 shadow-sm" aria-label="Incidencias registradas">
+
+      <!-- Cabecera de tabla -->
+      <div class="flex flex-col gap-4
+               border-b border-base-300
+               px-4 py-4
+               sm:flex-row
+               sm:items-center
+               sm:justify-between
+               sm:px-5">
+
+        <!-- Total -->
+        <div>
+          <h2 class="font-bold">
+            Incidencias registradas
+          </h2>
+
+          <p class="mt-1 text-xs text-base-content/55">
+            Reportes realizados por el sereno seleccionado.
+          </p>
+        </div>
+
+        <!-- Selector de cantidad -->
+        <div class="flex w-full items-center
+                 justify-between gap-3
+                 text-sm text-base-content/70
+                 sm:w-auto sm:justify-start">
+
+          <label for="incidentes-page-size" class="whitespace-nowrap">
+
+            Mostrar
+          </label>
+
+          <select id="incidentes-page-size" class="select select-bordered
+                   select-sm w-auto" [(ngModel)]="limit" (change)="cambiarLimite()">
+
+            @for ( size of pageSizeOptions; track size ) {
+            <option [ngValue]="size">
+              {{ size }}
+            </option>
+            }
+          </select>
+
+          <span class="whitespace-nowrap">
+            ítems por página
+          </span>
+        </div>
+      </div>
+
+      <!-- Tabla con scroll horizontal -->
+      <div class="overflow-x-auto">
+        <table class="table min-w-275">
+          <thead class="bg-base-300/90">
+            <tr class="text-xs uppercase
+                     tracking-wide
+                     text-base-content/60">
+              <th class="w-14 text-center"> N.°</th>
+              <th class="min-w-40"> Tipo </th>
+              <th class="min-w-70"> Descripción </th>
+              <th class="min-w-42"> Fecha y hora </th>
+              <th class="min-w-40"> Zona </th>
+              <th class="min-w-34"> Patrullaje </th>
+              <th class="min-w-30 text-center"> Evidencias </th>
+              <th class="min-w-34 text-center"> Estado </th>
+              <th class="w-28 text-center"> Acciones </th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <!-- Loading -->
+            @if (isLoading) {
+            @for ( item of [1, 2, 3, 4, 5, 6]; track item ) {
+            <tr>
+              <td>
+                <div class="skeleton mx-auto h-4 w-8"></div>
+              </td>
+
+              <td>
+                <div class="flex items-center gap-2">
+                  <div class="skeleton h-9 w-9 rounded-lg"></div>
+
+                  <div class="skeleton h-4 w-20"></div>
+                </div>
+              </td>
+
+              <td>
+                <div class="space-y-2">
+                  <div class="skeleton h-3 w-full"></div>
+                  <div class="skeleton h-3 w-3/4"></div>
+                </div>
+              </td>
+
+              <td>
+                <div class="skeleton h-4 w-30"></div>
+              </td>
+
+              <td>
+                <div class="skeleton h-4 w-24"></div>
+              </td>
+
+              <td>
+                <div class="skeleton h-4 w-20"></div>
+              </td>
+
+              <td>
+                <div class="skeleton mx-auto h-6 w-10"></div>
+              </td>
+
+              <td>
+                <div class="skeleton mx-auto h-6 w-22"></div>
+              </td>
+
+              <td>
+                <div class="flex justify-center gap-1">
+                  <div class="skeleton h-8 w-8 rounded-full"></div>
+
+                  <div class="skeleton h-8 w-8 rounded-full"></div>
+                </div>
+              </td>
+            </tr>
+            }
+            } @else {
+            <!-- =========================================== -->
+            <!-- FILAS DE INCIDENCIAS -->
+            <!-- =========================================== -->
+
+            @for ( incidencia of incidencias; track incidencia.id; let i = $index ) {
+            <tr class="transition-colors
+                       hover:bg-base-200/40">
+
+              <!-- Numeración paginada -->
+              <td class="text-center text-base-content/60">
+                {{ ((page - 1) * limit) + i + 1 }}
+              </td>
+
+              <!-- Tipo -->
+              <td>
+                <div class="flex items-center gap-2.5">
+                  <span class="flex h-9 w-9 shrink-0
+                             items-center justify-center
+                             rounded-lg bg-primary/10
+                             text-primary">
+                    <i class="fa-solid" [ngClass]="
+                          getTipoIcon(incidencia.tipo)
+                        "></i>
+                  </span>
+
+                  <span class="text-sm font-semibold">
+                    {{ incidencia.tipo }}
+                  </span>
+                </div>
+              </td>
+
+              <!-- Descripción -->
+              <td>
+                <p class="line-clamp-2 max-w-80
+                           text-sm leading-relaxed
+                           text-base-content/70" [title]="incidencia.descripcion">
+                  {{
+                  incidencia.descripcion ||
+                  'Sin descripción'
+                  }}
+                </p>
+              </td>
+
+              <!-- Fecha -->
+              <td>
+                <div class="flex items-center gap-2">
+                  <i class="fa-regular fa-calendar text-primary"></i>
+
+                  <div class="text-sm">
+                    <p class="font-medium">
+                      {{ incidencia.fecha_hora | date:'dd/MM/yyyy' }}
+                    </p>
+
+                    <p class="text-xs text-base-content/50">
+                      {{ incidencia.fecha_hora | date:'HH:mm' }}
+                    </p>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Zona -->
+              <td>
+                <div class="flex max-w-55 items-center gap-2">
+                  <i class="fa-solid fa-map-location-dot shrink-0 text-primary"></i>
+                  <span class="truncate">
+                    {{ incidencia.zona?.nombre || 'Sin zona' }}
+                  </span>
+                </div>
+              </td>
+
+              <!-- Patrullaje -->
+              <td>
+                @if (incidencia.patrullaje_id) {
+                <span class="badge badge-outline">
+                  <i class="fa-solid fa-route mr-1"></i>
+                  #{{ incidencia.patrullaje_id }}
+                </span>
+                } @else {
+                <span class="text-xs text-base-content/40">
+                  No relacionado
+                </span>
+                }
+              </td>
+
+              <!-- Evidencias -->
+              <td class="text-center">
+                <span class="badge badge-soft gap-1.5" [ngClass]="
+                      incidencia.total_evidencias > 0
+                        ? 'badge-info'
+                        : 'badge-ghost'
+                    ">
+                  <i class="fa-solid fa-paperclip"></i>
+                  {{ incidencia.total_evidencias }}
+                </span>
+              </td>
+
+              <!-- Estado -->
+              <td class="text-center">
+                <span class="badge badge-soft whitespace-nowrap" [ngClass]="
+                      getEstadoBadge(incidencia.estado)
+                    ">
+                  {{ getEstadoLabel(incidencia.estado) }}
+                </span>
+              </td>
+
+              <!-- Acciones -->
+
+              <td>
+                <div class="flex items-center justify-center gap-1">
+
+                  <!-- Ubicación -->
+                  <div class="tooltip tooltip-left" data-tip="Ver ubicación">
+                    <button type="button" class="btn btn-ghost btn-circle btn-sm"
+                      (click)="abrirMapaIncidencia(incidencia)" aria-label="Ver ubicación del incidente">
+                      <i class="fa-solid fa-map-location-dot"></i>
+                    </button>
+                  </div>
+
+                  <!-- Archivos -->
+                  <div class="tooltip tooltip-left" data-tip="Ver evidencias">
+                    <button type="button" class="btn btn-ghost btn-circle btn-sm" [disabled]="!incidencia.id"
+                      (click)="abrirArchivos(incidencia.id)" aria-label="Ver evidencias del incidente">
+                      <i class="fa-solid fa-paperclip"></i>
+                    </button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            }
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ===================================================== -->
+      <!-- PAGINACIÓN -->
+      <!-- ===================================================== -->
+      @if (!isLoading && totalItems > 0) {
+      <footer class="flex flex-col gap-4
+                 border-t border-base-300
+                 bg-base-200/50
+                 px-4 py-4
+                 lg:flex-row
+                 lg:items-center
+                 lg:justify-between
+                 sm:px-5">
+
+        <!-- Resumen de incidentes -->
+        <div class="text-center sm:text-left">
+          <h2 class="font-semibold text-base-content">
+            Incidentes registrados
+          </h2>
+
+          <p class="mt-0.5 text-sm text-base-content/55">
+            {{ totalItems }}
+            {{ totalItems === 1 ? 'incidente' : 'incidentes' }}
+            encontrados
+          </p>
+        </div>
+
+        <!-- Controles de paginación -->
+        <div class="flex w-full flex-col
+           items-center gap-3
+           text-sm text-base-content/70
+           sm:w-auto sm:flex-row">
+
+          <!-- Página actual -->
+          <span class="whitespace-nowrap">
+            @if (totalPages > 0) {
+            Página
+            <strong class="text-base-content">
+              {{ page }}
+            </strong>
+            de
+            <strong class="text-base-content">
+              {{ totalPages }}
+            </strong>
+            } @else {
+            Sin páginas disponibles
+            }
+          </span>
+
+          <!-- Botones -->
+          <div class="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
+            <button type="button" class="btn btn-sm w-full
+               gap-2 rounded-lg
+               sm:w-auto" [disabled]="isLoading || page <= 1" (click)="cambiarPagina(page - 1)">
+              <i class="fa-solid fa-chevron-left"></i>
+
+              Anterior
+            </button>
+
+            <button type="button" class="btn btn-sm w-full
+              gap-2 rounded-lg
+              sm:w-auto" [disabled]="
+                  isLoading ||
+                  totalPages === 0 ||
+                  page >= totalPages
+                " (click)="cambiarPagina(page + 1)">
+
+              Siguiente
+
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </footer>
+      }
+    </section>
+    }
+
+    <!-- ===================================================== -->
+    <!-- VACÍO -->
+    <!-- ===================================================== -->
+    @if (!isLoading && incidencias.length === 0) {
+    <section class="rounded-2xl border border-dashed
+           border-base-300 bg-base-100
+           px-6 py-16 text-center shadow-sm">
+      <div class="mx-auto flex h-20 w-20
+             items-center justify-center
+             rounded-full bg-base-200
+             text-base-content/35">
+        <i class="fa-regular fa-folder-open text-3xl"></i>
+      </div>
+
+      <h2 class="mt-5 text-lg font-bold">
+        No se encontraron incidencias
+      </h2>
+
+      <p class="mx-auto mt-2 max-w-md
+             text-sm text-base-content/55">
+        El sereno no tiene incidencias registradas o no existen
+        resultados para los filtros seleccionados.
+      </p>
+
+      @if (
+      tipoFiltro ||
+      estadoFiltro ||
+      fechaInicio ||
+      fechaFin
+      ) {
+      <button type="button" class="btn btn-primary btn-sm mt-5" (click)="limpiarFiltros()">
+        <i class="fa-solid fa-filter-circle-xmark"></i>
+        Limpiar filtros
+      </button>
+      }
+    </section>
+    }
+
+
+  </div>
+</div>

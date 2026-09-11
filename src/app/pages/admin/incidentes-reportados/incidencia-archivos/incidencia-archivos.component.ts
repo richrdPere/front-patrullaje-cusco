@@ -12,7 +12,7 @@ import { finalize } from 'rxjs';
 // Service
 import {
   IncidenciasService,
-} from 'src/app/services/incidencias.service';
+} from 'src/app/services/incidencia/incidencias.service';
 
 // Interfaces
 import {
@@ -22,7 +22,7 @@ import {
 
 import {
   TipoArchivoIncidencia,
-} from 'src/app/interfaces/incidencia/incidencias.interface';
+} from 'src/app/interfaces/incidencia/get-incidencias-paginated.interface';
 
 // Components
 import {
@@ -65,6 +65,20 @@ export class IncidenciaArchivosComponent implements OnChanges {
   archivoSeleccionado:
     IncidenciaArchivoDetalle | null = null;
 
+  modalWidthClass = 'max-w-4xl'; // default
+
+  setModalWidth(size: 'sm' | 'md' | 'lg' | 'xl' | 'full') {
+    const map = {
+      sm: 'max-w-md',
+      md: 'max-w-xl',
+      lg: 'max-w-4xl',
+      xl: 'max-w-6xl',
+      full: 'max-w-full w-[95vw]'
+    };
+
+    this.modalWidthClass = map[size];
+  }
+
   constructor(
     private incidenciasService: IncidenciasService,
   ) { }
@@ -99,6 +113,8 @@ export class IncidenciaArchivosComponent implements OnChanges {
     ) {
       this.limpiarEstado();
     }
+
+    this.setModalWidth('xl');
   }
 
   // =========================================================
@@ -143,17 +159,18 @@ export class IncidenciaArchivosComponent implements OnChanges {
 
           this.data = response.data;
 
+
+
           /*
            * La interfaz ArchivosIncidenciaData contiene:
            *
            * data: IncidenciaArchivoDetalle[]
            */
-          this.archivos = (
-            response.data.data ?? []
-          ).filter(
+          this.archivos = (response.data.items ?? []).filter(
             archivo => archivo.estado === 'ACTIVO',
           );
 
+          console.log("ARCHIVOS INCIDENCIA: ", this.archivos);
           this.archivosCargados.emit(
             this.archivos,
           );

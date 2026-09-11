@@ -1,22 +1,25 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { finalize } from 'rxjs';
 
 // Service
-import { IncidenciasService } from 'src/app/services/incidencias.service';
+import { IncidenciasService } from 'src/app/services/incidencia/incidencias.service';
 
 // Interfaces
 import {
+  EstadoIncidencia,
   IncidenciaPaginada,
   IncidenciasPaginadasData,
   IncidenciasPaginadasFilters,
-} from 'src/app/interfaces/incidencia/incidencias.interface';
+  OrigenIncidencia,
+  TipoIncidencia,
+} from 'src/app/interfaces/incidencia/get-incidencias-paginated.interface';
 import { IncidenciaDetalleComponent } from "./incidencia-detalle/incidencia-detalle.component";
-import { IncidenciaDetalle } from 'src/app/interfaces/incidencia/incidencia_detalle.interface';
+import { IncidenciaDetalle } from 'src/app/interfaces/incidencia/get-incidencia_by_id.interface';
 import { IncidenciaMapaComponent } from "./incidencia-mapa/incidencia-mapa.component";
 import { IncidenciaArchivosComponent } from "./incidencia-archivos/incidencia-archivos.component";
 import { IncidenciaEstadoFormComponent } from "./incidencia-estado-form/incidencia-estado-form.component";
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-incidentes-reportados',
@@ -31,7 +34,6 @@ export class IncidentesReportadosComponent implements OnInit, OnDestroy {
   incidente_id: number | null = null;
   isLoading = true;
   errorMessage = '';
-
 
   // Modal
   mostrarModalInfo = false;
@@ -53,10 +55,47 @@ export class IncidentesReportadosComponent implements OnInit, OnDestroy {
   incidenciaEstadoSeleccionada: IncidenciaPaginada | IncidenciaDetalle | null = null;
 
   // Search
-  descripcionBusqueda: string = '';
-  fechaBusqueda: string = '';
+// descripcionBusqueda = '';
+
+  tipoBusqueda: TipoIncidencia | '' = '';
+  estadoBusqueda: EstadoIncidencia | '' = '';
+
+  fechaInicioBusqueda = '';
+  fechaFinBusqueda = '';
 
   searchTimeout: ReturnType<typeof setTimeout> | null = null;
+
+  readonly tiposIncidencia: {
+    value: TipoIncidencia;
+    label: string;
+  }[] = [
+      { value: 'ROBO', label: 'Robo' },
+      { value: 'ACCIDENTE', label: 'Accidente' },
+      { value: 'INCENDIO', label: 'Incendio' },
+      { value: 'VIOLENCIA', label: 'Violencia' },
+      { value: 'SOSPECHOSO', label: 'Sospechoso' },
+      { value: 'OTRO', label: 'Otro' },
+    ];
+
+  readonly estadosIncidencia: {
+    value: EstadoIncidencia;
+    label: string;
+  }[] = [
+      { value: 'REPORTADO', label: 'Reportado' },
+      { value: 'EN_PROCESO', label: 'En proceso' },
+      { value: 'ATENDIDO', label: 'Atendido' },
+      { value: 'CERRADO', label: 'Cerrado' },
+      { value: 'ELIMINADO', label: 'Eliminado' },
+    ];
+
+  readonly origenesIncidencia: {
+    value: OrigenIncidencia;
+    label: string;
+  }[] = [
+      { value: 'APP_MOVIL', label: 'Aplicación móvil' },
+      { value: 'CENTRAL', label: 'Central' },
+      { value: 'SISTEMA', label: 'Sistema' },
+    ];
 
   // Paginado
   page = 1;
@@ -92,14 +131,17 @@ export class IncidentesReportadosComponent implements OnInit, OnDestroy {
     const filters: IncidenciasPaginadasFilters = {
       page: this.page,
       limit: this.limit,
-      mode: "web"
+      mode: "web",
+      // origen: 'SISTEMA',
+      tipo: this.tipoBusqueda || undefined,
+      estado: this.estadoBusqueda || undefined,
+      fecha_inicio: this.fechaInicioBusqueda || undefined,
+      fecha_fin: this.fechaFinBusqueda || undefined,
     };
 
 
     this.incidenciasService.getIncidentesPaginated(filters).subscribe({
       next: (res) => {
-
-        console.log("INCIEDENTES: ", res);
         const paginacion = res.data;
 
 
@@ -111,8 +153,6 @@ export class IncidentesReportadosComponent implements OnInit, OnDestroy {
         this.totalPages = paginacion.totalPages ?? 0;
 
         this.page = this.currentPage;
-
-        console.log('Incidencias paginadas:', this.incidentes);
 
         this.isLoading = false;
       },
@@ -141,7 +181,7 @@ export class IncidentesReportadosComponent implements OnInit, OnDestroy {
   }
 
   // - Buscador
-  onSearchChange() {
+  onSearchChange(): void {
     if (this.searchTimeout) {
       clearTimeout(this.searchTimeout);
     }
@@ -149,9 +189,45 @@ export class IncidentesReportadosComponent implements OnInit, OnDestroy {
     this.searchTimeout = setTimeout(() => {
       this.page = 1;
       this.getIncidentesPaginado();
-    }, 300);
+    }, 400);
   }
 
+  // =========================================================
+  // APLICAR FILTROS
+  // =========================================================
+
+  aplicarFiltros(): void {
+    if (
+      this.fechaInicioBusqueda &&
+      this.fechaFinBusqueda &&
+      this.fechaInicioBusqueda >
+      this.fechaFinBusqueda
+    ) {
+      void Swal.fire({
+        icon: 'warning',
+        title: 'Rango de fechas inválido',
+        text:
+          'La fecha inicial no puede ser posterior a la fecha final.',
+      });
+
+      return;
+    }
+
+    this.page = 1;
+    this.getIncidentesPaginado();
+  }
+
+  // =========================================================
+  // CAMBIO DE SELECT
+  // =========================================================
+
+  onFiltroChange(): void {
+    this.aplicarFiltros();
+  }
+  //  onFiltroChange() {
+  //     this.page = 1;
+  //     this.getIncidentesPaginado();
+  //   }
 
   // ================================
   // Helpers methods
@@ -164,10 +240,7 @@ export class IncidentesReportadosComponent implements OnInit, OnDestroy {
     this.cambiarLimite();
   }
 
-  onFiltroChange() {
-    this.page = 1;
-    this.getIncidentesPaginado();
-  }
+
 
   cambiarPagina(nuevaPagina: number) {
     if (nuevaPagina < 1 || nuevaPagina > this.totalPages || nuevaPagina === this.page ||
@@ -189,12 +262,32 @@ export class IncidentesReportadosComponent implements OnInit, OnDestroy {
   }
 
   limpiarFiltros(): void {
-    this.descripcionBusqueda = '';
-    this.fechaBusqueda = '';
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
+      this.searchTimeout = null;
+    }
+
+    // this.descripcionBusqueda = '';
+    this.tipoBusqueda = '';
+    this.estadoBusqueda = '';
+    this.fechaInicioBusqueda = '';
+    this.fechaFinBusqueda = '';
 
     this.page = 1;
-
     this.getIncidentesPaginado();
+  }
+
+
+  // VALIDAR SI EXISTEN FILTROS
+
+  get hayFiltrosActivos(): boolean {
+    return Boolean(
+      // this.descripcionBusqueda.trim() ||
+      this.tipoBusqueda ||
+      this.estadoBusqueda ||
+      this.fechaInicioBusqueda ||
+      this.fechaFinBusqueda
+    );
   }
 
   /*
