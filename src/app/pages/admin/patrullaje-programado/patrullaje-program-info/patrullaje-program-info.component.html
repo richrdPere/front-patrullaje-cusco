@@ -2,150 +2,220 @@
 
 <div class="modal modal-open">
 
-  <div class="modal-box max-w-4xl bg-base-100 text-base-content rounded-2xl shadow-2xl p-8" [ngClass]="modalWidthClass">
+  <!-- ===================================================== -->
+  <!-- MODAL: INFORMACIÓN DEL PATRULLAJE PROGRAMADO -->
+  <!-- ===================================================== -->
+  <div class="fixed inset-0 z-50 flex items-center justify-center
+           bg-black/30 p-4 " role="dialog" aria-modal="true" aria-labelledby="patrullaje-programado-info-title"
+    (click)="cerrarModal()">
 
-    <!-- Header -->
-    <div class="flex justify-between items-center border-b border-base-300 pb-2">
-      <h3 class="font-semibold text-xl ">Detalle de Patrullaje Programado</h3>
-      <button type="button" (click)="cerrarModal()" class="btn btn-sm btn-circle btn-ghost text-xl">✕</button>
-    </div>
+    <section class="relative flex max-h-[92vh] w-full flex-col
+             overflow-hidden rounded-2xl border border-base-300
+             bg-base-100 shadow-2xl" [ngClass]="modalWidthClass" (click)="$event.stopPropagation()">
 
-    <!-- LOADING -->
-    <div *ngIf="loading" class="text-center py-10">
-      <span class="loading loading-spinner"></span>
-    </div>
+      <!-- ================================================= -->
+      <!-- HEADER MODAL -->
+      <!-- ================================================= -->
+      <header class="flex items-start justify-between gap-4
+               border-b border-base-300 bg-base-200/50
+               px-5 py-4 sm:px-6">
+        <div class="flex min-w-0 items-center gap-3">
+          <div class="flex h-11 w-11 shrink-0 items-center justify-center
+                   rounded-xl bg-primary/10 text-primary">
+            <i class="fa-solid fa-calendar-check text-lg"></i>
 
-    <!-- CONTENIDO -->
-    <div *ngIf="!loading &&  patrullajeDetalle" class="p-6 space-y-6 max-h-[80vh] ">
-
-      <!-- Estado del Patrullaje -->
-      <div class="alert" [ngClass]="{
-       'alert-primary': patrullajeDetalle.estado === 'PROGRAMADO',
-       'alert-success': patrullajeDetalle.estado === 'EN_CURSO',
-       'alert-warning': patrullajeDetalle.estado === 'ACEPTADO',
-       'alert-info': patrullajeDetalle.estado === 'EN_CURSO',
-       'alert-error': patrullajeDetalle.estado === 'FINALIZADO'
-     }">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-        </svg>
-        <div>
-          <h3 class="font-bold">Estado: {{ patrullajeDetalle.estado || 'PROGRAMADO' }}</h3>
-          <div class="text-sm">Patrullaje programado para el día {{ patrullajeDetalle.fecha | date:'dd/MM/yyyy' }}</div>
-        </div>
-      </div>
-
-      <!-- Información General -->
-      <div class="space-y-3">
-        <h4 class="font-semibold text-lg flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24"
-            stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          Información General
-        </h4>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="bg-base-200 p-3 rounded-lg">
-            <label class="text-xs text-base-content/60">Fecha</label>
-            <p class="font-medium flex items-center gap-1">
-              📅 {{ formatearFecha(patrullajeDetalle.fecha)}}
-            </p>
           </div>
 
-          <div class="bg-base-200 p-3 rounded-lg">
-            <label class="text-xs text-base-content/60">Hora de Inicio</label>
-            <p class="font-medium flex items-center gap-1">
-              🕐 {{ formatearHora(patrullajeDetalle.hora_inicio)}}
-            </p>
-          </div>
+          <div class="min-w-0">
+            <h2 id="unidad-info-title" class="truncate text-lg font-bold text-base-content sm:text-xl">
+              Información del Patrullaje Programado
+            </h2>
 
-          <div class="bg-base-200 p-3 rounded-lg">
-            <label class="text-xs text-base-content/60">Hora de Fin</label>
-            <p class="font-medium flex items-center gap-1">
-              🕘 {{ formatearHora(patrullajeDetalle.hora_fin) }}
+            <p class="mt-0.5 text-sm text-base-content/60">
+              Datos generales y estado del patrullaje programado.
             </p>
           </div>
         </div>
 
-        <div class="bg-base-200 p-3 rounded-lg">
-          <label class="text-xs text-base-content/60">Descripción</label>
-          <p class="font-medium">{{ patrullajeDetalle.descripcion }}</p>
+        <button type="button" class="btn btn-ghost btn-circle btn-sm shrink-0" aria-label="Cerrar modal" title="Cerrar"
+          (click)="cerrarModal()">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </header>
+
+      <!-- ================================================= -->
+      <!-- CONTAINER MODAL -->
+      <!-- ================================================= -->
+      <div class="overflow-y-auto px-5 py-5 sm:px-6 sm:py-6">
+
+        <!-- LOADING -->
+        @if (loading) {
+        <div class="space-y-5" aria-live="polite">
+          <div class="flex flex-col gap-4 rounded-2xl border
+                     border-base-300 bg-base-200/40 p-5 sm:flex-row
+                     sm:items-center">
+            <div class="skeleton h-16 w-16 rounded-2xl"></div>
+
+            <div class="flex-1 space-y-3">
+              <div class="skeleton h-6 w-40"></div>
+              <div class="skeleton h-4 w-64 max-w-full"></div>
+            </div>
+
+            <div class="skeleton h-7 w-28 rounded-full"></div>
+          </div>
+
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            @for (item of [1, 2, 3, 4]; track item) {
+            <div class="rounded-xl border border-base-300
+                         bg-base-100 p-4">
+              <div class="skeleton mb-3 h-3 w-24"></div>
+              <div class="skeleton h-5 w-36"></div>
+            </div>
+            }
+          </div>
+
+          <div class="rounded-xl border border-base-300
+                     bg-base-100 p-4">
+            <div class="skeleton mb-3 h-3 w-28"></div>
+            <div class="skeleton h-4 w-full"></div>
+            <div class="skeleton mt-2 h-4 w-3/4"></div>
+          </div>
         </div>
-      </div>
+        }
 
-      <!-- Unidad y Zona -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- CONTENIDO -->
+        <div *ngIf="!loading &&  patrullajeDetalle" class="space-y-6 max-h-[80vh] ">
 
-        <!-- Información de la Unidad -->
-        <div class="space-y-3">
-          <h4 class="font-semibold text-lg flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor">
+          <!-- Estado del Patrullaje -->
+          <div class="alert" [ngClass]="{
+            'alert-primary': patrullajeDetalle.estado === 'PROGRAMADO',
+            'alert-success': patrullajeDetalle.estado === 'EN_CURSO',
+            'alert-warning': patrullajeDetalle.estado === 'ACEPTADO',
+            'alert-info': patrullajeDetalle.estado === 'EN_CURSO',
+            'alert-error': patrullajeDetalle.estado === 'FINALIZADO'
+          }">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+              class="stroke-current shrink-0 w-6 h-6">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
-            Unidad de Patrullaje
-          </h4>
+            <div>
+              <h3 class="font-bold">Estado: {{ patrullajeDetalle.estado || 'PROGRAMADO' }}</h3>
+              <div class="text-sm">Patrullaje programado para el día {{ patrullajeDetalle.fecha | date:'dd/MM/yyyy' }}
+              </div>
+            </div>
+          </div>
 
-          <div class="card bg-base-200">
-            <div class="card-body p-4">
-              <div class="flex items-center gap-3 mb-3">
+          <!-- Información General -->
+          <div class="space-y-3">
+            <h4 class="font-semibold text-lg flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Información General
+            </h4>
 
-                <div>
-                  <p class="font-bold">{{ patrullajeDetalle.unidad?.codigo }}</p>
-                  <p class="text-sm text-base-content/60">{{ patrullajeDetalle.unidad?.tipo }}</p>
-                </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="bg-base-200 p-3 rounded-lg">
+                <label class="text-xs text-base-content/60">Fecha</label>
+                <p class="font-medium flex items-center gap-1">
+                  📅 {{ formatearFecha(patrullajeDetalle.fecha)}}
+                </p>
               </div>
 
-              <div class="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <label class="text-xs text-base-content/60">Placa</label>
-                  <p class="font-medium">{{ patrullajeDetalle.unidad?.placa }}</p>
-                </div>
-                <div>
-                  <label class="text-xs text-base-content/60">Estado</label>
-                  <span class="badge badge-sm" [ngClass]="{
+              <div class="bg-base-200 p-3 rounded-lg">
+                <label class="text-xs text-base-content/60">Hora de Inicio</label>
+                <p class="font-medium flex items-center gap-1">
+                  🕐 {{ formatearHora(patrullajeDetalle.hora_inicio)}}
+                </p>
+              </div>
+
+              <div class="bg-base-200 p-3 rounded-lg">
+                <label class="text-xs text-base-content/60">Hora de Fin</label>
+                <p class="font-medium flex items-center gap-1">
+                  🕘 {{ formatearHora(patrullajeDetalle.hora_fin) }}
+                </p>
+              </div>
+            </div>
+
+            <div class="bg-base-200 p-3 rounded-lg">
+              <label class="text-xs text-base-content/60">Descripción</label>
+              <p class="font-medium">{{ patrullajeDetalle.descripcion }}</p>
+            </div>
+          </div>
+
+          <!-- Unidad y Zona -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            <!-- Información de la Unidad -->
+            <div class="space-y-3">
+              <h4 class="font-semibold text-lg flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                </svg>
+                Unidad de Patrullaje
+              </h4>
+
+              <div class="card bg-base-200">
+                <div class="card-body p-4">
+                  <div class="flex items-center gap-3 mb-3">
+
+                    <div>
+                      <p class="font-bold">{{ patrullajeDetalle.unidad?.codigo }}</p>
+                      <p class="text-sm text-base-content/60">{{ patrullajeDetalle.unidad?.tipo }}</p>
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <label class="text-xs text-base-content/60">Placa</label>
+                      <p class="font-medium">{{ patrullajeDetalle.unidad?.placa }}</p>
+                    </div>
+                    <div>
+                      <label class="text-xs text-base-content/60">Estado</label>
+                      <span class="badge badge-sm" [ngClass]="{
                     'badge-info': patrullajeDetalle.unidad?.estado === 'DISPONIBLE',
                     'badge-success': patrullajeDetalle.unidad?.estado === 'EN_PATRULLAJE',
                     'badge-warning': patrullajeDetalle.unidad?.estado === 'MANTENIMIENTO',
                     'badge-error': patrullajeDetalle.unidad?.estado === 'FUERA_DE_SERVICIO',
 
                   }">
-                    {{ patrullajeDetalle.unidad?.estado}}
-                  </span>
+                        {{ patrullajeDetalle.unidad?.estado}}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        <!-- Información de la Zona -->
-        <div class="space-y-3">
-          <h4 class="font-semibold text-lg flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            Zona de Patrullaje
-          </h4>
+            <!-- Información de la Zona -->
+            <div class="space-y-3">
+              <h4 class="font-semibold text-lg flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Zona de Patrullaje
+              </h4>
 
-          <div class="card bg-base-200">
-            <div class="card-body p-4">
-              <div class="flex items-center gap-3 mb-3">
+              <div class="card bg-base-200">
+                <div class="card-body p-4">
+                  <div class="flex items-center gap-3 mb-3">
 
-                <div>
-                  <p class="font-bold">{{ patrullajeDetalle.zona?.nombre }}</p>
-                  <p class="text-sm text-base-content/60">Zona ID: #{{ patrullajeDetalle.zona?.id }}</p>
-                </div>
-              </div>
+                    <div>
+                      <p class="font-bold">{{ patrullajeDetalle.zona?.nombre }}</p>
+                      <p class="text-sm text-base-content/60">Zona ID: #{{ patrullajeDetalle.zona?.id }}</p>
+                    </div>
+                  </div>
 
-              <!-- <div class="space-y-2">
+                  <!-- <div class="space-y-2">
                 <div>
                   <label class="text-xs text-base-content/60">Descripción</label>
                   <p class="text-sm">{{ patrullajeDetalle.zona?.descripcion }}</p>
@@ -161,139 +231,151 @@
                   </span>
                 </div>
               </div> -->
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <!-- Personal Asignado -->
-      <div class="space-y-3">
-        <h4 class="font-semibold text-lg flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24"
-            stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-          </svg>
-          Personal Asignado
-          <span class="badge badge-primary">{{ (patrullajeDetalle.serenos.length || 0) +
-            (patrullajeDetalle.policias.length || 0) }} personas</span>
-        </h4>
+          <!-- Personal Asignado -->
+          <div class="space-y-3">
+            <h4 class="font-semibold text-lg flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              Personal Asignado
+              <span class="badge badge-primary">{{ (patrullajeDetalle.serenos.length || 0) +
+                (patrullajeDetalle.policias.length || 0) }} personas</span>
+            </h4>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-          <!-- Serenos -->
-          <div class="card bg-base-200">
-            <div class="card-body p-4">
-              <div class="flex items-center gap-2 mb-3">
-                <span class="badge badge-primary">👮 Serenos</span>
-                <span class="text-sm text-base-content/60">{{ patrullajeDetalle.serenos.length }} asignados</span>
-              </div>
+              <!-- Serenos -->
+              <div class="card bg-base-200">
+                <div class="card-body p-4">
+                  <div class="flex items-center gap-2 mb-3">
+                    <span class="badge badge-primary">👮 Serenos</span>
+                    <span class="text-sm text-base-content/60">{{ patrullajeDetalle.serenos.length }} asignados</span>
+                  </div>
 
-              <div class="space-y-2 max-h-64 overflow-y-auto">
-                <div *ngFor="let sereno of patrullajeDetalle.serenos"
-                  class="flex items-center gap-3 p-2 bg-base-100 rounded-lg">
-                  <!-- <div class="avatar placeholder">
+                  <div class="space-y-2 max-h-64 overflow-y-auto">
+                    <div *ngFor="let sereno of patrullajeDetalle.serenos"
+                      class="flex items-center gap-3 p-2 bg-base-100 rounded-lg">
+                      <!-- <div class="avatar placeholder">
                     <div class="bg-primary text-primary-content rounded-full w-8">
                       <span class="text-xs">{{ (sereno.nombre?.charAt(0) || 'V') + (sereno.apellidos?.charAt(0) || 'A')
                         }}</span>
                     </div>
                   </div> -->
-                  <div class="flex-1">
-                    <p class="font-medium text-sm">{{ sereno.nombres }} {{ sereno.apellidos }}</p>
-                    <div class="flex flex-wrap gap-1 mt-1">
-                      <span *ngFor="let rol of sereno.roles" class="badge badge-xs badge-outline">
-                        {{ rol }}
-                      </span>
+                      <div class="flex-1">
+                        <p class="font-medium text-sm">{{ sereno.nombres }} {{ sereno.apellidos }}</p>
+                        <div class="flex flex-wrap gap-1 mt-1">
+                          <span *ngFor="let rol of sereno.roles" class="badge badge-xs badge-outline">
+                            {{ rol }}
+                          </span>
+                        </div>
+                      </div>
+                      <div class="badge badge-success badge-sm">Activo</div>
+                    </div>
+
+                    <div *ngIf="!patrullajeDetalle.serenos.length" class="text-center text-base-content/60 py-4">
+                      No hay serenos asignados
                     </div>
                   </div>
-                  <div class="badge badge-success badge-sm">Activo</div>
-                </div>
-
-                <div *ngIf="!patrullajeDetalle.serenos.length" class="text-center text-base-content/60 py-4">
-                  No hay serenos asignados
                 </div>
               </div>
-            </div>
-          </div>
 
-          <!-- Policías -->
-          <div class="card bg-base-200">
-            <div class="card-body p-4">
-              <div class="flex items-center gap-2 mb-3">
-                <span class="badge badge-secondary">👮‍♂️ Policías</span>
-                <span class="text-sm text-base-content/60">{{ patrullajeDetalle.policias.length || 1 }} asignados</span>
-              </div>
+              <!-- Policías -->
+              <div class="card bg-base-200">
+                <div class="card-body p-4">
+                  <div class="flex items-center gap-2 mb-3">
+                    <span class="badge badge-secondary">👮‍♂️ Policías</span>
+                    <span class="text-sm text-base-content/60">{{ patrullajeDetalle.policias.length || 1 }}
+                      asignados</span>
+                  </div>
 
-              <div class="space-y-2 max-h-64 overflow-y-auto">
-                <div *ngFor="let policia of patrullajeDetalle.policias"
-                  class="flex items-center gap-3 p-2 bg-base-100 rounded-lg">
-                  <!-- <div class="avatar placeholder">
+                  <div class="space-y-2 max-h-64 overflow-y-auto">
+                    <div *ngFor="let policia of patrullajeDetalle.policias"
+                      class="flex items-center gap-3 p-2 bg-base-100 rounded-lg">
+                      <!-- <div class="avatar placeholder">
                     <div class="bg-secondary text-secondary-content rounded-full w-8">
                       <span class="text-xs">{{ (policia.usuario?.nombre?.charAt(0) || 'E') +
                         (policia.usuario?.apellidos?.charAt(0) || 'C') }}</span>
                     </div>
                   </div> -->
-                  <div class="flex-1">
-                    <p class="font-medium text-sm">{{ policia.nombres }} {{ policia.apellidos }}</p>
-                    <div class="flex flex-wrap gap-1 mt-1">
-                      <span class="badge badge-xs badge-outline">{{ policia.grado }}</span>
-                      <span class="badge badge-xs badge-outline">{{ policia.comisaria }}</span>
+                      <div class="flex-1">
+                        <p class="font-medium text-sm">{{ policia.nombres }} {{ policia.apellidos }}</p>
+                        <div class="flex flex-wrap gap-1 mt-1">
+                          <span class="badge badge-xs badge-outline">{{ policia.grado }}</span>
+                          <span class="badge badge-xs badge-outline">{{ policia.comisaria }}</span>
+                        </div>
+                      </div>
+                      <div class="badge badge-info badge-sm">PNP</div>
+                    </div>
+
+                    <div *ngIf="!patrullajeDetalle.policias.length" class="text-center text-base-content/60 py-4">
+                      No hay policías asignados
                     </div>
                   </div>
-                  <div class="badge badge-info badge-sm">PNP</div>
-                </div>
-
-                <div *ngIf="!patrullajeDetalle.policias.length" class="text-center text-base-content/60 py-4">
-                  No hay policías asignados
                 </div>
               </div>
             </div>
           </div>
+
+          <!-- Información del Sistema -->
+          <div class="space-y-3">
+            <h4 class="font-semibold text-lg flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Información del Sistema
+            </h4>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="bg-base-200 p-3 rounded-lg">
+                <label class="text-xs text-base-content/60">Creado el</label>
+                <p class="font-medium text-sm">{{ patrullajeDetalle.createdAt |
+                  date:'dd/MM/yyyy
+                  hh:mm a' }}</p>
+              </div>
+
+              <div class="bg-base-200 p-3 rounded-lg">
+                <label class="text-xs text-base-content/60">Actualizado el</label>
+                <p class="font-medium text-sm">{{ patrullajeDetalle.updatedAt | date:'dd/MM/yyyy
+                  hh:mm a' }}</p>
+              </div>
+            </div>
+          </div>
+
+
         </div>
       </div>
 
-      <!-- Información del Sistema -->
-      <div class="space-y-3">
-        <h4 class="font-semibold text-lg flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24"
-            stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          Información del Sistema
-        </h4>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="bg-base-200 p-3 rounded-lg">
-            <label class="text-xs text-base-content/60">Creado el</label>
-            <p class="font-medium text-sm">{{ patrullajeDetalle.createdAt |
-              date:'dd/MM/yyyy
-              hh:mm a' }}</p>
-          </div>
-
-          <div class="bg-base-200 p-3 rounded-lg">
-            <label class="text-xs text-base-content/60">Actualizado el</label>
-            <p class="font-medium text-sm">{{ patrullajeDetalle.updatedAt | date:'dd/MM/yyyy
-              hh:mm a' }}</p>
-          </div>
-        </div>
-      </div>
 
       <!-- Footer con acciones -->
-      <div class="modal-action justify-center items-center gap-5">
-        <button class="btn btn-primary" (click)="cerrarModal()">
+      <footer class="flex shrink-0 flex-col-reverse gap-3
+               border-t border-base-300 px-5 py-4
+               sm:flex-row sm:items-center
+               sm:justify-between sm:px-6">
+        <div class="flex items-center gap-2 text-xs
+                 text-base-content/50">
+          <i class="fa-solid fa-circle-info"></i>
+
+          <span>
+            Consulte la información completa del patrullaje programado.
+          </span>
+        </div>
+
+        <button type="button" class="btn btn-accent min-w-28" (click)="cerrarModal()">
+          <i class="fa-solid fa-check"></i>
           Cerrar
         </button>
+      </footer>
 
-        <button class="btn btn-success">
-          Imprimir
-        </button>
-      </div>
-
-
-
-    </div>
+    </section>
   </div>
-
 </div>
 }

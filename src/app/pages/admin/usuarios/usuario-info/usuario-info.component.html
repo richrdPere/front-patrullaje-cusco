@@ -2,160 +2,273 @@
 
 <div class="modal modal-open">
 
-  <div class="modal-box max-w-4xl bg-base-100 text-base-content rounded-2xl shadow-2xl p-8" [ngClass]="modalWidthClass">
+  <!-- ===================================================== -->
+  <!-- MODAL: INFORMACIÓN DEL USUARIO -->
+  <!-- ===================================================== -->
+  <div class="fixed inset-0 z-50 flex items-center justify-center
+           bg-black/30 p-4 " role="dialog" aria-modal="true" aria-labelledby="unidad-info-title"
+    (click)="cerrarModal()">
 
-    <!-- Header -->
-    <div class="flex justify-between items-center border-b border-base-300 pb-2">
-      <h3 class="text-2xl font-semibold">Detalles del Usuario</h3>
-      <button type="button" (click)="cerrarModal()" class="btn btn-sm btn-circle btn-ghost text-xl">✕</button>
-    </div>
+    <section class="relative flex max-h-[92vh] w-full flex-col
+             overflow-hidden rounded-2xl border border-base-300
+             bg-base-100 shadow-2xl" [ngClass]="modalWidthClass" (click)="$event.stopPropagation()">
 
-    <!-- Información Personal -->
-    <div class="my-6">
-      <h4 class="font-semibold text-lg mb-3 flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24"
-          stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-        </svg>
-        Información Personal
-      </h4>
+      <!-- ================================================= -->
+      <!-- HEADER MODAL -->
+      <!-- ================================================= -->
+      <header class="flex items-start justify-between gap-4
+               border-b border-base-300 bg-base-200/50
+               px-5 py-4 sm:px-6">
+        <div class="flex min-w-0 items-center gap-3">
+          <div class="flex h-11 w-11 shrink-0 items-center justify-center
+                   rounded-xl bg-primary/10 text-primary">
+            <i class="fa-solid fa-user text-lg"></i>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-base-200 p-3 rounded-lg">
-          <label class="text-xs text-base-content/60">Nombre completo</label>
-          <p class="font-medium">{{usuario.persona.nombres}} {{usuario.persona.apellidos}}</p>
-        </div>
+          </div>
 
-        <div class="bg-base-200 p-3 rounded-lg">
-          <label class="text-xs text-base-content/60">Documento de Identidad</label>
-          <p class="font-medium">{{usuario.persona.documento_identidad}}</p>
-        </div>
+          <div class="min-w-0">
+            <h2 id="unidad-info-title" class="truncate text-lg font-bold text-base-content sm:text-xl">
+              Información del Usuario
+            </h2>
 
-        <div class="bg-base-200 p-3 rounded-lg">
-          <label class="text-xs text-base-content/60">Teléfono</label>
-          <p class="font-medium">{{usuario.persona.telefono}}</p>
-        </div>
-
-        <div class="bg-base-200 p-3 rounded-lg">
-          <label class="text-xs text-base-content/60">Correo Electrónico</label>
-          <p class="font-medium">{{usuario.correo}}
-        </div>
-
-        <div class="bg-base-200 p-3 rounded-lg">
-          <label class="text-xs text-base-content/60">Roles asignados</label>
-          <div class="flex flex-wrap gap-1 justify-start">
-            <span *ngFor="let rol of usuario.roles" class="badge badge-soft badge-primary badge-sm font-medium ">
-              {{ rol }}
-            </span>
+            <p class="mt-0.5 text-sm text-base-content/60">
+              Datos generales y estado del usuario activo.
+            </p>
           </div>
         </div>
 
-        <div class="bg-base-200 p-3 rounded-lg">
-          <label class="text-xs text-base-content/60">Estado</label>
+        <button type="button" class="btn btn-ghost btn-circle btn-sm shrink-0" aria-label="Cerrar modal" title="Cerrar"
+          (click)="cerrarModal()">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </header>
 
-          <div>
-            <span class="badge gap-1" [ngClass]="usuario.estado ? 'badge-success' : 'badge-error'">
-              <!-- Icono dinámico -->
-              <svg *ngIf="usuario.estado" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none"
-                viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+      <!-- ================================================= -->
+      <!-- CONTAINER MODAL -->
+      <!-- ================================================= -->
+      <div class="overflow-y-auto px-5 py-5 sm:px-6 sm:py-6">
+
+        <!-- Cargando -->
+        @if (loading) {
+        <div class="space-y-5" aria-live="polite">
+          <div class="flex flex-col gap-4 rounded-2xl border
+                     border-base-300 bg-base-200/40 p-5 sm:flex-row
+                     sm:items-center">
+            <div class="skeleton h-16 w-16 rounded-2xl"></div>
+
+            <div class="flex-1 space-y-3">
+              <div class="skeleton h-6 w-40"></div>
+              <div class="skeleton h-4 w-64 max-w-full"></div>
+            </div>
+
+            <div class="skeleton h-7 w-28 rounded-full"></div>
+          </div>
+
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            @for (item of [1, 2, 3, 4]; track item) {
+            <div class="rounded-xl border border-base-300
+                         bg-base-100 p-4">
+              <div class="skeleton mb-3 h-3 w-24"></div>
+              <div class="skeleton h-5 w-36"></div>
+            </div>
+            }
+          </div>
+
+          <div class="rounded-xl border border-base-300
+                     bg-base-100 p-4">
+            <div class="skeleton mb-3 h-3 w-28"></div>
+            <div class="skeleton h-4 w-full"></div>
+            <div class="skeleton mt-2 h-4 w-3/4"></div>
+          </div>
+        </div>
+        }
+
+        <!-- Información -->
+        @if (!loading && usuario){
+        <div class="space-y-5">
+          <!-- Información Personal -->
+          <div class="">
+            <h4 class="font-semibold text-lg mb-3 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
+              Información Personal
+            </h4>
 
-              <svg *ngIf="!usuario.estado" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none"
-                viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="bg-base-200 p-3 rounded-lg">
+                <label class="text-xs text-base-content/60">Nombre completo</label>
+                <p class="font-medium">{{usuario.persona.nombres}} {{usuario.persona.apellidos}}</p>
+              </div>
+
+              <div class="bg-base-200 p-3 rounded-lg">
+                <label class="text-xs text-base-content/60">Documento de Identidad</label>
+                <p class="font-medium">{{usuario.persona.documento_identidad}}</p>
+              </div>
+
+              <div class="bg-base-200 p-3 rounded-lg">
+                <label class="text-xs text-base-content/60">Teléfono</label>
+                <p class="font-medium">{{usuario.persona.telefono}}</p>
+              </div>
+
+              <div class="bg-base-200 p-3 rounded-lg">
+                <label class="text-xs text-base-content/60">Correo Electrónico</label>
+                <p class="font-medium">{{usuario.correo}}
+              </div>
+
+              <div class="bg-base-200 p-3 rounded-lg">
+                <label class="text-xs text-base-content/60">Roles asignados</label>
+                <div class="flex flex-wrap gap-1 justify-start">
+                  <span *ngFor="let rol of usuario.roles" class="badge badge-soft badge-primary badge-sm font-medium ">
+                    {{ rol }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="bg-base-200 p-3 rounded-lg">
+                <label class="text-xs text-base-content/60">Estado</label>
+
+                <div>
+                  <span class="badge gap-1" [ngClass]="usuario.estado ? 'badge-success' : 'badge-error'">
+                    <!-- Icono dinámico -->
+                    <svg *ngIf="usuario.estado" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none"
+                      viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+
+                    <svg *ngIf="!usuario.estado" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none"
+                      viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+
+                    <!-- Texto dinámico -->
+                    {{ usuario.estado ? 'Activo' : 'Desactivado' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ubicación -->
+          <div class="mb-6">
+            <h4 class="font-semibold text-lg mb-3 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
+              Ubicación
+            </h4>
 
-              <!-- Texto dinámico -->
-              {{ usuario.estado ? 'Activo' : 'Desactivado' }}
-            </span>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="bg-base-200 p-3 rounded-lg">
+                <label class="text-xs text-base-content/60">Dirección</label>
+                <p class="font-medium">{{usuario.persona.direccion}}</p>
+              </div>
+
+              <div class="bg-base-200 p-3 rounded-lg">
+                <label class="text-xs text-base-content/60">Distrito</label>
+                <p class="font-medium">{{distritoNombre}}</p>
+              </div>
+
+              <div class="bg-base-200 p-3 rounded-lg">
+                <label class="text-xs text-base-content/60">Provincia</label>
+                <p class="font-medium">{{provinciaNombre}}</p>
+              </div>
+
+              <div class="bg-base-200 p-3 rounded-lg">
+                <label class="text-xs text-base-content/60">Departamento</label>
+                <p class="font-medium">{{departamentoNombre}}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Estado en línea y Fechas -->
+          <div class="mb-6">
+            <h4 class="font-semibold text-lg mb-3 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Información del Sistema
+            </h4>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="bg-base-200 p-3 rounded-lg">
+                <label class="text-xs text-base-content/60">Estado en línea</label>
+                <div>
+                  <span class="badge gap-1" [ngClass]="usuario.estado ? 'badge-success' : 'badge-ghost'">
+                    <!-- Indicador -->
+                    <span class="w-2 h-2 rounded-full"
+                      [ngClass]="usuario.estado ? 'bg-green-500' : 'bg-gray-400'"></span>
+
+                    {{ usuario.estado ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="bg-base-200 p-3 rounded-lg">
+                <label class="text-xs text-base-content/60">Creado el</label>
+                <p class="font-medium text-sm">{{usuario.createdAt | date:'dd/MM/yyyy hh:mm a'}}</p>
+              </div>
+
+              <div class="bg-base-200 p-3 rounded-lg">
+                <label class="text-xs text-base-content/60">Actualizado el</label>
+                <p class="font-medium text-sm">{{usuario.persona.updatedAt | date:'dd/MM/yyyy hh:mm a'}}</p>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
+        }
 
-    <!-- Ubicación -->
-    <div class="mb-6">
-      <h4 class="font-semibold text-lg mb-3 flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24"
-          stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-        Ubicación
-      </h4>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-base-200 p-3 rounded-lg">
-          <label class="text-xs text-base-content/60">Dirección</label>
-          <p class="font-medium">{{usuario.persona.direccion}}</p>
-        </div>
-
-        <div class="bg-base-200 p-3 rounded-lg">
-          <label class="text-xs text-base-content/60">Distrito</label>
-          <p class="font-medium">{{distritoNombre}}</p>
-        </div>
-
-        <div class="bg-base-200 p-3 rounded-lg">
-          <label class="text-xs text-base-content/60">Provincia</label>
-          <p class="font-medium">{{provinciaNombre}}</p>
-        </div>
-
-        <div class="bg-base-200 p-3 rounded-lg">
-          <label class="text-xs text-base-content/60">Departamento</label>
-          <p class="font-medium">{{departamentoNombre}}</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Estado en línea y Fechas -->
-    <div class="mb-6">
-      <h4 class="font-semibold text-lg mb-3 flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24"
-          stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        Información del Sistema
-      </h4>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-base-200 p-3 rounded-lg">
-          <label class="text-xs text-base-content/60">Estado en línea</label>
-          <div>
-            <span class="badge gap-1" [ngClass]="usuario.estado ? 'badge-success' : 'badge-ghost'">
-              <!-- Indicador -->
-              <span class="w-2 h-2 rounded-full" [ngClass]="usuario.estado ? 'bg-green-500' : 'bg-gray-400'"></span>
-
-              {{ usuario.estado ? 'Activo' : 'Inactivo' }}
-            </span>
+        <!-- Sin datos -->
+        @if (!loading && !usuario) {
+        <div class="flex min-h-64 flex-col items-center
+                   justify-center text-center">
+          <div class="mb-4 flex h-16 w-16 items-center justify-center
+                     rounded-full bg-base-200 text-base-content/40">
+            <i class="fa-solid fa-car-burst text-2xl"></i>
           </div>
-        </div>
 
-        <div class="bg-base-200 p-3 rounded-lg">
-          <label class="text-xs text-base-content/60">Creado el</label>
-          <p class="font-medium text-sm">{{usuario.createdAt | date:'dd/MM/yyyy hh:mm a'}}</p>
-        </div>
+          <h3 class="font-semibold text-base-content">
+            No hay información disponible
+          </h3>
 
-        <div class="bg-base-200 p-3 rounded-lg">
-          <label class="text-xs text-base-content/60">Actualizado el</label>
-          <p class="font-medium text-sm">{{usuario.persona.updatedAt | date:'dd/MM/yyyy hh:mm a'}}</p>
+          <p class="mt-1 max-w-sm text-sm text-base-content/60">
+            No fue posible encontrar los datos del usuario seleccionado.
+          </p>
         </div>
+        }
       </div>
-    </div>
 
-    <!-- Footer con acciones -->
-    <div class="modal-action justify-center items-center gap-5">
-      <button class="btn btn-primary" (click)="cerrarModal()">
-        Cerrar
-      </button>
+      <!-- ================================================= -->
+      <!-- FOOTER MODAL -->
+      <!-- ================================================= -->
+      <footer class="flex shrink-0 flex-col-reverse gap-3
+               border-t border-base-300 px-5 py-4
+               sm:flex-row sm:items-center
+               sm:justify-between sm:px-6">
 
-      <button class="btn btn-success">
-        Imprimir
-      </button>
-    </div>
+        <div class="flex items-center gap-2 text-xs
+                 text-base-content/50">
+          <i class="fa-solid fa-circle-info"></i>
+
+          <span>
+            Consulte la información completa del usuario.
+          </span>
+        </div>
+        <button type="button" class="btn btn-accent min-w-28" (click)="cerrarModal()">
+          <i class="fa-solid fa-check"></i>
+          Cerrar
+        </button>
+      </footer>
+    </section>
   </div>
 </div>
+
 }

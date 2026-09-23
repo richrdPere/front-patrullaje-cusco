@@ -20,6 +20,7 @@ import { UpdatePatrullajeProgramadoRequest, UpdatePatrullajeProgramadoResponse }
 import { DeletePatrullajeProgramadoResponse } from 'src/app/interfaces/patrullaje_programado/delete-patrullaje-programado.model';
 import { GetRecorridoPatrullajeResponse } from 'src/app/interfaces/patrullaje_programado/get-recorrido-patrullaje.model';
 import { FinishPatrullajeProgramadoResponse } from 'src/app/interfaces/patrullaje_programado/finish-patrullaje-programado.model';
+import { PersonalDisponibilidadQueryParams, PersonalDisponibilidadResponse } from 'src/app/interfaces/patrullaje_programado/get-personal-disponible.model';
 
 @Injectable({ providedIn: 'root' })
 export class PatrullajeProgramadoService {
@@ -37,6 +38,7 @@ export class PatrullajeProgramadoService {
   private readonly API_DELETE_PATRULLAJE: string = this.API_BASE + '/eliminar/';
   private readonly API_GET_PATRULLAJE_RECORRIDO: string = this.API_BASE + '/recorrido/';
   private readonly API_PATCH_FINALIZAR_PATRULLAJE: string = this.API_BASE + '/finalizar/';
+  private readonly API_GET_PERSONAL_DISPONIBILIDAD: string = this.API_BASE + '/personal/disponibilidad';
 
   constructor(
     private readonly http: HttpClient,
@@ -240,6 +242,45 @@ export class PatrullajeProgramadoService {
           HttpServiceHelper.handleError(
             error,
             'No se pudo finalizar el patrullaje.',
+          ),
+        ),
+      );
+  }
+
+  // *********************************************************
+  // 9. OBTENER DISPONIBILIDAD DEL PERSONAL
+  // *********************************************************
+  getPersonalDisponibilidad(
+    query: PersonalDisponibilidadQueryParams,
+  ): Observable<PersonalDisponibilidadResponse> {
+    let params = new HttpParams()
+      .set('fecha', query.fecha)
+      .set('hora_inicio', query.hora_inicio)
+      .set('hora_fin', query.hora_fin);
+
+    if (
+      query.patrullaje_excluir_id !== undefined &&
+      query.patrullaje_excluir_id !== null
+    ) {
+      params = params.set(
+        'patrullaje_excluir_id',
+        query.patrullaje_excluir_id.toString(),
+      );
+    }
+
+    return this.http
+      .get<PersonalDisponibilidadResponse>(
+        this.API_GET_PERSONAL_DISPONIBILIDAD,
+        {
+          params,
+          headers: this.getJsonHeaders(),
+        },
+      )
+      .pipe(
+        catchError((error) =>
+          HttpServiceHelper.handleError(
+            error,
+            'No se pudo obtener la disponibilidad del personal.',
           ),
         ),
       );

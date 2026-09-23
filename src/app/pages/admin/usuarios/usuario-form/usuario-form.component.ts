@@ -192,6 +192,9 @@ export class UsuarioFormComponent implements OnInit, OnChanges {
   // Methods
   // ====================================
   crearOEditarUsuario() {
+ console.log('Se ejecutó crearOEditarUsuario');
+  console.log('Estado del formulario:', this.formUsuario.status);
+
 
     if (this.formUsuario.invalid) {
       this.formUsuario.markAllAsTouched();
@@ -213,6 +216,8 @@ export class UsuarioFormComponent implements OnInit, OnChanges {
       correo: form.correo,
       roles: form.roles
     };
+
+    console.log("PAY LOAD PARA CREAR: ", payload);
 
     this.isLoading = true;
 

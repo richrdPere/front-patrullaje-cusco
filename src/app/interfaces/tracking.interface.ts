@@ -73,3 +73,29 @@ export interface SerenoOnlinePayload {
     timestamp: string;
   };
 }
+
+
+export interface CentralTrackingData {
+  cantidadActivos: number;
+  cantidadConectados: number;
+  cantidadConUbicacion: number;
+  generadoEn: string;
+  serenosActivos: Array<{
+    usuarioId: number;
+    username: string;
+    correo: string | null;
+    roles: string[];
+    sereno: TrackingPayload['sereno'];
+    patrullaje: TrackingPayload['patrullaje'];
+    personal: {
+      id: number;
+      estado: string;
+    };
+    tieneUbicacion: boolean;
+    realtime: {
+      online: boolean;
+      timestamp: string | null;
+    };
+  }>;
+  trackings: TrackingPayload[];
+}

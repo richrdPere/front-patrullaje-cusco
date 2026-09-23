@@ -20,8 +20,8 @@ import { ZonaService } from 'src/app/services/zona/zona.service';
 import { TrackingService } from 'src/app/services/mapa-tracking/tracking.service';
 import { MapaTrackingService } from 'src/app/services/mapa-tracking/mapa-tracking.service';
 import { TrackingStoreService } from 'src/app/services/mapa-tracking/tracking-store.service';
-
-
+import { SocketService } from 'src/app/services/socket.service';
+import { GetZonasSelectResponse, ZonaSelectItem } from 'src/app/interfaces/zona/get-zonas-select.model';
 
 interface AlertaMapaPayload {
   lat: number;
@@ -56,9 +56,7 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
   // =====================================================
   // DESTRUCCIÓN DE OBSERVABLES
   // =====================================================
-
-  private readonly destroy$ =
-    new Subject<void>();
+  private readonly destroy$ = new Subject<void>();
 
   // =====================================================
   // MAPA
@@ -82,8 +80,18 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
    * Evita volver a actualizar marcadores
    * cuando el store emite nuevamente todo el Map.
    */
-  private readonly ultimoTrackingProcesado =
-    new Map<number, number>();
+  // private readonly ultimoTrackingProcesado = new Map<number, number>();
+  private destruido = false;
+
+  socketConectado = false;
+
+  // El store reemplaza el objeto cuando cambia el GPS
+  // o el estado online/offline.
+  private readonly ultimoTrackingProcesado = new Map<number, TrackingPayload>();
+
+  private readonly alertaInfoWindows = new Set<google.maps.InfoWindow>();
+
+  private readonly poligonosTemporales = new Set<google.maps.Polygon>();
 
   // =====================================================
   // ALERTAS
@@ -101,31 +109,11 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
   // =====================================================
   // ZONAS
   // =====================================================
-  zonas: ZonaPatrullaje[] = [];
+  zonas: ZonaSelectItem[] = [];
   zonasVisibles: Record<number, boolean> = {};
   poligonos: Record<number, google.maps.Polygon> = {};
 
-  // =====================================================
-  // LUGARES DE REFERENCIA
-  // =====================================================
 
-  // lugares: Lugar[] = [
-  //   {
-  //     nombre: 'Unsaac',
-  //     lat: -13.52189,
-  //     lng: -71.95828
-  //   },
-  //   {
-  //     nombre: 'Ex PRONAA',
-  //     lat: -13.53109,
-  //     lng: -71.94069
-  //   },
-  //   {
-  //     nombre: 'Gobierno Regional Cusco',
-  //     lat: -13.52493,
-  //     lng: -71.96274
-  //   }
-  // ];
 
   // =====================================================
   // PANEL ARRASTRABLE
@@ -139,20 +127,12 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
   };
 
   constructor(
-    private readonly mapsLoader:
-      GoogleMapsLoaderService,
-
-    private readonly zonaService:
-      ZonaService,
-
-    private readonly trackingService:
-      TrackingService,
-
-    private readonly mapaTrackingService:
-      MapaTrackingService,
-
-    private readonly trackingStoreService:
-      TrackingStoreService
+    private readonly mapsLoader: GoogleMapsLoaderService,
+    private readonly zonaService: ZonaService,
+    private readonly trackingService: TrackingService,
+    private readonly mapaTrackingService: MapaTrackingService,
+    private readonly trackingStoreService: TrackingStoreService,
+    private readonly socketService: SocketService
   ) { }
 
   // =====================================================
@@ -164,11 +144,15 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
       // 1. Cargar API Google Maps
       await this.mapsLoader.load();
 
+      if (this.destruido) return;
+
       // 2. Crear mapa
       this.initMapa();
 
       // 3. Reconstruir marcadores persistidos
-      this.mapaTrackingService.reconstruirMarcadores(this.map);
+      // this.mapaTrackingService.reconstruirMarcadores(this.map);
+      this.mapaTrackingService.limpiarTodo();
+      this.ultimoTrackingProcesado.clear();
 
       // 4. Cargar zonas
       this.loadZonas();
@@ -183,257 +167,386 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
 
       this.mapaCargado = true;
 
-      console.log("Cantidad de serenos activos:", this.cantidadSerenos);
-      console.log(
-        '🗺️ Mapa de patrullaje cargado correctamente'
-      );
+      // 7. Los listeners ya están registrados.
+      this.socketService.connect();
+
+      // console.log("Cantidad de serenos activos:", this.cantidadSerenos);
+      // console.log(
+      //   '🗺️ Mapa de patrullaje cargado correctamente'
+      // );
     } catch (error) {
+      if (this.destruido) return;
+
       this.mapaCargado = false;
 
       console.error(
         '❌ No se pudo inicializar el mapa:',
         error
       );
+      // this.mapaCargado = false;
+
+      // console.error(
+      //   '❌ No se pudo inicializar el mapa:',
+      //   error
+      // );
     }
   }
 
   ngOnDestroy(): void {
-    // Finalizar observables
+    this.destruido = true;
+
     this.destroy$.next();
     this.destroy$.complete();
 
-    // Detener movimiento del panel
     this.isDragging = false;
 
-    // Limpiar marcadores temporales de alerta
-    this.alertMarkers.forEach(marker => {
-      marker.setMap(null);
-    });
-
-    this.alertMarkers = [];
-
-    // Limpiar timeouts pendientes
     this.alertaTimeouts.forEach(timeout => {
       clearTimeout(timeout);
     });
-
     this.alertaTimeouts.clear();
 
-    /*
-     * No se llama limpiarTodo() porque el servicio
-     * conserva los marcadores para reconstruirlos
-     * cuando el usuario regrese al componente.
-     *
-     * limpiarTodo() debe reservarse para logout.
-     */
+    this.alertaInfoWindows.forEach(infoWindow => {
+      infoWindow.close();
+    });
+    this.alertaInfoWindows.clear();
+
+    this.alertMarkers.forEach(marker => {
+      marker.setMap(null);
+      google.maps.event.clearInstanceListeners(marker);
+    });
+    this.alertMarkers = [];
+
+    Object.values(this.poligonos).forEach(polygon => {
+      polygon.setMap(null);
+    });
+    this.poligonos = {};
+
+    this.poligonosTemporales.forEach(polygon => {
+      polygon.setMap(null);
+    });
+    this.poligonosTemporales.clear();
+
+    this.mapaTrackingService.limpiarTodo();
+    this.ultimoTrackingProcesado.clear();
+
+    // El store conserva los datos para volver a entrar.
+    // El socket global continúa disponible para otros módulos.
   }
+  // ngOnDestroy(): void {
+  //   // Finalizar observables
+  //   this.destroy$.next();
+  //   this.destroy$.complete();
+
+  //   // Detener movimiento del panel
+  //   this.isDragging = false;
+
+  //   // Limpiar marcadores temporales de alerta
+  //   this.alertMarkers.forEach(marker => {
+  //     marker.setMap(null);
+  //   });
+
+  //   this.alertMarkers = [];
+
+  //   // Limpiar timeouts pendientes
+  //   this.alertaTimeouts.forEach(timeout => {
+  //     clearTimeout(timeout);
+  //   });
+
+  //   this.alertaTimeouts.clear();
+
+  //   /*
+  //    * No se llama limpiarTodo() porque el servicio
+  //    * conserva los marcadores para reconstruirlos
+  //    * cuando el usuario regrese al componente.
+  //    *
+  //    * limpiarTodo() debe reservarse para logout.
+  //    */
+  // }
 
   // =====================================================
   // INICIALIZAR TRACKING
   // =====================================================
   private initTracking(): void {
-    this.trackingStoreService
-      .tracking$
-      .pipe(
-        takeUntil(this.destroy$)
-      )
+    this.socketService.connected$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(connected => {
+        this.socketConectado = connected;
+      });
+
+    this.trackingStoreService.tracking$
+      .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: trackingMap => {
-          this.procesarTrackingMap(
-            trackingMap
-          );
+          this.procesarTrackingMap(trackingMap);
         },
         error: error => {
           console.error(
-            '❌ Error en tracking:',
+            '❌ Error recibiendo el estado de tracking:',
             error
           );
         }
       });
 
     this.trackingService.listenAlertas()
-      .pipe(
-        takeUntil(this.destroy$)
-      )
+      .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: data => {
-          this.mostrarAlerta(
-            data as AlertaMapaPayload
-          );
+          this.mostrarAlerta(data as AlertaMapaPayload);
         },
         error: error => {
           console.error(
-            '❌ Error en alertas:',
+            '❌ Error escuchando alertas:',
             error
           );
         }
       });
-
-    this.trackingService.unirseCentralTracking();
-
-
-    this.trackingService.listenSerenoOffline()
-      .subscribe(payload => {
-        this.mapaTrackingService.marcarSerenoOffline(
-          payload.usuarioId,
-          payload.realtime.timestamp,
-        );
-      });
-
-    this.trackingService
-      .listenSerenoOnline()
-      .pipe(
-        takeUntil(this.destroy$),
-      )
-      .subscribe({
-        next: payload => {
-
-          this.mapaTrackingService
-            .marcarSerenoOnline(
-              payload.usuarioId,
-              payload.realtime.timestamp,
-            );
-        },
-
-        error: error => {
-          console.error(
-            'Error escuchando reconexión del sereno:',
-            error,
-          );
-        },
-      });
   }
+  // private initTracking(): void {
+  //   this.trackingStoreService
+  //     .tracking$
+  //     .pipe(
+  //       takeUntil(this.destroy$)
+  //     )
+  //     .subscribe({
+  //       next: trackingMap => {
+  //         this.procesarTrackingMap(
+  //           trackingMap
+  //         );
+  //       },
+  //       error: error => {
+  //         console.error(
+  //           '❌ Error en tracking:',
+  //           error
+  //         );
+  //       }
+  //     });
+
+  //   this.trackingService.listenAlertas()
+  //     .pipe(
+  //       takeUntil(this.destroy$)
+  //     )
+  //     .subscribe({
+  //       next: data => {
+  //         this.mostrarAlerta(
+  //           data as AlertaMapaPayload
+  //         );
+  //       },
+  //       error: error => {
+  //         console.error(
+  //           '❌ Error en alertas:',
+  //           error
+  //         );
+  //       }
+  //     });
+
+  //   this.trackingService.unirseCentralTracking();
+
+
+  //   this.trackingService.listenSerenoOffline()
+  //     .subscribe(payload => {
+  //       this.mapaTrackingService.marcarSerenoOffline(
+  //         payload.usuarioId,
+  //         payload.realtime.timestamp,
+  //       );
+  //     });
+
+  //   this.trackingService
+  //     .listenSerenoOnline()
+  //     .pipe(
+  //       takeUntil(this.destroy$),
+  //     )
+  //     .subscribe({
+  //       next: payload => {
+
+  //         this.mapaTrackingService
+  //           .marcarSerenoOnline(
+  //             payload.usuarioId,
+  //             payload.realtime.timestamp,
+  //           );
+  //       },
+
+  //       error: error => {
+  //         console.error(
+  //           'Error escuchando reconexión del sereno:',
+  //           error,
+  //         );
+  //       },
+  //     });
+  // }
 
   // =====================================================
   // PROCESAR ESTADO DE TRACKING
   // =====================================================
-
   private procesarTrackingMap(
-    trackingMap:
-      ReadonlyMap<number, TrackingPayload>
+    trackingMap: ReadonlyMap<number, TrackingPayload>
   ): void {
+    if (this.destruido || !this.map) return;
 
-    if (!this.map) {
-      return;
+    // Retirar usuarios eliminados del store.
+    for (const usuarioId of this.ultimoTrackingProcesado.keys()) {
+      if (!trackingMap.has(usuarioId)) {
+        this.mapaTrackingService.removerSereno(usuarioId);
+        this.ultimoTrackingProcesado.delete(usuarioId);
+      }
     }
 
-    const usuariosActuales =
-      new Set<number>(
-        trackingMap.keys()
+    for (const [usuarioId, tracking] of trackingMap) {
+      const anterior =
+        this.ultimoTrackingProcesado.get(usuarioId);
+
+      if (anterior === tracking) {
+        continue;
+      }
+
+      // No mezclar rutas de distintos patrullajes.
+      if (
+        anterior &&
+        anterior.patrullaje.id !== tracking.patrullaje.id
+      ) {
+        this.mapaTrackingService.removerSereno(usuarioId);
+      }
+
+      this.mapaTrackingService.actualizarTracking(
+        this.map,
+        tracking
       );
 
-    /*
-     * Eliminar del mapa usuarios que ya no
-     * aparecen en el TrackingStoreService.
-     */
-    for (
-      const usuarioId
-      of this.ultimoTrackingProcesado.keys()
-    ) {
-      if (
-        !usuariosActuales.has(usuarioId)
-      ) {
-        this.mapaTrackingService
-          .removerSereno(usuarioId);
-
-        this.ultimoTrackingProcesado
-          .delete(usuarioId);
-      }
+      this.ultimoTrackingProcesado.set(
+        usuarioId,
+        tracking
+      );
     }
 
-    /*
-     * Procesar únicamente ubicaciones nuevas.
-     */
-    trackingMap.forEach(
-      (
-        tracking: TrackingPayload,
-        usuarioId: number
-      ) => {
-
-        if (
-          !this.debeProcesarTracking(
-            tracking
-          )
-        ) {
-          return;
-        }
-
-        this.mapaTrackingService
-          .actualizarTracking(
-            this.map,
-            tracking
-          );
-
-        const timestamp =
-          new Date(
-            tracking.realtime.timestamp
-          ).getTime();
-
-        this.ultimoTrackingProcesado.set(
-          usuarioId,
-          timestamp
-        );
-      }
-    );
-
-    this.cantidadSerenos =
-      trackingMap.size;
-
-    this.trackingActivo =
-      this.cantidadSerenos > 0;
+    // Cantidad de serenos con ubicación guardada,
+    // no necesariamente conectados.
+    this.cantidadSerenos = trackingMap.size;
+    this.trackingActivo = this.cantidadSerenos > 0;
   }
+  // private procesarTrackingMap(
+  //   trackingMap:
+  //     ReadonlyMap<number, TrackingPayload>
+  // ): void {
+
+  //   if (!this.map) {
+  //     return;
+  //   }
+
+  //   const usuariosActuales =
+  //     new Set<number>(
+  //       trackingMap.keys()
+  //     );
+
+  //   /*
+  //    * Eliminar del mapa usuarios que ya no
+  //    * aparecen en el TrackingStoreService.
+  //    */
+  //   for (
+  //     const usuarioId
+  //     of this.ultimoTrackingProcesado.keys()
+  //   ) {
+  //     if (
+  //       !usuariosActuales.has(usuarioId)
+  //     ) {
+  //       this.mapaTrackingService
+  //         .removerSereno(usuarioId);
+
+  //       this.ultimoTrackingProcesado
+  //         .delete(usuarioId);
+  //     }
+  //   }
+
+  //   /*
+  //    * Procesar únicamente ubicaciones nuevas.
+  //    */
+  //   trackingMap.forEach(
+  //     (
+  //       tracking: TrackingPayload,
+  //       usuarioId: number
+  //     ) => {
+
+  //       if (
+  //         !this.debeProcesarTracking(
+  //           tracking
+  //         )
+  //       ) {
+  //         return;
+  //       }
+
+  //       this.mapaTrackingService
+  //         .actualizarTracking(
+  //           this.map,
+  //           tracking
+  //         );
+
+  //       const timestamp =
+  //         new Date(
+  //           tracking.realtime.timestamp
+  //         ).getTime();
+
+  //       this.ultimoTrackingProcesado.set(
+  //         usuarioId,
+  //         timestamp
+  //       );
+  //     }
+  //   );
+
+  //   this.cantidadSerenos =
+  //     trackingMap.size;
+
+  //   this.trackingActivo =
+  //     this.cantidadSerenos > 0;
+  // }
 
   /**
    * Verifica si el tracking recibido es más
    * reciente que el último procesado.
    */
-  private debeProcesarTracking(
-    tracking: TrackingPayload
-  ): boolean {
+  // private debeProcesarTracking(
+  //   tracking: TrackingPayload
+  // ): boolean {
 
-    if (
-      !tracking ||
-      !tracking.realtime ||
-      !tracking.gps
-    ) {
-      return false;
-    }
+  //   if (
+  //     !tracking ||
+  //     !tracking.realtime ||
+  //     !tracking.gps
+  //   ) {
+  //     return false;
+  //   }
 
-    const timestamp =
-      new Date(
-        tracking.realtime.timestamp
-      ).getTime();
+  //   const timestamp =
+  //     new Date(
+  //       tracking.realtime.timestamp
+  //     ).getTime();
 
-    if (
-      !Number.isFinite(timestamp)
-    ) {
-      console.warn(
-        '⚠️ Tracking con fecha inválida:',
-        tracking
-      );
+  //   if (
+  //     !Number.isFinite(timestamp)
+  //   ) {
+  //     console.warn(
+  //       '⚠️ Tracking con fecha inválida:',
+  //       tracking
+  //     );
 
-      return false;
-    }
+  //     return false;
+  //   }
 
-    const ultimoTimestamp =
-      this.ultimoTrackingProcesado.get(
-        tracking.usuarioId
-      );
+  //   const ultimoTimestamp =
+  //     this.ultimoTrackingProcesado.get(
+  //       tracking.usuarioId
+  //     );
 
-    if (
-      ultimoTimestamp !== undefined &&
-      timestamp <= ultimoTimestamp
-    ) {
-      return false;
-    }
+  //   if (
+  //     ultimoTimestamp !== undefined &&
+  //     timestamp <= ultimoTimestamp
+  //   ) {
+  //     return false;
+  //   }
 
-    return true;
-  }
+  //   return true;
+  // }
 
   // =====================================================
   // MAPA
   // =====================================================
-
   private initMapa(): void {
     const center = {
       lat: -13.518219, // -13.540348,
@@ -441,46 +554,35 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
     };
 
 
-    this.map =
-      new google.maps.Map(
-        this.mapaElement.nativeElement,
-        {
-          center,
-          zoom: 15,
-          mapTypeId:
-            google.maps.MapTypeId.ROADMAP,
+    this.map = new google.maps.Map(
+      this.mapaElement.nativeElement,
+      {
+        center,
+        zoom: 15,
+        mapTypeId: google.maps.MapTypeId.ROADMAP,
+        streetViewControl: false,
+        fullscreenControl: true,
+        mapTypeControl: true,
 
-          streetViewControl: false,
-          fullscreenControl: true,
-          mapTypeControl: true,
-
-          gestureHandling: 'greedy'
-        }
-      );
+        gestureHandling: 'greedy'
+      }
+    );
   }
 
   // =====================================================
   // ALERTAS
   // =====================================================
-
-  private mostrarAlerta(
-    data: AlertaMapaPayload
-  ): void {
+  private mostrarAlerta(data: AlertaMapaPayload): void {
 
     if (!this.map) {
       return;
     }
 
-    const lat =
-      Number(data?.lat);
+    const lat = Number(data?.lat);
 
-    const lng =
-      Number(data?.lng);
+    const lng = Number(data?.lng);
 
-    if (
-      !Number.isFinite(lat) ||
-      !Number.isFinite(lng)
-    ) {
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
       console.warn(
         '⚠️ Alerta sin coordenadas válidas:',
         data
@@ -503,46 +605,31 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
-    const usuarioId =
-      data.usuarioId ??
-      data.userId ??
-      null;
+    const usuarioId = data.usuarioId ?? data.userId ?? null;
 
-    const marker =
-      new google.maps.Marker({
-        position: {
-          lat,
-          lng
-        },
-
-        map: this.map,
-
-        title:
-          data.titulo ??
-          'Alerta de serenazgo',
-
-        icon: {
-          url:
-            'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
-
-          scaledSize:
-            new google.maps.Size(
-              44,
-              44
-            )
-        },
-
-        animation:
-          google.maps.Animation.BOUNCE
-      });
+    const marker = new google.maps.Marker({
+      position: {
+        lat,
+        lng
+      },
+      map: this.map,
+      title: data.titulo ?? 'Alerta de serenazgo',
+      icon: {
+        url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
+        scaledSize: new google.maps.Size(
+          44,
+          44
+        )
+      },
+      animation: google.maps.Animation.BOUNCE
+    });
 
     this.alertMarkers.push(
       marker
     );
 
-    const infoWindow =
-      new google.maps.InfoWindow({
-        content: `
+    const infoWindow = new google.maps.InfoWindow({
+      content: `
           <div style="
             width:240px;
             font-family:Arial,sans-serif;
@@ -554,37 +641,39 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
               margin-bottom:8px;
             ">
               🚨 ${this.escapeHtml(
-          data.titulo ??
-          'ALERTA DE SERENAZGO'
-        )}
+        data.titulo ??
+        'ALERTA DE SERENAZGO'
+      )}
             </div>
 
             ${data.descripcion
-            ? `
+          ? `
                   <div style="
                     margin-bottom:8px;
                     color:#374151;
                   ">
                     ${this.escapeHtml(
-              data.descripcion
-            )}
+            data.descripcion
+          )}
                   </div>
                 `
-            : ''
-          }
+          : ''
+        }
 
             <div style="
               font-size:12px;
               color:#6B7280;
             ">
               ${usuarioId !== null
-            ? `Sereno ID: ${usuarioId}`
-            : 'Usuario no identificado'
-          }
+          ? `Sereno ID: ${usuarioId}`
+          : 'Usuario no identificado'
+        }
             </div>
           </div>
         `
-      });
+    });
+
+    this.alertaInfoWindows.add(infoWindow);
 
     infoWindow.open({
       map: this.map,
@@ -596,23 +685,22 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
       lng
     });
 
-    const timeout =
-      setTimeout(() => {
+    const timeout = setTimeout(() => {
 
-        marker.setMap(null);
-        infoWindow.close();
+      marker.setMap(null);
+      infoWindow.close();
+      this.alertaInfoWindows.delete(infoWindow);
 
-        this.alertMarkers =
-          this.alertMarkers.filter(
-            currentMarker =>
-              currentMarker !== marker
-          );
+      this.alertMarkers = this.alertMarkers.filter(
+        currentMarker =>
+          currentMarker !== marker
+      );
 
-        this.alertaTimeouts.delete(
-          timeout
-        );
+      this.alertaTimeouts.delete(
+        timeout
+      );
 
-      }, 10_000);
+    }, 10_000);
 
     this.alertaTimeouts.add(
       timeout
@@ -623,20 +711,13 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
   // ZONAS
   // =====================================================
   loadZonas(): void {
-    this.zonaService.getZonasPaginated({})
+    this.zonaService.getZonasSelect({})
       .pipe(
         takeUntil(this.destroy$)
       )
       .subscribe({
-        next: (response: any) => {
-          this.zonas =
-            response?.data?.rows ?? [];
-
-          this.zonas.forEach(zona => {
-            this.zonasVisibles[
-              zona.id
-            ] = false;
-          });
+        next: (res: GetZonasSelectResponse) => {
+          this.zonas = res.data.items;
         },
 
         error: error => {
@@ -648,19 +729,17 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
       });
   }
 
-  toggleZona(
-    zona: ZonaPatrullaje
-  ): void {
+  toggleZona(zona: ZonaSelectItem): void {
 
     const visible =
       this.zonasVisibles[
-      zona.id
+      zona.value
       ];
 
     if (visible) {
       const poligono =
         this.poligonos[
-        zona.id
+        zona.value
         ];
 
       if (poligono) {
@@ -668,7 +747,7 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
       }
 
       this.zonasVisibles[
-        zona.id
+        zona.value
       ] = false;
 
       return;
@@ -677,16 +756,9 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
     this.showZona(zona);
   }
 
-  private showZona(
-    zona: ZonaPatrullaje
-  ): void {
+  private showZona(zona: ZonaSelectItem): void {
 
-    if (
-      !Array.isArray(
-        zona.coordenadas
-      ) ||
-      zona.coordenadas.length === 0
-    ) {
+    if (!Array.isArray(zona.coordenadas) || zona.coordenadas.length === 0) {
       console.warn(
         '⚠️ Zona sin coordenadas:',
         zona
@@ -695,68 +767,42 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
-    const color =
-      this.getColorByRiesgo(
-        zona.riesgo
-      );
+    const color = this.getColorByRiesgo(zona.riesgo);
 
     /*
      * Reutilizar polígono si ya fue creado.
      */
-    const poligonoExistente =
-      this.poligonos[
-      zona.id
-      ];
+    const poligonoExistente = this.poligonos[zona.value];
 
     if (poligonoExistente) {
       poligonoExistente.setMap(
         this.map
       );
 
-      this.zonasVisibles[
-        zona.id
-      ] = true;
+      this.zonasVisibles[zona.value] = true;
 
       this.fitZonaBounds(zona);
 
       return;
     }
 
-    const polygon =
-      new google.maps.Polygon({
-        paths:
-          zona.coordenadas,
-
-        strokeColor:
-          color,
-
-        strokeOpacity:
-          0.8,
-
-        strokeWeight:
-          2,
-
-        fillColor:
-          color,
-
-        fillOpacity:
-          0.35,
-
-        clickable:
-          true
-      });
+    const polygon = new google.maps.Polygon({
+      paths: zona.coordenadas,
+      strokeColor: color,
+      strokeOpacity: 0.8,
+      strokeWeight: 2,
+      fillColor: color,
+      fillOpacity: 0.35,
+      clickable: true
+    });
 
     polygon.setMap(
       this.map
     );
 
-    this.poligonos[
-      zona.id
-    ] = polygon;
+    this.poligonos[zona.value] = polygon;
 
-    this.zonasVisibles[
-      zona.id
-    ] = true;
+    this.zonasVisibles[zona.value] = true;
 
     this.fitZonaBounds(
       zona
@@ -781,32 +827,21 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  private fitZonaBounds(
-    zona: ZonaPatrullaje
-  ): void {
+  private fitZonaBounds(zona: ZonaSelectItem): void {
 
-    if (
-      !zona.coordenadas?.length
-    ) {
+    if (!zona.coordenadas?.length) {
       return;
     }
 
-    const bounds =
-      new google.maps.LatLngBounds();
+    const bounds = new google.maps.LatLngBounds();
 
     zona.coordenadas
       .forEach(coord => {
 
-        const lat =
-          Number(coord.lat);
+        const lat = Number(coord.lat);
+        const lng = Number(coord.lng);
 
-        const lng =
-          Number(coord.lng);
-
-        if (
-          Number.isFinite(lat) &&
-          Number.isFinite(lng)
-        ) {
+        if (Number.isFinite(lat) && Number.isFinite(lng)) {
           bounds.extend({
             lat,
             lng
@@ -839,38 +874,24 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
-    const polygon =
-      new google.maps.Polygon({
-        paths:
-          zona.coordenadas,
+    const polygon = new google.maps.Polygon({
+      paths: zona.coordenadas,
+      strokeColor: '#0AD962',
+      strokeOpacity: 0.8,
+      strokeWeight: 2,
+      fillColor: '#0AD962',
+      fillOpacity: 0.25,
+      map: this.map
+    });
 
-        strokeColor:
-          '#0AD962',
-
-        strokeOpacity:
-          0.8,
-
-        strokeWeight:
-          2,
-
-        fillColor:
-          '#0AD962',
-
-        fillOpacity:
-          0.25,
-
-        map:
-          this.map
-      });
 
     /*
      * Este método crea un polígono temporal.
      * Si luego quieres eliminarlo, debes guardarlo.
      */
-    console.log(
-      '🟢 Zona temporal dibujada:',
-      polygon
-    );
+    this.poligonosTemporales.add(polygon);
+
+    console.log('🟢 Zona temporal dibujada:', polygon);
   }
 
   // =====================================================
@@ -1006,7 +1027,6 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
   // =====================================================
   // SEGURIDAD HTML
   // =====================================================
-
   private escapeHtml(
     value: string
   ): string {

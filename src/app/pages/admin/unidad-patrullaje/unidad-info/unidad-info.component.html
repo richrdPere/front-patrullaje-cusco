@@ -317,9 +317,20 @@
       <!-- ================================================= -->
       <!-- FOOTER MODAL -->
       <!-- ================================================= -->
-      <footer class="flex justify-center border-t border-base-300
-               bg-base-200/40 px-5 py-4 sm:px-6">
-        <button type="button" class="btn btn-primary min-w-28" (click)="cerrarModal()">
+      <footer class="flex shrink-0 flex-col-reverse gap-3
+               border-t border-base-300 px-5 py-4
+               sm:flex-row sm:items-center
+               sm:justify-between sm:px-6">
+
+        <div class="flex items-center gap-2 text-xs
+                 text-base-content/50">
+          <i class="fa-solid fa-circle-info"></i>
+
+          <span>
+            Consulte la información completa del reporte.
+          </span>
+        </div>
+        <button type="button" class="btn btn-accent min-w-28" (click)="cerrarModal()">
           <i class="fa-solid fa-check"></i>
           Cerrar
         </button>

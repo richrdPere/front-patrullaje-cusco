@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Injectable, OnDestroy } from '@angular/core';
+import { BehaviorSubject, Subscription } from 'rxjs';
 
 // Interfaces
 import { TrackingPayload } from 'src/app/interfaces/tracking.interface';
@@ -11,62 +11,144 @@ import { TrackingService } from './tracking.service';
 @Injectable({
   providedIn: 'root'
 })
-export class TrackingStoreService {
+export class TrackingStoreService implements OnDestroy {
+
+  private readonly subscriptions = new Subscription();
 
   // ESTADO GLOBAL TRACKING
   private trackingMap = new Map<number, TrackingPayload>();
 
   // OBSERVABLE GLOBAL
-  private trackingSubject =
-    new BehaviorSubject<Map<number, TrackingPayload>>(
-      new Map()
-    );
+  private trackingSubject = new BehaviorSubject<Map<number, TrackingPayload>>(
+    new Map()
+  );
 
   tracking$ = this.trackingSubject.asObservable();
 
   constructor(
-    // private socketService: SocketService,
+    private socketService: SocketService,
     private trackingService: TrackingService
   ) {
+    // Primero registrar los receptores.
     this.initSocketListeners();
+
+    // Después observar la conexión.
+    // BehaviorSubject también informa si ya estaba conectado.
+    this.subscriptions.add(
+      this.socketService.connected$.subscribe(connected => {
+        if (!connected) return;
+
+        this.trackingService.unirseCentralTracking((data) => {
+          this.cargarTrackingInicial(data.trackings);
+        });
+        // this.trackingService.unirseCentralTracking();
+      })
+    );
   }
 
   // SOCKET LISTENERS
   // SOLO UNA VEZ
   private initSocketListeners(): void {
-    this.trackingService
-      .listenTracking()
-      .subscribe({
-        next: (tracking) => {
+    this.subscriptions.add(
+      this.trackingService.listenTracking().subscribe({
+        next: tracking => {
           this.actualizarTracking(tracking);
         },
-
-        error: (error) => {
+        error: error => {
           console.error(
-            '❌ Error recibiendo tracking en tiempo real:',
+            '❌ Error escuchando tracking:',
             error
           );
         }
-      });
+      })
+    );
 
-    this.trackingService
-      .listenTrackingErrors()
-      .subscribe({
-        next: (error) => {
+    this.subscriptions.add(
+      this.trackingService.listenTrackingErrors().subscribe({
+        next: error => {
           console.error(
-            '❌ Error enviado por el backend:',
+            '❌ Error de tracking:',
             error.message
           );
-        },
-
-        error: (error) => {
-          console.error(
-            '❌ Error escuchando tracking_error:',
-            error
-          );
         }
-      });
+      })
+    );
+
+    this.subscriptions.add(
+      this.trackingService.listenSerenoOffline().subscribe({
+        next: payload => {
+          this.marcarOffline(payload.usuarioId);
+        }
+      })
+    );
+
+    this.subscriptions.add(
+      this.trackingService.listenSerenoOnline().subscribe({
+        next: payload => {
+          this.marcarOnline(payload.usuarioId);
+        }
+      })
+    );
   }
+  private marcarOnline(usuarioId: number): void {
+    const tracking = this.trackingMap.get(usuarioId);
+
+    if (!tracking) {
+      // El evento online no contiene coordenadas.
+      return;
+    }
+
+    this.trackingMap.set(usuarioId, {
+      ...tracking,
+      realtime: {
+        ...tracking.realtime,
+        online: true
+
+        // Conservar timestamp: es la fecha GPS.
+      }
+    });
+
+    this.emitirEstado();
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+    this.trackingSubject.complete();
+  }
+  // private initSocketListeners(): void {
+  //   this.trackingService
+  //     .listenTracking()
+  //     .subscribe({
+  //       next: (tracking) => {
+  //         this.actualizarTracking(tracking);
+  //       },
+
+  //       error: (error) => {
+  //         console.error(
+  //           '❌ Error recibiendo tracking en tiempo real:',
+  //           error
+  //         );
+  //       }
+  //     });
+
+  //   this.trackingService
+  //     .listenTrackingErrors()
+  //     .subscribe({
+  //       next: (error) => {
+  //         console.error(
+  //           '❌ Error enviado por el backend:',
+  //           error.message
+  //         );
+  //       },
+
+  //       error: (error) => {
+  //         console.error(
+  //           '❌ Error escuchando tracking_error:',
+  //           error
+  //         );
+  //       }
+  //     });
+  // }
 
   /**
    * Agrega o actualiza la posición
@@ -224,38 +306,62 @@ export class TrackingStoreService {
    * Permite cargar las ubicaciones iniciales
    * obtenidas mediante una petición HTTP.
    */
-  cargarTrackingInicial(
-    trackings: TrackingPayload[]
-  ): void {
-
-    this.trackingMap.clear();
-
+  cargarTrackingInicial(trackings: TrackingPayload[]): void {
     for (const tracking of trackings) {
       if (!this.esTrackingValido(tracking)) {
         continue;
       }
 
-      const trackingActual =
-        this.trackingMap.get(
-          tracking.usuarioId
-        );
+      const actual = this.trackingMap.get(tracking.usuarioId);
 
-      if (
-        !trackingActual ||
-        this.esTrackingMasReciente(
-          trackingActual,
-          tracking
-        )
-      ) {
-        this.trackingMap.set(
-          tracking.usuarioId,
-          tracking
-        );
+      if (actual) {
+        const fechaActual = new Date(
+          actual.realtime.timestamp
+        ).getTime();
+
+        const fechaRecibida = new Date(
+          tracking.realtime.timestamp
+        ).getTime();
+
+        // Conserva los eventos recibidos mientras se
+        // recuperaba la carga inicial, incluso a igual fecha.
+        if (fechaRecibida <= fechaActual) {
+          continue;
+        }
       }
+
+      this.trackingMap.set(tracking.usuarioId, tracking);
     }
 
     this.emitirEstado();
   }
+  // cargarTrackingInicial(trackings: TrackingPayload[]): void {
+
+  //   // this.trackingMap.clear();
+
+  //   for (const tracking of trackings) {
+  //     if (!this.esTrackingValido(tracking)) {
+  //       continue;
+  //     }
+
+  //     const trackingActual = this.trackingMap.get(tracking.usuarioId);
+
+  //     if (
+  //       !trackingActual ||
+  //       this.esTrackingMasReciente(
+  //         trackingActual,
+  //         tracking
+  //       )
+  //     ) {
+  //       this.trackingMap.set(
+  //         tracking.usuarioId,
+  //         tracking
+  //       );
+  //     }
+  //   }
+
+  //   this.emitirEstado();
+  // }
 
   /**
    * Obtiene una copia del estado actual.

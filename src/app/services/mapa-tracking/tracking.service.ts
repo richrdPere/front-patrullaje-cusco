@@ -6,7 +6,7 @@ import { SocketService } from '../socket.service';
 
 
 // Interface
-import { SerenoOfflinePayload, SerenoOnlinePayload, TrackingPayload } from 'src/app/interfaces/tracking.interface';
+import { CentralTrackingData, SerenoOfflinePayload, SerenoOnlinePayload, TrackingPayload } from 'src/app/interfaces/tracking.interface';
 
 export interface SocketResponse<T = unknown> {
   success: boolean;
@@ -72,25 +72,66 @@ export class TrackingService {
   /**
    * Unir y centrar los trackings.
    */
-  unirseCentralTracking(): void {
+  unirseCentralTracking(
+    onSuccess?: (data: CentralTrackingData) => void
+  ): void {
     this.socketService.emit(
       'tracking:unirse-central',
       {},
-      (response: SocketResponse) => {
+      (response: SocketResponse<CentralTrackingData>) => {
         if (!response?.success) {
           console.error(
             '❌ No se pudo ingresar a central_tracking:',
-            response
+            response?.message ?? 'Respuesta inválida del backend.'
           );
 
           return;
         }
 
-        console.log(
-          '✅ Socket unido a central_tracking:',
-          response.message
-        );
+        const data = response.data;
+
+        if (
+          !data ||
+          !Array.isArray(data.trackings) ||
+          !Array.isArray(data.serenosActivos)
+        ) {
+          console.error(
+            '❌ Respuesta de central_tracking incompleta:',
+            data
+          );
+
+          return;
+        }
+
+        console.log('✅ Central tracking recuperada:', {
+          activos: data.cantidadActivos,
+          conectados: data.cantidadConectados,
+          conUbicacion: data.cantidadConUbicacion,
+        });
+
+        onSuccess?.(data);
       }
     );
   }
+  // unirseCentralTracking(): void {
+  //   this.socketService.emit(
+  //     'tracking:unirse-central',
+  //     {},
+  //     (response: SocketResponse) => {
+  //       if (!response?.success) {
+  //         console.error(
+  //           '❌ No se pudo ingresar a central_tracking:',
+  //           response
+  //         );
+
+  //         return;
+  //       }
+
+  //       console.log(
+  //         '✅ Socket unido a central_tracking:',
+  //         response.message
+  //       );
+  //     }
+  //   );
+  // }
 }

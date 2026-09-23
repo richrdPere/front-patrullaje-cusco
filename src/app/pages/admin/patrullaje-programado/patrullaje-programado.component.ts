@@ -72,7 +72,6 @@ export class PatrullajeProgramadoComponent implements OnInit {
   // Methods
   // ================================
   getPatrullajePaginado() {
-
     const params: GetPatrullajesPaginatedParams = {
       page: this.page,
       limit: this.limit,
@@ -145,12 +144,9 @@ export class PatrullajeProgramadoComponent implements OnInit {
                 title: 'Error',
                 text: 'No se pudo eliminar el operativo'
               });
-
             }
           });
-
       }
-
     });
   }
 
@@ -159,6 +155,10 @@ export class PatrullajeProgramadoComponent implements OnInit {
     this.modoEdicion = true;
     this.patrullajeSeleccionado = { ...patrullaje };
     this.mostrarModal = true;
+
+    console.log("mostrar modal: ", this.mostrarModal);
+    console.log("modo Edicion: ", this.modoEdicion);
+    console.log("patrullaje Seleccionado: ", this.patrullajeSeleccionado);
   }
 
   // - Ver historial

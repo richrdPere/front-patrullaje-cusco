@@ -114,46 +114,21 @@ export interface PatrullajePaginatedItemData {
    * Es null en patrullajes que no utilizan unidad.
    */
   unidad_id: number | null;
-
   zona_id: number;
-
-  tipo_patrullaje:
-  TipoPatrullaje;
-
-  modalidad_patrullaje:
-  ModalidadPatrullaje;
-
-  detalle_tipo_patrullaje:
-  string | null;
-
-  creado_por_usuario_id:
-  number | null;
-
+  tipo_patrullaje: TipoPatrullaje;
+  modalidad_patrullaje: ModalidadPatrullaje;
+  detalle_tipo_patrullaje: string | null;
+  creado_por_usuario_id: number | null;
   fecha: string;
-
   hora_inicio: string;
-
   hora_fin: string;
-
   descripcion: string | null;
-
-  estado:
-  EstadoPatrullaje;
-
-  unidad:
-  PatrullajePaginatedUnidadData | null;
-
-  zona:
-  PatrullajePaginatedZonaData | null;
-
-  serenos:
-  PatrullajePaginatedSerenoData[];
-
-  policias:
-  PatrullajePaginatedPoliciaData[];
-
+  estado: EstadoPatrullaje;
+  unidad: PatrullajePaginatedUnidadData | null;
+  zona: PatrullajePaginatedZonaData | null;
+  serenos: PatrullajePaginatedSerenoData[];
+  policias: PatrullajePaginatedPoliciaData[];
   createdAt: string;
-
   updatedAt: string;
 }
 

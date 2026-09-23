@@ -255,49 +255,51 @@ export class MapaTrackingService {
 
     this.detenerAnimacion(usuarioId);
 
-    const latInicial =
-      posicionInicial.lat();
+    if (
+      !posicionInicial ||
+      posicionInicial.equals(nuevaPosicion) ||
+      !data.realtime.online
+    ) {
+      marker.setPosition(nuevaPosicion);
+      return;
+    }
 
-    const lngInicial =
-      posicionInicial.lng();
+    const latInicial = posicionInicial.lat();
 
-    const latFinal =
-      nuevaPosicion.lat();
+    const lngInicial = posicionInicial.lng();
 
-    const lngFinal =
-      nuevaPosicion.lng();
+    const latFinal = nuevaPosicion.lat();
+
+    const lngFinal = nuevaPosicion.lng();
 
     let progreso = 0;
 
-    this.animationIntervals[usuarioId] =
-      setInterval(() => {
+    this.animationIntervals[usuarioId] = setInterval(() => {
 
-        progreso += 0.1;
+      progreso += 0.1;
 
-        const latInterpolada =
-          latInicial +
-          (latFinal - latInicial) *
-          progreso;
+      const latInterpolada =
+        latInicial +
+        (latFinal - latInicial) *
+        progreso;
 
-        const lngInterpolada =
-          lngInicial +
-          (lngFinal - lngInicial) *
-          progreso;
+      const lngInterpolada =
+        lngInicial +
+        (lngFinal - lngInicial) *
+        progreso;
 
-        marker.setPosition({
-          lat: latInterpolada,
-          lng: lngInterpolada
-        });
+      marker.setPosition({
+        lat: latInterpolada,
+        lng: lngInterpolada
+      });
 
-        if (progreso >= 1) {
-          marker.setPosition(nuevaPosicion);
+      if (progreso >= 1) {
+        marker.setPosition(nuevaPosicion);
 
-          this.detenerAnimacion(
-            usuarioId
-          );
-        }
+        this.detenerAnimacion(usuarioId);
+      }
 
-      }, 50);
+    }, 50);
   }
 
   // =====================================================
@@ -826,31 +828,33 @@ export class MapaTrackingService {
     data: TrackingPayload
   ): boolean {
 
-    if (!data.realtime.online) {
-      return false;
-    }
+    return data.realtime.online === true;
 
-    console.log("data.realtime.online", data.realtime.online);
-    console.log("data.realtime.timestamp", data.realtime.timestamp);
+    // if (!data.realtime.online) {
+    //   return false;
+    // }
 
-    const timestamp =
-      new Date(
-        data.realtime.timestamp
-      ).getTime();
+    // console.log("data.realtime.online", data.realtime.online);
+    // console.log("data.realtime.timestamp", data.realtime.timestamp);
 
-    if (!Number.isFinite(timestamp)) {
-      return false;
-    }
+    // const timestamp =
+    //   new Date(
+    //     data.realtime.timestamp
+    //   ).getTime();
 
-    const diferencia = Date.now() - timestamp;
+    // if (!Number.isFinite(timestamp)) {
+    //   return false;
+    // }
 
-    console.log("diferencia", diferencia);
+    // const diferencia = Date.now() - timestamp;
 
-    return (
-      diferencia >= 0 &&
-      diferencia <=
-      this.ONLINE_TIMEOUT_MS
-    );
+    // console.log("diferencia", diferencia);
+
+    // return (
+    //   diferencia >= 0 &&
+    //   diferencia <=
+    //   this.ONLINE_TIMEOUT_MS
+    // );
   }
 
   // =====================================================
@@ -967,14 +971,11 @@ export class MapaTrackingService {
     });
   }
 
-  private detenerAnimacion(
-    usuarioId: number
-  ): void {
+  private detenerAnimacion(usuarioId: number): void {
 
-    const intervalo =
-      this.animationIntervals[
+    const intervalo = this.animationIntervals[
       usuarioId
-      ];
+    ];
 
     if (!intervalo) {
       return;
@@ -982,9 +983,7 @@ export class MapaTrackingService {
 
     clearInterval(intervalo);
 
-    delete this.animationIntervals[
-      usuarioId
-    ];
+    delete this.animationIntervals[usuarioId];
   }
 
   // =====================================================
