@@ -8,6 +8,7 @@ import { JwtHelperService } from '@auth0/angular-jwt';
 // Services
 import { SocketService } from '../socket.service';
 import { MapaTrackingService } from '../mapa-tracking/mapa-tracking.service';
+import { AlertasStoreService } from '../alertas/alerta-store.service';
 
 // Environment
 import { environment } from '@environments/environment';
@@ -56,8 +57,8 @@ export class AuthService {
   constructor(
     private readonly http: HttpClient,
     private readonly socketService: SocketService,
-    private readonly mapaTrackingService:
-      MapaTrackingService,
+    private readonly mapaTrackingService: MapaTrackingService,
+    private readonly alertasStoreService: AlertasStoreService,
   ) {
     this.restoreSession();
   }
@@ -244,6 +245,9 @@ export class AuthService {
   // CERRAR SESIÓN LOCAL
   // =========================================================
   private closeLocalSession(): void {
+
+     this.alertasStoreService.cerrarSesion();
+
     this.socketService.disconnect();
 
     this.mapaTrackingService.limpiarTodo();

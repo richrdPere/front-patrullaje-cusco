@@ -1,10 +1,15 @@
 import { Component } from '@angular/core';
 import { NavbarMenuOptionsComponent } from "./navbar-menu-options/navbar-menu-options.component";
 import { NavbarMenuProfileComponent } from "./navbar-menu-profile/navbar-menu-profile.component";
+import { NavbarAlertasComponent } from './navbar-alertas/navbar-alertas.component';
 
 @Component({
   selector: 'navbar-menu-admin',
-  imports: [NavbarMenuOptionsComponent, NavbarMenuProfileComponent],
+  imports: [
+    NavbarMenuOptionsComponent,
+    NavbarMenuProfileComponent,
+    NavbarAlertasComponent
+  ],
   templateUrl: './navbar-menu.component.html',
   styles: ``
 })

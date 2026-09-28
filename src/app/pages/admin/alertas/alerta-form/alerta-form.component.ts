@@ -8,7 +8,7 @@ import Swal from 'sweetalert2';
 import { UppercaseDirective } from 'src/app/pages/shared/directives/uppercase.directive';
 
 // Services
-import { AlertaService } from 'src/app/services/alerta.service';
+import { AlertaService } from 'src/app/services/alertas/alerta.service';
 import { UsuarioService } from 'src/app/services/usuarios/usuarios.service';
 
 // Interfaces

@@ -5,7 +5,7 @@ import { finalize } from 'rxjs';
 import Swal from 'sweetalert2';
 
 // Service
-import { AlertaService } from 'src/app/services/alerta.service';
+import { AlertaService } from 'src/app/services/alertas/alerta.service';
 
 // Interfaces
 import {

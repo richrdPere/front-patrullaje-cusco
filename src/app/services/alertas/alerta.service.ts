@@ -6,8 +6,8 @@ import { Observable } from 'rxjs';
 import { environment } from '@environments/environment';
 
 // Interface
-import { Alerta, AlertaDestinatario, AlertaDestinatariosDetalle, ApiResponse, CrearAlertaRequest } from '../interfaces/alertas.interface';
-import { PaginadoResponse } from '../pages/shared/interfaces/paginado-response';
+import { Alerta, AlertaDestinatario, AlertaDestinatariosDetalle, ApiResponse, CrearAlertaRequest } from '../../interfaces/alertas.interface';
+import { PaginadoResponse } from '../../pages/shared/interfaces/paginado-response';
 
 
 @Injectable({

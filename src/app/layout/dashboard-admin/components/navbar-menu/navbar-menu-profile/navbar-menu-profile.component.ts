@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 // IziToast
 import iziToast from 'izitoast';
@@ -23,6 +24,8 @@ export interface MenuOptions {
   styles: ``
 })
 export class NavbarMenuProfileComponent {
+
+  private readonly destroyRef = inject(DestroyRef);
 
   // variables
   public name: string = '';
@@ -52,12 +55,16 @@ export class NavbarMenuProfileComponent {
   constructor(
     private authService: AuthService,
     private perfilService: PerfilService,
+
     private router: Router
   ) { }
 
 
   ngOnInit(): void {
     this.authService.currentUser$
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe((usuario) => {
         if (!usuario) {
           this.name = '';
@@ -76,8 +83,7 @@ export class NavbarMenuProfileComponent {
 
         this.email = usuario.correo;
 
-        this.avatar =
-          usuario.persona?.foto_perfil || null;
+        this.avatar = usuario.persona?.foto_perfil || null;
       });
   }
 

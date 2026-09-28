@@ -18,9 +18,8 @@ import { SidebarMenuComponent } from '../components/sidebar-menu/sidebar-menu.co
 import { NavbarMenuComponent } from '../components/navbar-menu/navbar-menu.component';
 
 // Services
-import {
-  AuthService,
-} from 'src/app/services/auth/auth.service';
+import { AuthService } from 'src/app/services/auth/auth.service';
+import { AlertasStoreService } from 'src/app/services/alertas/alerta-store.service';
 
 @Component({
   selector: 'app-dash-admin',
@@ -43,9 +42,11 @@ export class DashAdminComponent implements OnInit {
 
   constructor(
     private readonly authService: AuthService,
+    private readonly alertasStoreService: AlertasStoreService,
   ) { }
 
   ngOnInit(): void {
+    this.alertasStoreService.iniciar();
     this.listenCurrentUser();
   }
 

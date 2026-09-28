@@ -112,18 +112,22 @@ export class SocketService {
     payload?: any,
     callback?: SocketHandler
   ): void {
-    if (!this.socket) {
+    const socket = this.socket;
+
+    if (!socket?.connected) {
       console.warn(
-        `⚠️ No se emitió ${event}: socket no inicializado.`
+        `⚠️ No se emitió ${event}: Socket.IO no está conectado.`
       );
+
       return;
     }
 
     if (callback) {
-      this.socket.emit(event, payload, callback);
-    } else {
-      this.socket.emit(event, payload);
+      socket.emit(event, payload, callback);
+      return;
     }
+
+    socket.emit(event, payload);
   }
 
   on(
