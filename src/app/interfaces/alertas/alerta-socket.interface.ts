@@ -29,3 +29,13 @@ export interface NuevaAlertaSocketPayload {
   data: AlertaTiempoReal;
   timestamp: string;
 }
+
+
+export interface AlertaMapaPayload {
+  lat: number;
+  lng: number;
+  userId?: number;
+  usuarioId?: number;
+  titulo?: string;
+  descripcion?: string;
+}

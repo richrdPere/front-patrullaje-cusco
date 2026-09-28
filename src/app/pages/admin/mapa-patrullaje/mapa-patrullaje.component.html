@@ -46,7 +46,10 @@
   <!-- ========================= -->
   <!-- PANEL TRACKING -->
   <!-- ========================= -->
-  <div
+  <mapa-patrullaje-toolbar [mapaCargado]="mapaCargado" [socketConectado]="socketConectado"
+    [trackingActivo]="trackingActivo" [cantidadSerenos]="cantidadSerenos">
+  </mapa-patrullaje-toolbar>
+  <!-- <div
     class="absolute top-4 left-4 z-40 bg-base-100/90 backdrop-blur-md rounded-xl shadow-xl border border-base-200 p-3 min-w-55">
 
     <div class="flex items-center justify-between mb-2 gap-3">
@@ -86,19 +89,13 @@
 
     </div>
 
-  </div>
+  </div> -->
 
   <!-- ========================= -->
   <!-- BOTÓN ZONAS (OVERLAY) -->
   <!-- ========================= -->
+
   <!-- @if (!panelVisible) {
-  <button (click)="mostrarPanel()"
-    class="btn btn-primary btn-sm absolute top-4 right-8 z-30 flex items-center gap-1 shadow-lg">
-    <i class="fa-solid fa-map-location-dot"></i>
-    <span>Zonas</span>
-  </button>
-  } -->
-  @if (!panelVisible) {
   <button type="button" class="btn btn-primary btn-square
              absolute right-3 top-3 z-40
              shadow-lg shadow-primary/20
@@ -117,12 +114,14 @@
       Zonas
     </span>
   </button>
-  }
+  } -->
 
   <!-- ========================= -->
   <!-- PANEL ZONAS (FLOAT) -->
   <!-- ========================= -->
-  @if (panelVisible) {
+  <mapa-zonas-panel [zonas]="zonas" [zonasVisibles]="zonasVisibles" (zonaCambiada)="toggleZona($event)">
+  </mapa-zonas-panel>
+  <!-- @if (panelVisible) {
   <section #zonaPanel class="absolute bottom-3 left-3 right-3
              z-40 max-h-[55dvh]
              overflow-hidden rounded-2xl
@@ -131,13 +130,13 @@
              backdrop-blur-md
              sm:bottom-auto sm:left-auto
              sm:right-4 sm:top-4 sm:w-80" aria-labelledby="zonas-panel-title">
-    <!-- Indicador móvil -->
+
     <div class="flex justify-center pb-1 pt-2 sm:hidden" aria-hidden="true">
       <span class="h-1 w-10 rounded-full
                  bg-base-content/15"></span>
     </div>
 
-    <!-- Header -->
+
     <header class="flex items-center justify-between
                gap-3 border-b border-base-300
                px-4 py-3">
@@ -161,7 +160,7 @@
       </button>
     </header>
 
-    <!-- Lista con scroll independiente -->
+
     <div class="max-h-[calc(55dvh-5.5rem)]
                overflow-y-auto overscroll-contain
                p-3 sm:max-h-[50dvh]">
@@ -208,13 +207,15 @@
       }
     </div>
   </section>
-  }
+  } -->
 
   <!-- ===================================================== -->
   <!-- LEYENDA INFERIOR -->
   <!-- ===================================================== -->
-
-  <div class="pointer-events-none absolute
+  <mapa-tracking-resumen [mapaCargado]="mapaCargado" [socketConectado]="socketConectado"
+    [trackingActivo]="trackingActivo" [cantidadSerenos]="cantidadSerenos">
+  </mapa-tracking-resumen>
+  <!-- <div class="pointer-events-none absolute
            bottom-3 left-3 z-20
            hidden rounded-lg border
            border-base-300/80
@@ -224,7 +225,7 @@
     <p class="text-[11px] text-base-content/55">
       Monitoreo operativo · Actualización en tiempo real
     </p>
-  </div>
+  </div> -->
 
 
 </section>

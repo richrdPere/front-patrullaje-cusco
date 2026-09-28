@@ -33,6 +33,13 @@ export const adminRoutes: Routes = [
         data: { roles: ['ADMIN', 'OPERADOR', 'GERENTE_SERENAZGO', 'SUPERVISOR_SERENAZGO'] }
       },
 
+      // Alerta operativas
+      {
+        path: 'alertas-operativas',
+        loadComponent: () => import('../../pages/admin/alertas-operativas/alertas-operativas.component').then(m => m.AlertasOperativasComponent),
+        data: { roles: ['ADMIN', 'OPERADOR', 'GERENTE_SERENAZGO', 'SUPERVISOR_SERENAZGO'] }
+      },
+
       // Rutas
       {
         path: 'ruta-patrullaje',

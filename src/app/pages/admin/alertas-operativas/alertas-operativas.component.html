@@ -1,0 +1,591 @@
+<div
+  class="min-h-full min-w-0 bg-base-300 px-4 py-5 text-base-content transition-colors duration-300 sm:px-6 sm:py-6 lg:px-8">
+
+  <!-- CONTENEDOR DEL DASHBOARD -->
+  <div class="mx-auto w-full max-w-500">
+
+    <!-- ================================================= -->
+    <!-- ENCABEZADO -->
+    <!-- ================================================= -->
+    <header class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+      <!-- ÍCONO + INFORMACIÓN -->
+      <div class="flex min-w-0 items-center gap-3">
+        <div
+          class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary sm:h-12 sm:w-12">
+          <i class="fa-solid fa-users text-xl sm:text-2xl"> </i>
+        </div>
+
+        <div class="min-w-0">
+          <h1 class="truncate text-xl font-bold leading-tight text-base-content sm:text-2xl">
+
+            Alertas Operativa
+          </h1>
+
+          <p class="mt-1 text-sm leading-relaxed
+                   text-base-content/60">
+            Actue coordinadamente con las alertas emitidas por el personal de Serenazgo.
+          </p>
+        </div>
+      </div>
+    </header>
+
+
+    <!-- ================================================= -->
+    <!-- FILTROS -->
+    <!-- ================================================= -->
+    <section class="mb-6 overflow-hidden rounded-2xl
+         border border-base-300
+         bg-base-100 shadow-sm">
+
+      <div class="grid grid-cols-1
+           lg:grid-cols-[minmax(0,1fr)_170px]">
+
+        <!-- =============================================== -->
+        <!-- CAMPOS DE FILTRO -->
+        <!-- =============================================== -->
+        <div class="p-4 sm:p-5">
+
+          <div class="grid grid-cols-1 gap-4
+               sm:grid-cols-2
+               xl:grid-cols-[minmax(240px,1.4fr)_minmax(180px,1fr)_minmax(190px,1fr)_auto]">
+
+            <!-- Buscar por nombre -->
+            <label class="form-control w-full">
+              <span class="mb-1.5 text-xs font-semibold
+                   uppercase tracking-wide
+                   text-base-content/60">
+
+                Descripción
+              </span>
+
+              <div class="relative">
+                <i class="fa-solid fa-magnifying-glass
+                     pointer-events-none absolute
+                     left-3.5 top-1/2
+                     -translate-y-1/2
+                     text-base-content/35">
+                </i>
+
+                <input type="text" class="input input-bordered
+                     h-11 w-full rounded-xl
+                     bg-base-100 pl-10 pr-4
+                     focus:outline-none
+                     focus:ring-2
+                     focus:ring-primary/30" placeholder="Buscar descripción" autocomplete="off"
+                  [(ngModel)]="searchBusqueda" (ngModelChange)="onSearchChange()" appUppercase />
+              </div>
+            </label>
+
+            <!-- Filtrar por tipo -->
+            <label class="form-control w-full">
+              <span class="mb-1.5 text-xs font-semibold
+                   uppercase tracking-wide
+                   text-base-content/60">
+
+                Tipo
+              </span>
+
+              <select id="filtro-tipo" class="select select-bordered
+                   h-11 min-h-11 w-full
+                   rounded-xl bg-base-100
+                   focus:outline-none
+                   focus:ring-2
+                   focus:ring-primary/30" [(ngModel)]="filtros.tipo" (ngModelChange)="onSearchChange()">
+                <option value="">
+                  Todos los tipos
+                </option>
+
+                @for (tipo of tipos; track tipo) {
+                <option [value]="tipo">
+                  {{ formatearTextoEnum(tipo) }}
+                </option>
+                }
+              </select>
+            </label>
+
+            <!-- Filtrar por prioridades -->
+            <label class="form-control w-full">
+              <span class="mb-1.5 text-xs font-semibold
+                   uppercase tracking-wide
+                   text-base-content/60">
+
+                Prioridades
+              </span>
+
+              <select id="filtro-tipo" class="select select-bordered
+                   h-11 min-h-11 w-full
+                   rounded-xl bg-base-100
+                   focus:outline-none
+                   focus:ring-2
+                   focus:ring-primary/30" [(ngModel)]="filtros.prioridad" (ngModelChange)="onSearchChange()">
+                <option value="">
+                  Todos las prioridades
+                </option>
+
+                @for (prioridad of prioridades; track prioridad) {
+                <option [value]="prioridad">
+                  {{ formatearTextoEnum(prioridad) }}
+                </option>
+                }
+              </select>
+            </label>
+
+            <!-- Filtrar por estados -->
+            <label class="form-control w-full">
+              <span class="mb-1.5 text-xs font-semibold
+                   uppercase tracking-wide
+                   text-base-content/60">
+
+                Estados
+              </span>
+
+              <select id="filtro-tipo" class="select select-bordered
+                   h-11 min-h-11 w-full
+                   rounded-xl bg-base-100
+                   focus:outline-none
+                   focus:ring-2
+                   focus:ring-primary/30" [(ngModel)]="filtros.estado" (ngModelChange)="onSearchChange()">
+                <option value="">
+                  Todos los estados
+                </option>
+
+                @for (estado of estados; track estado) {
+                <option [value]="estado">
+                  {{ formatearTextoEnum(estado) }}
+                </option>
+                }
+              </select>
+            </label>
+
+            <!-- Limpiar filtros -->
+            <div class="flex items-end
+                 sm:col-span-2
+                 xl:col-span-1">
+
+              <button type="button" class="btn btn-outline
+                   h-11 min-h-11 w-full
+                   gap-2 rounded-xl
+                   xl:w-auto xl:min-w-28" [disabled]="
+              !searchBusqueda &&
+              !estadoBusqueda &&
+              !prioridadBusqueda &&
+              !tipoBusqueda
+            " (click)="limpiarFiltros()">
+
+                <i class="fa-solid fa-eraser"></i>
+                <!-- <i class="fa-solid fa-filter-circle-xmark"></i> -->
+
+                Limpiar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- =============================================== -->
+        <!-- ILUSTRACIÓN DE BÚSQUEDA -->
+        <!-- =============================================== -->
+        <div class="hidden items-center justify-center border-base-300 px-5 lg:flex">
+
+          <img src="assets/img/search.png" alt="" aria-hidden="true" class="h-32 w-32
+               select-none object-contain
+               opacity-90
+               drop-shadow-sm" draggable="false" />
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================= -->
+    <!-- MODALES -->
+    <!-- ================================================= -->
+
+
+
+    <!-- ================================================= -->
+    <!-- TABLA DE ALERTAS OPERATIVAS -->
+    <!-- ================================================= -->
+    <section class="overflow-hidden rounded-2xl border
+         border-base-300 bg-base-100 shadow-sm">
+
+      <!-- Cabecera de tabla -->
+      <div class="flex flex-col gap-4
+         border-b border-base-300
+         px-4 py-4
+         sm:flex-row
+         sm:items-center
+         sm:justify-between
+         sm:px-5">
+
+        <!-- Selector de cantidad -->
+        <div class="flex w-full items-center
+           justify-between gap-3
+           text-sm text-base-content/70
+           sm:w-auto sm:justify-start">
+
+          <label for="alertas-page-size" class="whitespace-nowrap">
+            Mostrar
+          </label>
+
+          <select id="alertas-page-size" class="select select-bordered select-sm w-auto" [(ngModel)]="limit"
+            (change)="cambiarLimite()">
+
+            <option *ngFor="let size of pageSizeOptions" [ngValue]="size">
+              {{ size }}
+            </option>
+          </select>
+
+          <span class="whitespace-nowrap">
+            items por página
+          </span>
+        </div>
+
+        <!-- Botones -->
+        <!-- <div class="flex w-full items-center justify-end sm:w-auto">
+
+          <button type="button" class="btn btn-primary
+             min-h-10 w-full gap-2
+             rounded-xl border-none
+            hover:text-white bg-info hover:bg-primary
+             sm:w-auto sm:min-w-36" (click)="abrirModal()">
+
+            <i class="fa-solid fa-plus mr-1"></i>
+
+            Usuario
+          </button>
+        </div> -->
+
+        <div class="flex w-full items-center justify-end sm:w-auto">
+          <button type="button" class="btn btn-info min-h-10 w-full gap-2 rounded-xl
+               border-none text-info-content hover:bg-primary
+               hover:text-primary-content sm:w-auto" [disabled]="isLoading" (click)="getAlertasOperativosPaginados()">
+
+            <i class="fa-solid fa-rotate-right"></i>
+            Actualizar
+          </button>
+        </div>
+      </div>
+
+            <!-- Contenedor de scroll exclusivo para tabla -->
+      <div class="w-full overflow-x-auto">
+        <table class="table min-w-310 w-full">
+
+          <thead class="bg-base-200/80">
+            <tr class="text-xs uppercase tracking-wide
+                 text-base-content/60">
+
+              <th class="w-16 text-center">N.°</th>
+              <th>Alerta</th>
+              <th>Emisor</th>
+              <th>Zona / Patrullaje</th>
+              <th class="text-center">Prioridad</th>
+              <th class="text-center">Estado</th>
+              <th>Fecha de emisión</th>
+              <th class="text-center">Destinatarios</th>
+              <th class="text-center">Acciones</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <!-- Carga -->
+            @if (isLoading) {
+            <tr>
+              <td colspan="9" class="py-14 text-center">
+                <div class="flex flex-col items-center
+                       justify-center gap-3">
+
+                  <span class="loading loading-spinner loading-md
+                         text-primary">
+                  </span>
+
+                  <span class="text-sm text-base-content/60">
+                    Cargando alertas operativas...
+                  </span>
+                </div>
+              </td>
+            </tr>
+            }
+
+            <!-- ALERTAS  -->
+            @if (!isLoading) {
+            @for (alerta of alertas; track alerta.id; let i = $index) {
+            <tr class="border-base-200 transition-colors
+                     hover:bg-base-200/50">
+
+              <!-- N.° -->
+              <td class="text-center text-base-content/60">
+                {{ ((page - 1) * limit) + i + 1 }}
+              </td>
+
+              <!-- Alerta -->
+              <td>
+                <div class="min-w-45 max-w-70">
+                  <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-triangle-exclamation
+                             text-error" aria-hidden="true">
+                    </i>
+
+                    <p class="truncate font-semibold text-base-content" [title]="alerta.titulo">
+                      {{ alerta.titulo }}
+                    </p>
+                  </div>
+
+                  <p class="mt-1 line-clamp-2 text-xs
+                           text-base-content/55" [title]="alerta.descripcion">
+                    {{ alerta.descripcion }}
+                  </p>
+
+                  <span class="mt-2 inline-flex rounded-md
+                           bg-base-200 px-2 py-0.5
+                           text-[11px] font-semibold
+                           text-base-content/65">
+                    {{ formatearTextoEnum(alerta.tipo) }}
+                  </span>
+                </div>
+              </td>
+
+              <!-- Emisor -->
+              <td>
+                <div class="min-w-40">
+                  <p class="font-medium text-base-content">
+                    {{
+                    alerta.emisor?.persona
+                    ? alerta.emisor?.persona?.nombres +
+                    ' ' +
+                    alerta.emisor?.persona?.apellidos
+                    : 'Usuario no disponible'
+                    }}
+                  </p>
+
+                  <p class="mt-0.5 text-xs text-base-content/50">
+                    &#64;{{ alerta.emisor?.username || 'Sin usuario' }}
+                  </p>
+
+                  <p class="mt-0.5 max-w-52 truncate text-xs
+                           text-base-content/45" [title]="alerta.emisor?.correo || ''">
+                    {{ alerta.emisor?.correo || 'Sin correo' }}
+                  </p>
+                </div>
+              </td>
+
+              <!-- Zona y patrullaje -->
+              <td>
+                <div class="min-w-40">
+                  <p class="font-medium text-base-content">
+                    {{ alerta.zona?.nombre || 'Sin zona asignada' }}
+                  </p>
+
+                  @if (alerta.zona?.riesgo) {
+                  <p class="mt-0.5 text-xs font-medium
+                             text-base-content/55">
+                    Riesgo:
+                    {{ formatearTextoEnum(alerta?.zona?.riesgo) }}
+                  </p>
+                  }
+
+                  @if (alerta.patrullaje) {
+                  <p class="mt-1 text-xs text-base-content/50">
+                    Patrullaje #{{ alerta.patrullaje.id }}
+                    · {{ alerta.patrullaje.fecha | date: 'dd/MM/yyyy' }}
+                  </p>
+                  } @else {
+                  <p class="mt-1 text-xs text-base-content/40">
+                    Sin patrullaje relacionado
+                  </p>
+                  }
+                </div>
+              </td>
+
+              <!-- Prioridad -->
+              <td class="text-center">
+                <span class="badge badge-sm whitespace-nowrap font-semibold"
+                  [class.badge-success]="alerta.prioridad === 'BAJA'" [class.badge-info]="alerta.prioridad === 'MEDIA'"
+                  [class.badge-warning]="alerta.prioridad === 'ALTA'"
+                  [class.badge-error]="alerta.prioridad === 'CRITICA'">
+
+                  {{ formatearTextoEnum(alerta.prioridad) }}
+                </span>
+              </td>
+
+              <!-- Estado -->
+              <td class="text-center">
+                <span class="badge badge-sm whitespace-nowrap font-semibold"
+                  [class.badge-warning]="alerta.estado === 'PENDIENTE'"
+                  [class.badge-info]="alerta.estado === 'EN_ATENCION'"
+                  [class.badge-success]="alerta.estado === 'ATENDIDA'"
+                  [class.badge-error]="alerta.estado === 'CANCELADA'"
+                  [class.badge-ghost]="alerta.estado === 'EXPIRADA'">
+
+                  {{ formatearTextoEnum(alerta.estado) }}
+                </span>
+              </td>
+
+              <!-- Fecha -->
+              <td class="whitespace-nowrap text-sm">
+                <p class="font-medium text-base-content">
+                  {{ alerta.createdAt | date: 'dd/MM/yyyy' }}
+                </p>
+
+                <p class="mt-0.5 text-xs text-base-content/50">
+                  {{ alerta.createdAt | date: 'hh:mm a' }}
+                </p>
+              </td>
+
+              <!-- Destinatarios -->
+              <td class="text-center">
+                <div class="inline-flex flex-col items-center">
+                  <span class="font-semibold text-base-content">
+                    {{ alerta.resumen_destinatarios.total }}
+                  </span>
+
+                  @if (alerta.resumen_destinatarios.atendidas > 0) {
+                  <span class="text-xs text-success">
+                    {{ alerta.resumen_destinatarios.atendidas }}
+                    atendida(s)
+                  </span>
+                  } @else if (
+                  alerta.resumen_destinatarios.leidas > 0
+                  ) {
+                  <span class="text-xs text-info">
+                    {{ alerta.resumen_destinatarios.leidas }}
+                    leída(s)
+                  </span>
+                  } @else if (
+                  alerta.resumen_destinatarios.pendientes > 0
+                  ) {
+                  <span class="text-xs text-warning">
+                    Pendiente(s)
+                  </span>
+                  } @else {
+                  <span class="text-xs text-base-content/45">
+                    Sin asignar
+                  </span>
+                  }
+                </div>
+              </td>
+
+              <!-- Acciones -->
+              <td>
+                <div class="flex items-center justify-center gap-1">
+                  <div class="tooltip tooltip-left" data-tip="Ver detalle de alerta">
+
+                    <button type="button" class="btn btn-ghost btn-circle btn-sm" (click)="verAlerta(alerta)"
+                      [attr.aria-label]="'Ver alerta ' + alerta.id">
+
+                      <i class="fa-solid fa-eye"></i>
+                    </button>
+                  </div>
+
+                  @if (
+                  alerta.latitud !== null &&
+                  alerta.longitud !== null
+                  ) {
+                  <div class="tooltip tooltip-left" data-tip="Ubicación disponible">
+
+                    <span class="btn btn-ghost btn-circle btn-sm
+                               pointer-events-none text-info">
+
+                      <i class="fa-solid fa-location-dot"></i>
+                    </span>
+                  </div>
+                  }
+                </div>
+              </td>
+            </tr>
+            }
+
+            <!-- Vacío -->
+            @if (alertas.length === 0) {
+            <tr>
+              <td colspan="9" class="py-12 text-center">
+                <div class="mx-auto flex max-w-md flex-col
+                         items-center">
+
+                  <i class="fa-solid fa-bell-slash mb-4
+                           text-5xl text-base-content/20" aria-hidden="true">
+                  </i>
+
+                  <h3 class="text-base font-semibold text-base-content">
+                    No se encontraron alertas operativas
+                  </h3>
+
+                  <p class="mt-1 text-sm text-base-content/55">
+                    No existen alertas que coincidan con los filtros
+                    seleccionados.
+                  </p>
+
+                  @if (
+                  searchBusqueda ||
+                  estadoBusqueda ||
+                  prioridadBusqueda ||
+                  tipoBusqueda
+                  ) {
+                  <button type="button" class="btn btn-ghost btn-sm mt-4" (click)="limpiarFiltros()">
+
+                    Limpiar filtros
+                  </button>
+                  }
+                </div>
+              </td>
+            </tr>
+            }
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ================================================= -->
+      <!-- PAGINACIÓN -->
+      <!-- ================================================= -->
+      <footer class="flex flex-col gap-4 border-t border-base-300
+           bg-base-200/50 px-4 py-4 sm:flex-row
+           sm:items-center sm:justify-between sm:px-5">
+
+        <div class="text-center sm:text-left">
+          <h2 class="font-semibold text-base-content">
+            Alertas operativas
+          </h2>
+
+          <p class="mt-0.5 text-sm text-base-content/55">
+            {{ totalItems }}
+            {{ totalItems === 1 ? 'alerta encontrada' : 'alertas encontradas' }}
+          </p>
+        </div>
+
+        <div class="flex w-full flex-col items-center gap-3
+             text-sm text-base-content/70
+             sm:w-auto sm:flex-row">
+
+          <span class="whitespace-nowrap">
+            @if (totalPages > 0) {
+            Página
+            <strong class="text-base-content">{{ page }}</strong>
+            de
+            <strong class="text-base-content">{{ totalPages }}</strong>
+            } @else {
+            Sin páginas disponibles
+            }
+          </span>
+
+          <div class="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
+            <button type="button" class="btn btn-sm w-full gap-2 rounded-lg sm:w-auto"
+              [disabled]="isLoading || page <= 1" (click)="cambiarPagina(page - 1)">
+
+              <i class="fa-solid fa-chevron-left"></i>
+              Anterior
+            </button>
+
+            <button type="button" class="btn btn-sm w-full gap-2 rounded-lg sm:w-auto" [disabled]="
+            isLoading ||
+            totalPages === 0 ||
+            page >= totalPages
+          " (click)="cambiarPagina(page + 1)">
+
+              Siguiente
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </footer>
+    </section>
+  </div>
+</div>

@@ -32,7 +32,7 @@ import { AlertaFormComponent } from './alerta-form/alerta-form.component';
 export class AlertasComponent implements OnInit {
 
   // ESTADOS DE CARGA
-  cargandoAlertas = false;
+  isLoading = false;
   cargandoDestinatarios = false;
 
   cancelandoAlertaId: number | null = null;
@@ -59,6 +59,8 @@ export class AlertasComponent implements OnInit {
 
   totalRegistros = 0;
   totalPaginas = 0;
+
+  pageSizeOptions = [5, 10, 20, 50];
 
   // FILTROS
   filtros = {
@@ -132,11 +134,11 @@ export class AlertasComponent implements OnInit {
   // OBTENER ALERTAS EMITIDAS
   // ============================================================
   loadAlertasEmitidas(): void {
-    if (this.cargandoAlertas) {
+    if (this.isLoading) {
       return;
     }
 
-    this.cargandoAlertas = true;
+    this.isLoading = true;
 
     this.alertaService
       .getAlertasEmitidas({
@@ -148,7 +150,7 @@ export class AlertasComponent implements OnInit {
       })
       .pipe(
         finalize(() => {
-          this.cargandoAlertas = false;
+          this.isLoading = false;
         }),
       )
       .subscribe({
@@ -228,7 +230,7 @@ export class AlertasComponent implements OnInit {
   // ============================================================
   paginaAnterior(): void {
     if (
-      this.cargandoAlertas ||
+      this.isLoading ||
       this.paginaActual <= 1
     ) {
       return;
@@ -238,7 +240,7 @@ export class AlertasComponent implements OnInit {
     this.loadAlertasEmitidas();
   }
   paginaSiguiente(): void {
-    if (this.cargandoAlertas) {
+    if (this.isLoading) {
       return;
     }
 
@@ -255,7 +257,7 @@ export class AlertasComponent implements OnInit {
 
   cambiarPagina(pagina: number): void {
     if (
-      this.cargandoAlertas ||
+      this.isLoading ||
       pagina < 1 ||
       pagina === this.paginaActual
     ) {
@@ -273,21 +275,27 @@ export class AlertasComponent implements OnInit {
     this.loadAlertasEmitidas();
   }
 
-  cambiarLimite(nuevoLimite: number | string): void {
-    const limiteConvertido = Number(nuevoLimite);
-
-    if (
-      !Number.isFinite(limiteConvertido) ||
-      limiteConvertido <= 0
-    ) {
-      return;
-    }
-
-    this.limite = limiteConvertido;
+  cambiarLimite() {
+    this.limite = Number(this.limite);
     this.paginaActual = 1;
-
     this.loadAlertasEmitidas();
   }
+
+  // cambiarLimite(nuevoLimite: number | string): void {
+  //   const limiteConvertido = Number(nuevoLimite);
+
+  //   if (
+  //     !Number.isFinite(limiteConvertido) ||
+  //     limiteConvertido <= 0
+  //   ) {
+  //     return;
+  //   }
+
+  //   this.limite = limiteConvertido;
+  //   this.paginaActual = 1;
+
+  //   this.loadAlertasEmitidas();
+  // }
 
   get paginasVisibles(): number[] {
     if (this.totalPaginas <= 0) {
@@ -390,7 +398,7 @@ export class AlertasComponent implements OnInit {
 
           this.paginationDestinatarios = data?.pagination ?? null;
 
-          console.log('DATA DESTINATARIOS:', data,          );
+          console.log('DATA DESTINATARIOS:', data,);
         },
 
         error: (error) => {

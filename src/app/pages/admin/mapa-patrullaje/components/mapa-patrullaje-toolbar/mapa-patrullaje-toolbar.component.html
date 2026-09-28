@@ -1,0 +1,101 @@
+<section class="absolute left-3 top-3 z-40 w-[min(17rem,calc(100vw-1.5rem))]
+         rounded-2xl border border-base-300/80 bg-base-100/92
+         p-3 shadow-xl backdrop-blur-md
+         sm:left-4 sm:top-4" aria-label="Estado del monitoreo operativo" aria-live="polite">
+
+  <!-- Cabecera -->
+  <div class="flex items-start justify-between gap-3">
+    <div class="min-w-0">
+      <div class="flex items-center gap-2">
+        <span class="flex size-7 items-center justify-center rounded-lg
+                 bg-primary/12 text-primary">
+
+          <i class="fa-solid fa-satellite-dish text-sm" aria-hidden="true">
+          </i>
+        </span>
+
+        <div class="min-w-0">
+          <h2 class="truncate text-sm font-bold text-base-content">
+            Tracking en tiempo real
+          </h2>
+
+          <p class="mt-0.5 text-[11px] text-base-content/55">
+            Monitoreo de patrullaje
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <span class="badge badge-sm shrink-0 border-0 font-semibold" [class.badge-success]="
+        mapaCargado &&
+        socketConectado &&
+        trackingActivo
+      " [class.badge-error]="
+        mapaCargado &&
+        !socketConectado
+      " [class.badge-warning]="!mapaCargado" [class.badge-ghost]="
+        mapaCargado &&
+        socketConectado &&
+        !trackingActivo
+      ">
+      {{ estadoTracking }}
+    </span>
+  </div>
+
+  <!-- Datos -->
+  <div class="mt-3 space-y-2 border-t border-base-300/80 pt-3
+           text-xs">
+
+    <div class="flex items-center justify-between gap-3">
+      <span class="flex items-center gap-2 text-base-content/65">
+        <i class="fa-solid fa-user-shield w-4 text-center
+                 text-primary/80" aria-hidden="true">
+        </i>
+
+        Serenos visibles
+      </span>
+
+      <span class="rounded-md bg-base-200 px-2 py-0.5
+               font-bold tabular-nums text-base-content">
+        {{ cantidadSerenos }}
+      </span>
+    </div>
+
+    <div class="flex items-center justify-between gap-3">
+      <span class="flex items-center gap-2 text-base-content/65">
+        <i [class]="iconoConexion" class="w-4 text-center" [class.text-success]="socketConectado"
+          [class.text-error]="!socketConectado" aria-hidden="true">
+        </i>
+
+        Central
+      </span>
+
+      <span class="flex items-center gap-1.5 font-medium" [class.text-success]="socketConectado"
+        [class.text-error]="!socketConectado">
+
+        <span class="size-1.5 rounded-full" [ngClass]="claseEstadoTracking">
+        </span>
+
+        {{ textoConexion }}
+      </span>
+    </div>
+
+    <!-- <div class="flex items-center justify-between gap-3">
+      <span class="flex items-center gap-2 text-base-content/65">
+        <i class="fa-solid fa-map-location-dot w-4 text-center
+                 text-info" aria-hidden="true">
+        </i>
+
+        Mapa operativo
+      </span>
+
+      <span class="font-medium" [ngClass]="
+        mapaCargado
+          ? 'text-success'
+          : 'text-base-content/45'
+      ">
+        {{ mapaCargado ? 'Disponible' : 'Preparando' }}
+      </span>
+    </div> -->
+  </div>
+</section>

@@ -54,7 +54,6 @@
                xl:grid-cols-[minmax(240px,1.4fr)_minmax(180px,1fr)_minmax(190px,1fr)_auto]">
 
             <!-- Buscar por nombre -->
-
             <label class="form-control w-full">
               <span class="mb-1.5 text-xs font-semibold
                    uppercase tracking-wide
@@ -82,7 +81,6 @@
             </label>
 
             <!-- Buscar por DNI -->
-
             <label class="form-control w-full">
               <span class="mb-1.5 text-xs font-semibold
                    uppercase tracking-wide
@@ -110,7 +108,6 @@
             </label>
 
             <!-- Filtrar por rol -->
-
             <label class="form-control w-full">
               <span class="mb-1.5 text-xs font-semibold
                    uppercase tracking-wide
@@ -157,7 +154,6 @@
             </label>
 
             <!-- Limpiar filtros -->
-
             <div class="flex items-end
                  sm:col-span-2
                  xl:col-span-1">
@@ -171,9 +167,8 @@
               !rolesBusqueda
             " (click)="limpiarFiltros()">
 
-                <i class="fa-solid
-                     fa-filter-circle-xmark">
-                </i>
+                <i class="fa-solid fa-eraser"></i>
+                <!-- <i class="fa-solid fa-filter-circle-xmark"></i> -->
 
                 Limpiar
               </button>
@@ -426,7 +421,6 @@
             }
 
             <!-- Estado vacío -->
-
             @if (usuarios.length === 0) {
             <tr>
               <td colspan="9" class="py-12 text-center">

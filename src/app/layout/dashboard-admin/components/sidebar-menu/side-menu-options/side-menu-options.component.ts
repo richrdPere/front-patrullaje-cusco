@@ -85,6 +85,17 @@ export class SideMenuOptionsComponent implements OnInit {
             'OPERADOR',
           ],
         },
+        {
+          icon: 'assets/icons/sidebar/alerta.svg',
+          name: 'Alertas Operativas',
+          path: '/admin/alertas-operativas',
+          roles: [
+            'ADMIN',
+            'GERENTE_SERENAZGO',
+            'SUPERVISOR_SERENAZGO',
+            'OPERADOR',
+          ],
+        },
       ],
     },
     {

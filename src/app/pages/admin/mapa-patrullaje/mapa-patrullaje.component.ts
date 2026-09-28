@@ -13,6 +13,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { Lugar } from 'src/app/interfaces/lugar';
 import { ZonaPatrullaje } from 'src/app/interfaces/zonaPatrullaje';
 import { TrackingPayload } from 'src/app/interfaces/tracking.interface';
+import { GetZonasSelectResponse, ZonaSelectItem } from 'src/app/interfaces/zona/get-zonas-select.model';
 
 // Services
 import { GoogleMapsLoaderService } from 'src/app/services/google-maps-loader.service';
@@ -21,20 +22,15 @@ import { TrackingService } from 'src/app/services/mapa-tracking/tracking.service
 import { MapaTrackingService } from 'src/app/services/mapa-tracking/mapa-tracking.service';
 import { TrackingStoreService } from 'src/app/services/mapa-tracking/tracking-store.service';
 import { SocketService } from 'src/app/services/socket.service';
-import { GetZonasSelectResponse, ZonaSelectItem } from 'src/app/interfaces/zona/get-zonas-select.model';
-
-interface AlertaMapaPayload {
-  lat: number;
-  lng: number;
-  userId?: number;
-  usuarioId?: number;
-  titulo?: string;
-  descripcion?: string;
-}
+import { AlertasStoreService } from 'src/app/services/alertas/alerta-store.service';
+import { AlertaTiempoReal } from 'src/app/interfaces/alertas/alerta-socket.interface';
+import { MapaPatrullajeToolbarComponent } from './components/mapa-patrullaje-toolbar/mapa-patrullaje-toolbar.component';
+import { MapaTrackingResumenComponent } from './components/mapa-tracking-resumen/mapa-tracking-resumen.component';
+import { MapaZonasPanelComponent } from './components/mapa-zonas-panel/mapa-zonas-panel.component';
 
 @Component({
   selector: 'mapa-patrullaje',
-  imports: [CommonModule],
+  imports: [CommonModule, MapaPatrullajeToolbarComponent, MapaTrackingResumenComponent, MapaZonasPanelComponent],
   templateUrl: './mapa-patrullaje.component.html',
   styles: `
   :host {
@@ -113,8 +109,6 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
   zonasVisibles: Record<number, boolean> = {};
   poligonos: Record<number, google.maps.Polygon> = {};
 
-
-
   // =====================================================
   // PANEL ARRASTRABLE
   // =====================================================
@@ -129,10 +123,11 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
   constructor(
     private readonly mapsLoader: GoogleMapsLoaderService,
     private readonly zonaService: ZonaService,
-    private readonly trackingService: TrackingService,
+    // private readonly trackingService: TrackingService,
     private readonly mapaTrackingService: MapaTrackingService,
     private readonly trackingStoreService: TrackingStoreService,
-    private readonly socketService: SocketService
+    private readonly socketService: SocketService,
+    private readonly alertasStoreService: AlertasStoreService,
   ) { }
 
   // =====================================================
@@ -170,10 +165,7 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
       // 7. Los listeners ya están registrados.
       this.socketService.connect();
 
-      // console.log("Cantidad de serenos activos:", this.cantidadSerenos);
-      // console.log(
-      //   '🗺️ Mapa de patrullaje cargado correctamente'
-      // );
+
     } catch (error) {
       if (this.destruido) return;
 
@@ -183,12 +175,7 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
         '❌ No se pudo inicializar el mapa:',
         error
       );
-      // this.mapaCargado = false;
 
-      // console.error(
-      //   '❌ No se pudo inicializar el mapa:',
-      //   error
-      // );
     }
   }
 
@@ -232,36 +219,6 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
     // El store conserva los datos para volver a entrar.
     // El socket global continúa disponible para otros módulos.
   }
-  // ngOnDestroy(): void {
-  //   // Finalizar observables
-  //   this.destroy$.next();
-  //   this.destroy$.complete();
-
-  //   // Detener movimiento del panel
-  //   this.isDragging = false;
-
-  //   // Limpiar marcadores temporales de alerta
-  //   this.alertMarkers.forEach(marker => {
-  //     marker.setMap(null);
-  //   });
-
-  //   this.alertMarkers = [];
-
-  //   // Limpiar timeouts pendientes
-  //   this.alertaTimeouts.forEach(timeout => {
-  //     clearTimeout(timeout);
-  //   });
-
-  //   this.alertaTimeouts.clear();
-
-  //   /*
-  //    * No se llama limpiarTodo() porque el servicio
-  //    * conserva los marcadores para reconstruirlos
-  //    * cuando el usuario regrese al componente.
-  //    *
-  //    * limpiarTodo() debe reservarse para logout.
-  //    */
-  // }
 
   // =====================================================
   // INICIALIZAR TRACKING
@@ -287,96 +244,32 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
         }
       });
 
-    this.trackingService.listenAlertas()
-      .pipe(takeUntil(this.destroy$))
+    this.alertasStoreService.nuevaAlerta$
+      .pipe(
+        takeUntil(this.destroy$)
+      )
       .subscribe({
-        next: data => {
-          this.mostrarAlerta(data as AlertaMapaPayload);
+        next: (alerta) => {
+          this.mostrarNuevaAlertaEnMapa(alerta);
         },
-        error: error => {
+        error: (error) => {
           console.error(
-            '❌ Error escuchando alertas:',
+            '❌ Error recibiendo alerta en el mapa:',
             error
           );
-        }
+        },
       });
   }
-  // private initTracking(): void {
-  //   this.trackingStoreService
-  //     .tracking$
-  //     .pipe(
-  //       takeUntil(this.destroy$)
-  //     )
-  //     .subscribe({
-  //       next: trackingMap => {
-  //         this.procesarTrackingMap(
-  //           trackingMap
-  //         );
-  //       },
-  //       error: error => {
-  //         console.error(
-  //           '❌ Error en tracking:',
-  //           error
-  //         );
-  //       }
-  //     });
-
-  //   this.trackingService.listenAlertas()
-  //     .pipe(
-  //       takeUntil(this.destroy$)
-  //     )
-  //     .subscribe({
-  //       next: data => {
-  //         this.mostrarAlerta(
-  //           data as AlertaMapaPayload
-  //         );
-  //       },
-  //       error: error => {
-  //         console.error(
-  //           '❌ Error en alertas:',
-  //           error
-  //         );
-  //       }
-  //     });
-
-  //   this.trackingService.unirseCentralTracking();
-
-
-  //   this.trackingService.listenSerenoOffline()
-  //     .subscribe(payload => {
-  //       this.mapaTrackingService.marcarSerenoOffline(
-  //         payload.usuarioId,
-  //         payload.realtime.timestamp,
-  //       );
-  //     });
-
-  //   this.trackingService
-  //     .listenSerenoOnline()
-  //     .pipe(
-  //       takeUntil(this.destroy$),
-  //     )
-  //     .subscribe({
-  //       next: payload => {
-
-  //         this.mapaTrackingService
-  //           .marcarSerenoOnline(
-  //             payload.usuarioId,
-  //             payload.realtime.timestamp,
-  //           );
-  //       },
-
-  //       error: error => {
-  //         console.error(
-  //           'Error escuchando reconexión del sereno:',
-  //           error,
-  //         );
-  //       },
-  //     });
-  // }
 
   // =====================================================
   // PROCESAR ESTADO DE TRACKING
   // =====================================================
+  private mostrarNuevaAlertaEnMapa(
+    alerta: AlertaTiempoReal
+  ): void {
+    this.mostrarAlerta(alerta);
+  }
+
   private procesarTrackingMap(
     trackingMap: ReadonlyMap<number, TrackingPayload>
   ): void {
@@ -422,127 +315,6 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
     this.cantidadSerenos = trackingMap.size;
     this.trackingActivo = this.cantidadSerenos > 0;
   }
-  // private procesarTrackingMap(
-  //   trackingMap:
-  //     ReadonlyMap<number, TrackingPayload>
-  // ): void {
-
-  //   if (!this.map) {
-  //     return;
-  //   }
-
-  //   const usuariosActuales =
-  //     new Set<number>(
-  //       trackingMap.keys()
-  //     );
-
-  //   /*
-  //    * Eliminar del mapa usuarios que ya no
-  //    * aparecen en el TrackingStoreService.
-  //    */
-  //   for (
-  //     const usuarioId
-  //     of this.ultimoTrackingProcesado.keys()
-  //   ) {
-  //     if (
-  //       !usuariosActuales.has(usuarioId)
-  //     ) {
-  //       this.mapaTrackingService
-  //         .removerSereno(usuarioId);
-
-  //       this.ultimoTrackingProcesado
-  //         .delete(usuarioId);
-  //     }
-  //   }
-
-  //   /*
-  //    * Procesar únicamente ubicaciones nuevas.
-  //    */
-  //   trackingMap.forEach(
-  //     (
-  //       tracking: TrackingPayload,
-  //       usuarioId: number
-  //     ) => {
-
-  //       if (
-  //         !this.debeProcesarTracking(
-  //           tracking
-  //         )
-  //       ) {
-  //         return;
-  //       }
-
-  //       this.mapaTrackingService
-  //         .actualizarTracking(
-  //           this.map,
-  //           tracking
-  //         );
-
-  //       const timestamp =
-  //         new Date(
-  //           tracking.realtime.timestamp
-  //         ).getTime();
-
-  //       this.ultimoTrackingProcesado.set(
-  //         usuarioId,
-  //         timestamp
-  //       );
-  //     }
-  //   );
-
-  //   this.cantidadSerenos =
-  //     trackingMap.size;
-
-  //   this.trackingActivo =
-  //     this.cantidadSerenos > 0;
-  // }
-
-  /**
-   * Verifica si el tracking recibido es más
-   * reciente que el último procesado.
-   */
-  // private debeProcesarTracking(
-  //   tracking: TrackingPayload
-  // ): boolean {
-
-  //   if (
-  //     !tracking ||
-  //     !tracking.realtime ||
-  //     !tracking.gps
-  //   ) {
-  //     return false;
-  //   }
-
-  //   const timestamp =
-  //     new Date(
-  //       tracking.realtime.timestamp
-  //     ).getTime();
-
-  //   if (
-  //     !Number.isFinite(timestamp)
-  //   ) {
-  //     console.warn(
-  //       '⚠️ Tracking con fecha inválida:',
-  //       tracking
-  //     );
-
-  //     return false;
-  //   }
-
-  //   const ultimoTimestamp =
-  //     this.ultimoTrackingProcesado.get(
-  //       tracking.usuarioId
-  //     );
-
-  //   if (
-  //     ultimoTimestamp !== undefined &&
-  //     timestamp <= ultimoTimestamp
-  //   ) {
-  //     return false;
-  //   }
-
-  //   return true;
-  // }
 
   // =====================================================
   // MAPA
@@ -572,15 +344,15 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
   // =====================================================
   // ALERTAS
   // =====================================================
-  private mostrarAlerta(data: AlertaMapaPayload): void {
+  private mostrarAlerta(data: AlertaTiempoReal): void {
 
     if (!this.map) {
       return;
     }
 
-    const lat = Number(data?.lat);
+    const lat = Number(data?.latitud);
 
-    const lng = Number(data?.lng);
+    const lng = Number(data?.longitud);
 
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
       console.warn(
@@ -605,7 +377,7 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
-    const usuarioId = data.usuarioId ?? data.userId ?? null;
+    const usuarioId = data.emisor_id ?? null;
 
     const marker = new google.maps.Marker({
       position: {
@@ -975,9 +747,7 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
-    const panel =
-      this.zonaPanel
-        ?.nativeElement;
+    const panel = this.zonaPanel?.nativeElement;
 
     if (!panel) {
       return;
@@ -987,34 +757,20 @@ export class MapaPatrullajeComponent implements AfterViewInit, OnDestroy {
 
     const maxTop = window.innerHeight - panel.offsetHeight;
 
-    const left =
-      Math.min(
-        Math.max(
-          event.clientX -
-          this.offset.x,
-          0
-        ),
-        Math.max(maxLeft, 0)
-      );
+    const left = Math.min(Math.max(event.clientX - this.offset.x, 0),
+      Math.max(maxLeft, 0)
+    );
 
-    const top =
-      Math.min(
-        Math.max(
-          event.clientY -
-          this.offset.y,
-          0
-        ),
-        Math.max(maxTop, 0)
-      );
+    const top = Math.min(
+      Math.max(event.clientY - this.offset.y, 0),
+      Math.max(maxTop, 0)
+    );
 
-    panel.style.left =
-      `${left}px`;
+    panel.style.left = `${left}px`;
 
-    panel.style.top =
-      `${top}px`;
+    panel.style.top = `${top}px`;
 
-    panel.style.right =
-      'auto';
+    panel.style.right = 'auto';
   }
 
   @HostListener(

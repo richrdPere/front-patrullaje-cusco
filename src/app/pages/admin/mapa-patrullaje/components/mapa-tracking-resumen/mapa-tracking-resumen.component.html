@@ -1,0 +1,18 @@
+<section class="pointer-events-none absolute bottom-3 left-3 z-20
+         hidden max-w-[calc(100vw-1.5rem)] items-center gap-3
+         rounded-xl border border-base-300/80 bg-base-100/88
+         px-3 py-2 shadow-lg backdrop-blur-md md:flex" aria-label="Resumen del monitoreo">
+
+  <span class="size-2 shrink-0 rounded-full" [ngClass]="clasePunto" aria-hidden="true">
+  </span>
+
+  <div class="min-w-0">
+    <p class="truncate text-xs font-semibold" [ngClass]="claseEstado">
+      {{ estadoPrincipal }}
+    </p>
+
+    <p class="mt-0.5 text-[11px] text-base-content/55">
+      {{ textoSerenos }} · Actualización en tiempo real
+    </p>
+  </div>
+</section>
